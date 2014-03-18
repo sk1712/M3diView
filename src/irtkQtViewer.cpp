@@ -3,12 +3,10 @@
 #include <cstdio>
 
 irtkQtViewer* irtkQtViewer::viewInstance = NULL;
-irtkImage* irtkQtViewer::_targetImage = NULL;
-irtkImage* irtkQtViewer::_sourceImage = NULL;
 
 irtkQtViewer::irtkQtViewer() {
-//    _targetImage = NULL;
-//    _sourceImage = NULL;
+    _targetImage = NULL;
+    _sourceImage = NULL;
 }
 
 irtkQtViewer* irtkQtViewer::Instance() {
@@ -18,9 +16,16 @@ irtkQtViewer* irtkQtViewer::Instance() {
     return viewInstance;
 }
 
+void irtkQtViewer::Destroy() {
+    delete viewInstance;
+}
+
 void irtkQtViewer::CreateTargetImage(string imageFileName) {
     _targetImage = irtkImage::New(imageFileName.c_str());
     printf("Creating target image \n");
+
+    _targetImage->GetOrientation(_axisX, _axisY, _axisZ);
+    _targetImage->GetOrigin(_originX, _originY, _originZ);
 }
 
 void irtkQtViewer::DestroyTargetImage() {

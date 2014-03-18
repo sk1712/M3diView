@@ -4,8 +4,6 @@
 #include <QtViewerWidget.h>
 
 #include <QMainWindow>
-//#include <QMenu>
-//#include <QAction>
 
 class QtMainWindow : public QMainWindow
 {
