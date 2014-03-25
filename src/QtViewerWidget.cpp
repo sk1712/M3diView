@@ -11,9 +11,9 @@ QtViewerWidget::QtViewerWidget(QWidget *parent) : QWidget(parent) {
 
     sliceSlider = new QSlider(Qt::Vertical);
     sliceSlider->setMinimum(1);
-    //sliceSlider->setEnabled(false);
+    sliceSlider->setEnabled(false);
     layout->addWidget(sliceSlider, 0, 1);
-    connect(sliceSlider, SIGNAL(valueChanged(int)), this, SLOT(changeSlice(int)));
+    connect(sliceSlider, SIGNAL(valueChanged(int)), this, SLOT(updateSlice(int)));
 
     sliceLabel = new QLabel();
     layout->addWidget(sliceLabel, 1, 0, 1, 2, Qt::AlignRight);
@@ -26,6 +26,18 @@ void QtViewerWidget::initializeParameters() {
     maximumSlice = 0;
 }
 
-void QtViewerWidget::changeSlice(int slice) {
-    sliceLabel->setText(QString::number(slice));
+void QtViewerWidget::changeSlice(int steps) {
+    currentSlice += steps;
+
+    if (currentSlice < 1)
+        currentSlice = 1;
+
+    if (currentSlice > maximumSlice)
+        currentSlice = maximumSlice;
+
+    sliceSlider->setValue(currentSlice);
+}
+
+void QtViewerWidget::updateSlice(int slice) {
+    sliceLabel->setText(QString::number(slice) + " out of " + QString::number(maximumSlice));
 }

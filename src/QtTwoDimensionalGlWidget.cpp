@@ -3,7 +3,7 @@
 
 QtTwoDimensionalGlWidget::QtTwoDimensionalGlWidget(QWidget *parent)
     :QtGlWidget(parent) {
-
+    initialized = false;
 }
 
 void QtTwoDimensionalGlWidget::drawCursor() {
@@ -18,7 +18,9 @@ void QtTwoDimensionalGlWidget::drawCursor() {
     glEnd();
 }
 
-void QtTwoDimensionalGlWidget::drawImage(QColor *drawable) {
+void QtTwoDimensionalGlWidget::drawImage(irtkColor *drawable) {
+    printf("Drawing image \n");
+    glClear(GL_COLOR_BUFFER_BIT);
     // Set raster position
     glRasterPos2f(0, 0);
     // Draw pixelmap
@@ -53,7 +55,11 @@ void QtTwoDimensionalGlWidget::resizeGL(int w, int h) {
 
 void QtTwoDimensionalGlWidget::paintGL() {
     printf("Painting GL \n");
-    glClear(GL_COLOR_BUFFER_BIT);
+
+    if (!initialized) {
+        glClear(GL_COLOR_BUFFER_BIT);
+        initialized = true;
+    }
 }
 
 

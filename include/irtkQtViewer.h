@@ -14,6 +14,9 @@ class irtkQtViewer
     /// image orientation
     double _axisX[3], _axisY[3], _axisZ[3];
 
+    /// image resolution
+    double _resolution;
+
     /// private constructor
     irtkQtViewer();
     irtkQtViewer(irtkQtViewer const&);
@@ -26,18 +29,21 @@ public:
 
     void CreateTargetImage(string imageName);
     void DestroyTargetImage();
+    irtkImage* GetTargetImage();
 
     void CreateSourceImage(string imageName);
     void DestroySourceImage();
 
-    irtkQtTwoDimensionalViewer* CreateTwoDimensionalViewer(irtkViewMode viewMode,
-                                                           double originX = 0,
-                                                           double originY = 0,
-                                                           double originZ = 0);
+    irtkQtTwoDimensionalViewer* CreateTwoDimensionalViewer(irtkViewMode viewMode);
 
 protected:
     void InitializeTargetImage();
     void InitializeSourceImage();
 };
+
+
+inline irtkImage* irtkQtViewer::GetTargetImage() {
+    return _targetImage;
+}
 
 #endif // IRTKQTVIEWER_H

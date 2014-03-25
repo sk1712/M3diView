@@ -3,8 +3,7 @@
 
 #include <QtOpenGL/QGLWidget>
 
-#include <QColor>
-
+#include <irtkLookupTable.h>
 
 #include <cstdio>
 
@@ -20,7 +19,7 @@ public:
     QSize sizeHint() const;
 
 protected:
-    virtual void drawImage(QColor *drawable) = 0;
+    virtual void drawImage(irtkColor *drawable) = 0;
 
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);

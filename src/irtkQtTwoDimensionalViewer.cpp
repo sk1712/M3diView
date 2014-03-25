@@ -1,29 +1,7 @@
 #include <irtkQtTwoDimensionalViewer.h>
 
-irtkQtTwoDimensionalViewer::irtkQtTwoDimensionalViewer(irtkImage *image, irtkViewMode viewMode) {
-    double x[3], y[3], z[3];
-
-    _targetImage = image;
+irtkQtTwoDimensionalViewer::irtkQtTwoDimensionalViewer(irtkViewMode viewMode) {
     _viewMode = viewMode;
-
-    _targetImage->GetOrientation(x, y, z);
-    _targetImage->GetOrigin(_originX, _originY, _originZ);
-
-    switch (viewMode) {
-    case VIEW_AXIAL :
-        SetOrientation(x, y, z);
-        break;
-    case VIEW_SAGITTAL :
-        SetOrientation(y, z, x);
-        break;
-    case VIEW_CORONAL :
-        SetOrientation(x, z, y);
-        break;
-    default:
-        cerr << "Not a valid type of two dimensional viewer" << endl;
-        exit(1);
-        break;
-    }
 
     _targetImageOutput = new irtkGreyImage;
     _targetTransform = new irtkAffineTransformation;
@@ -64,6 +42,35 @@ void irtkQtTwoDimensionalViewer::InitializeOutputImage() {
     attr._zaxis[2] = _axisZ[2];
 
     _targetImageOutput->Initialize(attr);
+
+    // calculate the actual output image
+    CalculateOutputImage();
+}
+
+void irtkQtTwoDimensionalViewer::InitializeOriginOrientation() {
+    double x[3], y[3], z[3];
+
+    _targetImage->GetOrientation(x, y, z);
+    _targetImage->GetOrigin(_originX, _originY, _originZ);
+
+    switch (_viewMode) {
+    case VIEW_AXIAL :
+        sliceNum = _targetImage->GetZ();
+        SetOrientation(x, y, z);
+        break;
+    case VIEW_SAGITTAL :
+        sliceNum = _targetImage->GetX();
+        SetOrientation(y, z, x);
+        break;
+    case VIEW_CORONAL :
+        sliceNum = _targetImage->GetY();
+        SetOrientation(x, z, y);
+        break;
+    default:
+        cerr << "Not a valid type of two dimensional viewer" << endl;
+        exit(1);
+        break;
+    }
 }
 
 void irtkQtTwoDimensionalViewer::SetOrientation(const double * xaxis, const double * yaxis, const double * zaxis) {
@@ -104,6 +111,8 @@ irtkColor* irtkQtTwoDimensionalViewer::GetDrawable() {
     irtkColor *drawn = drawable;
 
     int i, j;
+
+    printf("Dimensions are %d, %d \n", _width, _height);
 
     // Only display the target image
     for (j = 0; j < _height; j++) {

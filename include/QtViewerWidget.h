@@ -21,12 +21,41 @@ protected:
 public:
     QtViewerWidget(QWidget *parent = 0);
     //~QtViewerWidget();
+    QtTwoDimensionalGlWidget* getGlWidget();
+    QSlider* getSlider();
+    QLabel* getLabel();
+
+    void setCurrentSlice(int current);
+    void setMaximumSlice(int maximum);
 
 private:
     void initializeParameters();
 
 private slots:
     void changeSlice(int slice);
+    void updateSlice(int slice);
 };
+
+
+inline QtTwoDimensionalGlWidget* QtViewerWidget::getGlWidget() {
+    return glWidget;
+}
+
+inline QSlider* QtViewerWidget::getSlider() {
+    return sliceSlider;
+}
+
+inline QLabel* QtViewerWidget::getLabel() {
+    return sliceLabel;
+}
+
+inline void QtViewerWidget::setCurrentSlice(int current) {
+    currentSlice = current;
+}
+
+inline void QtViewerWidget::setMaximumSlice(int maximum) {
+    maximumSlice = maximum;
+    sliceSlider->setMaximum(maximumSlice);
+}
 
 #endif // QTVIEWERWIDGET_H

@@ -22,6 +22,9 @@ class irtkQtTwoDimensionalViewer
     /// dimensions
     int _width, _height;
 
+    /// number of slices
+    int sliceNum;
+
     /// view mode (axial, sagittal, coronal)
     irtkViewMode _viewMode;
 
@@ -34,26 +37,37 @@ class irtkQtTwoDimensionalViewer
     irtkLookupTable *_targetLookupTable;
 
     irtkTransformation *_targetTransform;
+
     irtkImageFunction *_targetInterpolator;
 
 public:
-    irtkQtTwoDimensionalViewer(irtkImage* image, irtkViewMode viewMode);
+    irtkQtTwoDimensionalViewer(irtkViewMode viewMode);
     ~irtkQtTwoDimensionalViewer();
 
+    void SetTarget(irtkImage* image);
     void SetOrigin(double x, double y, double z);
     void SetResolution(double dx, double dy, double dz);
     void SetDimensions(int width, int height);
 
+    int GetSliceNumber();
     irtkViewMode GetViewMode();
     irtkColor* GetDrawable();
 
     void InitializeOutputImage();
 
 protected:
+    void InitializeOriginOrientation();
+
     void SetOrientation(const double * xaxis, const double * yaxis, const double * zaxis);
     void CalculateOutputImage();
 };
 
+
+inline void irtkQtTwoDimensionalViewer::SetTarget(irtkImage *image) {
+    _targetImage = image;
+    SetResolution(1, 1, _targetImage->GetZSize());
+    InitializeOriginOrientation();
+}
 
 inline void irtkQtTwoDimensionalViewer::SetOrigin(double x, double y, double z) {
     _originX = x;
@@ -70,6 +84,10 @@ inline void irtkQtTwoDimensionalViewer::SetResolution(double dx, double dy, doub
 inline void irtkQtTwoDimensionalViewer::SetDimensions(int width, int height) {
     _width = width;
     _height = height;
+}
+
+inline int irtkQtTwoDimensionalViewer::GetSliceNumber() {
+    return sliceNum;
 }
 
 inline irtkViewMode irtkQtTwoDimensionalViewer::GetViewMode() {

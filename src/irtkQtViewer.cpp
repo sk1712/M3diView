@@ -26,6 +26,8 @@ void irtkQtViewer::CreateTargetImage(string imageFileName) {
 
     _targetImage->GetOrientation(_axisX, _axisY, _axisZ);
     _targetImage->GetOrigin(_originX, _originY, _originZ);
+
+    _resolution = 1;
 }
 
 void irtkQtViewer::DestroyTargetImage() {
@@ -39,4 +41,9 @@ void irtkQtViewer::CreateSourceImage(string imageFileName) {
 
 void irtkQtViewer::DestroySourceImage() {
     delete _sourceImage;
+}
+
+irtkQtTwoDimensionalViewer* irtkQtViewer::CreateTwoDimensionalViewer(irtkViewMode viewMode) {
+    irtkQtTwoDimensionalViewer* twoDViewer = new irtkQtTwoDimensionalViewer(viewMode);
+    return twoDViewer;
 }
