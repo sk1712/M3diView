@@ -2,7 +2,10 @@
 
 #include <QMenuBar>
 #include <QFileDialog>
+
 #include <QGridLayout>
+
+#include <QResizeEvent>
 
 QtMainWindow::QtMainWindow() {
     viewers.clear();
@@ -15,6 +18,7 @@ QtMainWindow::QtMainWindow() {
 
 QtMainWindow::~QtMainWindow() {
     irtkQtViewer::Destroy();
+    clearVectors();
 }
 
 void QtMainWindow::createMenu() {
@@ -56,7 +60,18 @@ void QtMainWindow::showTargetImage() {
         viewerWidgets.at(i)->getGlWidget()->makeCurrent();
         viewerWidgets.at(i)->getGlWidget()->drawImage(drawn);
         viewerWidgets.at(i)->getGlWidget()->drawCursor();
+        viewerWidgets.at(i)->setCurrentSlice(viewers.at(i)->GetCurrentSlice());
         delete drawn;
+
+        connect(viewerWidgets.at(i)->getGlWidget(), SIGNAL(resized(int, int)),
+                viewers.at(i), SLOT(ResizeImage(int, int)));
+        connect(viewers.at(i), SIGNAL(ImageResized(irtkColor*)),
+                viewerWidgets.at(i)->getGlWidget(), SLOT(updateImage(irtkColor*)));
+
+        connect(viewerWidgets.at(i)->getSlider(), SIGNAL(valueChanged(int)),
+                viewers.at(i), SLOT(ChangeSlice(int)));
+        connect(viewers.at(i), SIGNAL(OriginChanged(double, double, double)),
+                this, SLOT(updateOrigin(double, double, double)));
     }
 }
 
@@ -72,10 +87,19 @@ QtViewerWidget* QtMainWindow::createTwoDimensionalView(irtkViewMode viewMode) {
     return qtViewer;
 }
 
+void QtMainWindow::clearVectors() {
+    qDeleteAll(viewers);
+    qDeleteAll(viewerWidgets);
+
+    viewers.clear();
+    viewerWidgets.clear();
+}
+
 void QtMainWindow::openTargetImage() {
     QString fileName = QFileDialog::getOpenFileName(this);
 
     if (!fileName.isEmpty()) {
+        irtkQtViewer::Instance()->DestroyTargetImage();
         irtkQtViewer::Instance()->CreateTargetImage(fileName.toStdString());
         // to do check if image file is valid
         showTargetImage();
@@ -86,11 +110,14 @@ void QtMainWindow::openSourceImage() {
     QString fileName = QFileDialog::getOpenFileName(this);
 
     if (!fileName.isEmpty()) {
+        irtkQtViewer::Instance()->DestroySourceImage();
         irtkQtViewer::Instance()->CreateSourceImage(fileName.toStdString());
     }
 }
 
 void QtMainWindow::createOrthogonalView() {
+    clearVectors();
+
     QWidget *mainWidget = new QWidget();
     QGridLayout *layout = new QGridLayout();
 
@@ -101,3 +128,20 @@ void QtMainWindow::createOrthogonalView() {
     mainWidget->setLayout(layout);
     this->setCentralWidget(mainWidget);
 }
+
+void QtMainWindow::updateOrigin(double x, double y, double z) {
+    printf("new origin is %f, %f, %f \n", x, y, z);
+    irtkColor *drawn;
+
+    for (int i = 0; i < viewers.size(); i++) {
+        viewers.at(i)->SetOrigin(x, y, z);
+        viewers.at(i)->InitializeOutputImage();
+
+        drawn = viewers.at(i)->GetDrawable();
+        viewerWidgets.at(i)->getGlWidget()->makeCurrent();
+        viewerWidgets.at(i)->getGlWidget()->drawImage(drawn);
+        viewerWidgets.at(i)->getGlWidget()->drawCursor();
+        delete drawn;
+    }
+}
+

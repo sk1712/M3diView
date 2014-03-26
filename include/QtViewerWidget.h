@@ -28,11 +28,14 @@ public:
     void setCurrentSlice(int current);
     void setMaximumSlice(int maximum);
 
+protected:
+    void updateLabel();
+
 private:
     void initializeParameters();
 
 private slots:
-    void changeSlice(int slice);
+    void changeSlider(int slice);
     void updateSlice(int slice);
 };
 
@@ -50,7 +53,7 @@ inline QLabel* QtViewerWidget::getLabel() {
 }
 
 inline void QtViewerWidget::setCurrentSlice(int current) {
-    currentSlice = current;
+    sliceSlider->setValue(current);
 }
 
 inline void QtViewerWidget::setMaximumSlice(int maximum) {

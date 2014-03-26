@@ -25,7 +25,7 @@ void QtGlWidget::mousePressEvent(QMouseEvent *event) {
 }
 
 void QtGlWidget::mouseMoveEvent(QMouseEvent *event) {
-    printf("%d, %d \n", event->x(), event->y());
+    //printf("%d, %d \n", event->x(), event->y());
 }
 
 void QtGlWidget::wheelEvent(QWheelEvent *event) {

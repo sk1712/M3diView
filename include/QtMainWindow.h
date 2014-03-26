@@ -30,12 +30,14 @@ private:
     void createActions();
     void showTargetImage();
     QtViewerWidget* createTwoDimensionalView(irtkViewMode viewMode);
+    void clearVectors();
 
 private slots:
     void openTargetImage();
     void openSourceImage();
 
     void createOrthogonalView();
+    void updateOrigin(double x, double y, double z);
 };
 
 #endif // QTMAINWINDOW_H

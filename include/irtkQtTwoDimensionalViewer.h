@@ -1,6 +1,8 @@
 #ifndef IRTKQTTWODIMENSIONALVIEWER_H
 #define IRTKQTTWODIMENSIONALVIEWER_H
 
+#include <QObject>
+
 #include <irtkImage.h>
 #include <irtkTransformation.h>
 
@@ -8,8 +10,10 @@
 
 enum irtkViewMode {VIEW_AXIAL, VIEW_SAGITTAL, VIEW_CORONAL};
 
-class irtkQtTwoDimensionalViewer
+class irtkQtTwoDimensionalViewer : public QObject
 {
+    Q_OBJECT
+
     /// image origin
     double _originX, _originY, _originZ;
 
@@ -49,17 +53,26 @@ public:
     void SetResolution(double dx, double dy, double dz);
     void SetDimensions(int width, int height);
 
+    int GetCurrentSlice();
     int GetSliceNumber();
     irtkViewMode GetViewMode();
     irtkColor* GetDrawable();
 
     void InitializeOutputImage();
 
+public slots:
+    void ResizeImage(int width, int height);
+    void ChangeSlice(int slice);
+
 protected:
     void InitializeOriginOrientation();
 
     void SetOrientation(const double * xaxis, const double * yaxis, const double * zaxis);
     void CalculateOutputImage();
+
+signals:
+    void ImageResized(irtkColor*);
+    void OriginChanged(double originX, double originY, double originZ);
 };
 
 

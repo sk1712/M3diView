@@ -19,13 +19,21 @@ void QtTwoDimensionalGlWidget::drawCursor() {
 }
 
 void QtTwoDimensionalGlWidget::drawImage(irtkColor *drawable) {
-    printf("Drawing image \n");
+    printf("drawing image \n");
+    initialized = true;
+
     glClear(GL_COLOR_BUFFER_BIT);
     // Set raster position
     glRasterPos2f(0, 0);
     // Draw pixelmap
     glDrawPixels(width(), height(), GL_RGB, GL_UNSIGNED_BYTE,
             drawable);
+}
+
+void QtTwoDimensionalGlWidget::updateImage(irtkColor *drawable) {
+    printf("updating image \n");
+    drawImage(drawable);
+    drawCursor();
 }
 
 void QtTwoDimensionalGlWidget::initializeGL() {
@@ -49,16 +57,12 @@ void QtTwoDimensionalGlWidget::resizeGL(int w, int h) {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    // TO DO : need to calculate new drawable
-    update();
+    emit resized(w, h);
 }
 
 void QtTwoDimensionalGlWidget::paintGL() {
-    printf("Painting GL \n");
-
     if (!initialized) {
         glClear(GL_COLOR_BUFFER_BIT);
-        initialized = true;
     }
 }
 

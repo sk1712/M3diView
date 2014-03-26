@@ -16,6 +16,35 @@ irtkQtTwoDimensionalViewer::~irtkQtTwoDimensionalViewer() {
     delete _targetLookupTable;
 }
 
+int irtkQtTwoDimensionalViewer::GetCurrentSlice() {
+    double x, y, z;
+
+    x = _originX;
+    y = _originY;
+    z = _originZ;
+
+    _targetImage->WorldToImage(x, y, z);
+
+    int result;
+
+    switch (_viewMode) {
+    case VIEW_AXIAL :
+        result = (int) round(z);
+        break;
+    case VIEW_SAGITTAL :
+        result = (int) round(x);
+        break;
+    case VIEW_CORONAL :
+        result = (int) round(y);
+        break;
+    default:
+        result = 0;
+        break;
+    }
+
+    return result;
+}
+
 void irtkQtTwoDimensionalViewer::InitializeOutputImage() {
     irtkImageAttributes attr;
 
@@ -45,6 +74,26 @@ void irtkQtTwoDimensionalViewer::InitializeOutputImage() {
 
     // calculate the actual output image
     CalculateOutputImage();
+}
+
+void irtkQtTwoDimensionalViewer::ResizeImage(int width, int height) {
+    printf("in resize event %d, %d\n", width, height);
+    //if ( (width != _width) || (height != _height) ) {
+    SetDimensions(width, height);
+    InitializeOutputImage();
+    emit ImageResized(GetDrawable());
+    //}
+}
+
+void irtkQtTwoDimensionalViewer::ChangeSlice(int slice) {
+    double x, y, z;
+
+    _targetImageOutput->GetOrigin(x, y, z);
+    _targetImageOutput->WorldToImage(x, y, z);
+    z = slice;
+    _targetImageOutput->ImageToWorld(x, y, z);
+
+    emit OriginChanged(x, y, z);
 }
 
 void irtkQtTwoDimensionalViewer::InitializeOriginOrientation() {
@@ -111,8 +160,6 @@ irtkColor* irtkQtTwoDimensionalViewer::GetDrawable() {
     irtkColor *drawn = drawable;
 
     int i, j;
-
-    printf("Dimensions are %d, %d \n", _width, _height);
 
     // Only display the target image
     for (j = 0; j < _height; j++) {

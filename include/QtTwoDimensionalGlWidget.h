@@ -16,10 +16,16 @@ public:
     void drawImage(irtkColor *drawable);
     void drawCursor();
 
+public slots:
+    void updateImage(irtkColor *drawable);
+
 protected:
     void initializeGL();
     void resizeGL(int w, int h);
     void paintGL();
+
+signals:
+    void resized(int w, int h);
 };
 
 #endif // QTTWODIMENSIONALGLWIDGET_H

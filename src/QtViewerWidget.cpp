@@ -7,7 +7,7 @@ QtViewerWidget::QtViewerWidget(QWidget *parent) : QWidget(parent) {
 
     glWidget = new QtTwoDimensionalGlWidget(this);
     layout->addWidget(glWidget, 0, 0);
-    connect(glWidget, SIGNAL(wheelMoved(int)), this, SLOT(changeSlice(int)));
+    connect(glWidget, SIGNAL(wheelMoved(int)), this, SLOT(changeSlider(int)));
 
     sliceSlider = new QSlider(Qt::Vertical);
     sliceSlider->setMinimum(1);
@@ -21,23 +21,28 @@ QtViewerWidget::QtViewerWidget(QWidget *parent) : QWidget(parent) {
     this->setLayout(layout);
 }
 
+void QtViewerWidget::updateLabel() {
+    sliceLabel->setText(QString::number(currentSlice) + " out of " + QString::number(maximumSlice));
+}
+
 void QtViewerWidget::initializeParameters() {
     currentSlice = 0;
     maximumSlice = 0;
 }
 
-void QtViewerWidget::changeSlice(int steps) {
-    currentSlice += steps;
+void QtViewerWidget::changeSlider(int steps) {
+    int newSlice = currentSlice + steps;
 
-    if (currentSlice < 1)
-        currentSlice = 1;
+    if (newSlice < 1)
+        newSlice = 1;
 
-    if (currentSlice > maximumSlice)
-        currentSlice = maximumSlice;
+    if (newSlice > maximumSlice)
+        newSlice = maximumSlice;
 
-    sliceSlider->setValue(currentSlice);
+    sliceSlider->setValue(newSlice);
 }
 
 void QtViewerWidget::updateSlice(int slice) {
-    sliceLabel->setText(QString::number(slice) + " out of " + QString::number(maximumSlice));
+    currentSlice = slice;
+    updateLabel();
 }
