@@ -2,18 +2,22 @@
 
 #include <QMenuBar>
 #include <QFileDialog>
+#include <QStatusBar>
 
 #include <QGridLayout>
 
 #include <QResizeEvent>
 
+#include <QMessageBox>
+
 QtMainWindow::QtMainWindow() {
-    viewers.clear();
-    viewerWidgets.clear();
+    clearVectors();
 
     createActions();
     createMenu();
     createOrthogonalView();
+
+    flag = false;
 }
 
 QtMainWindow::~QtMainWindow() {
@@ -57,21 +61,26 @@ void QtMainWindow::showTargetImage() {
         viewerWidgets.at(i)->setMaximumSlice(viewers.at(i)->GetSliceNumber());
 
         drawn = viewers.at(i)->GetDrawable();
-        viewerWidgets.at(i)->getGlWidget()->makeCurrent();
-        viewerWidgets.at(i)->getGlWidget()->drawImage(drawn);
-        viewerWidgets.at(i)->getGlWidget()->drawCursor();
+        viewerWidgets.at(i)->getGlWidget()->setDrawable(drawn);
+        viewerWidgets.at(i)->getGlWidget()->updateScene();
+
         viewerWidgets.at(i)->setCurrentSlice(viewers.at(i)->GetCurrentSlice());
-        delete drawn;
 
-        connect(viewerWidgets.at(i)->getGlWidget(), SIGNAL(resized(int, int)),
-                viewers.at(i), SLOT(ResizeImage(int, int)));
-        connect(viewers.at(i), SIGNAL(ImageResized(irtkColor*)),
-                viewerWidgets.at(i)->getGlWidget(), SLOT(updateImage(irtkColor*)));
+//        if (flag != true) {
+            connect(viewerWidgets.at(i)->getGlWidget(), SIGNAL(resized(int, int)),
+                    viewers.at(i), SLOT(ResizeImage(int, int)));
+            connect(viewers.at(i), SIGNAL(ImageResized(irtkColor*)),
+                    viewerWidgets.at(i)->getGlWidget(), SLOT(updateDrawable(irtkColor*)));
+            flag = true;
 
-        connect(viewerWidgets.at(i)->getSlider(), SIGNAL(valueChanged(int)),
-                viewers.at(i), SLOT(ChangeSlice(int)));
-        connect(viewers.at(i), SIGNAL(OriginChanged(double, double, double)),
-                this, SLOT(updateOrigin(double, double, double)));
+//            QMessageBox msgBox;
+//            msgBox.setText("Connecting signals to slots.");
+//            msgBox.exec();
+//        }
+//        connect(viewerWidgets.at(i)->getSlider(), SIGNAL(valueChanged(int)),
+//                viewers.at(i), SLOT(ChangeSlice(int)));
+//        connect(viewers.at(i), SIGNAL(OriginChanged(double, double, double)),
+//                this, SLOT(updateOrigin(double, double, double)));
     }
 }
 
@@ -88,8 +97,8 @@ QtViewerWidget* QtMainWindow::createTwoDimensionalView(irtkViewMode viewMode) {
 }
 
 void QtMainWindow::clearVectors() {
-    qDeleteAll(viewers);
-    qDeleteAll(viewerWidgets);
+    //qDeleteAll(viewers);
+    //qDeleteAll(viewerWidgets);
 
     viewers.clear();
     viewerWidgets.clear();
@@ -138,10 +147,7 @@ void QtMainWindow::updateOrigin(double x, double y, double z) {
         viewers.at(i)->InitializeOutputImage();
 
         drawn = viewers.at(i)->GetDrawable();
-        viewerWidgets.at(i)->getGlWidget()->makeCurrent();
-        viewerWidgets.at(i)->getGlWidget()->drawImage(drawn);
-        viewerWidgets.at(i)->getGlWidget()->drawCursor();
-        delete drawn;
+        viewerWidgets.at(i)->getGlWidget()->setDrawable(drawn);
+        viewerWidgets.at(i)->getGlWidget()->updateScene();
     }
 }
-

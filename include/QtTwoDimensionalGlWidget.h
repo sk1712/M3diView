@@ -7,17 +7,19 @@ class QtTwoDimensionalGlWidget : public QtGlWidget
 {
     Q_OBJECT
 
-    bool initialized;
+    irtkColor* _drawable;
 
 public:
     QtTwoDimensionalGlWidget(QWidget *parent = NULL);
-    //~QtTwoDimensionalGlWidget();
+    ~QtTwoDimensionalGlWidget();
 
-    void drawImage(irtkColor *drawable);
+    void drawImage();
     void drawCursor();
+    void setDrawable(irtkColor* drawable);
+    void updateScene();
 
 public slots:
-    void updateImage(irtkColor *drawable);
+    void updateDrawable(irtkColor* drawable);
 
 protected:
     void initializeGL();
@@ -27,5 +29,10 @@ protected:
 signals:
     void resized(int w, int h);
 };
+
+inline void QtTwoDimensionalGlWidget::setDrawable(irtkColor *drawable) {
+    delete _drawable;
+    _drawable = drawable;
+}
 
 #endif // QTTWODIMENSIONALGLWIDGET_H

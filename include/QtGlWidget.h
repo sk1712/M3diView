@@ -19,7 +19,7 @@ public:
     QSize sizeHint() const;
 
 protected:
-    virtual void drawImage(irtkColor *drawable) = 0;
+    virtual void drawImage() = 0;
 
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);

@@ -3,7 +3,11 @@
 
 QtTwoDimensionalGlWidget::QtTwoDimensionalGlWidget(QWidget *parent)
     :QtGlWidget(parent) {
-    initialized = false;
+    _drawable = NULL;
+}
+
+QtTwoDimensionalGlWidget::~QtTwoDimensionalGlWidget() {
+    delete _drawable;
 }
 
 void QtTwoDimensionalGlWidget::drawCursor() {
@@ -18,22 +22,25 @@ void QtTwoDimensionalGlWidget::drawCursor() {
     glEnd();
 }
 
-void QtTwoDimensionalGlWidget::drawImage(irtkColor *drawable) {
+void QtTwoDimensionalGlWidget::drawImage() {
     printf("drawing image \n");
-    initialized = true;
 
-    glClear(GL_COLOR_BUFFER_BIT);
-    // Set raster position
-    glRasterPos2f(0, 0);
-    // Draw pixelmap
-    glDrawPixels(width(), height(), GL_RGB, GL_UNSIGNED_BYTE,
-            drawable);
+    if (_drawable) {
+        // Set raster position
+        glRasterPos2f(0, 0);
+        // Draw pixelmap
+        glDrawPixels(width(), height(), GL_RGB, GL_UNSIGNED_BYTE,
+                _drawable);
+    }
 }
 
-void QtTwoDimensionalGlWidget::updateImage(irtkColor *drawable) {
-    printf("updating image \n");
-    drawImage(drawable);
-    drawCursor();
+void QtTwoDimensionalGlWidget::updateScene() {
+    update();
+}
+
+void QtTwoDimensionalGlWidget::updateDrawable(irtkColor* drawable) {
+    setDrawable(drawable);
+    updateScene();
 }
 
 void QtTwoDimensionalGlWidget::initializeGL() {
@@ -61,9 +68,12 @@ void QtTwoDimensionalGlWidget::resizeGL(int w, int h) {
 }
 
 void QtTwoDimensionalGlWidget::paintGL() {
-    if (!initialized) {
-        glClear(GL_COLOR_BUFFER_BIT);
-    }
+    printf("in paint gl \n");
+
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    drawImage();
+    drawCursor();
 }
 
 

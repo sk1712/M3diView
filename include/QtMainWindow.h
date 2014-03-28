@@ -11,6 +11,8 @@ class QtMainWindow : public QMainWindow
 {
     Q_OBJECT
 
+    bool flag;
+
     QMenu *fileMenu;
     QMenu *viewMenu;
 

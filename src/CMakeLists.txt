@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.9)
 
 IF(APPLE)
   set(CMAKE_PREFIX_PATH "/Users/ira/Qt5.1.1/5.1.1/clang_64/lib/cmake")
-  set(CMAKE_CXX_FLAGS "-framework OpenGL")
+  #set(CMAKE_CXX_FLAGS "-framework OpenGL")
 ENDIF()
 
 project(newviewer)
@@ -15,8 +15,8 @@ link_libraries(rview++)
   SET (CMAKE_AUTOMOC ON)
 
 # Find the QtWidgets library
-find_package(Qt5Core REQUIRED)
-find_package(Qt5Gui REQUIRED)
+#find_package(Qt5Core REQUIRED)
+#find_package(Qt5Gui REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5OpenGL REQUIRED)
 
@@ -37,7 +37,7 @@ QtMainWindow.cpp
 irtkQtViewer.cpp
 irtkQtTwoDimensionalViewer.cpp)
 
-add_executable(newviewer ${VIEWER_SOURCES} ${VIEWER_HEADERS})
+add_executable(newviewer MACOSX_BUNDLE ${VIEWER_SOURCES} ${VIEWER_HEADERS})
 
 # Use the Widgets module from Qt 5.
-qt5_use_modules(newviewer Core Gui Widgets OpenGL)
+qt5_use_modules(newviewer Widgets OpenGL)

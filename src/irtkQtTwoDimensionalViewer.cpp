@@ -93,6 +93,12 @@ void irtkQtTwoDimensionalViewer::ChangeSlice(int slice) {
     z = slice;
     _targetImageOutput->ImageToWorld(x, y, z);
 
+    _targetImage->WorldToImage(x, y, z);
+    x = round(x);
+    y = round(y);
+    z = round(z);
+    _targetImage->ImageToWorld(x, y, z);
+
     emit OriginChanged(x, y, z);
 }
 
@@ -150,6 +156,8 @@ void irtkQtTwoDimensionalViewer::CalculateOutputImage() {
    - _targetMin), -_targetMin * 10000.0 / (_targetMax - _targetMin));
    _targetTransformFilter->PutSourcePaddingValue(-1);
    _targetTransformFilter->Run();
+
+   delete _targetTransformFilter;
 }
 
 irtkColor* irtkQtTwoDimensionalViewer::GetDrawable() {
