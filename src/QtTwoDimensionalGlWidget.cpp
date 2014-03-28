@@ -23,8 +23,6 @@ void QtTwoDimensionalGlWidget::drawCursor() {
 }
 
 void QtTwoDimensionalGlWidget::drawImage() {
-    printf("drawing image \n");
-
     if (_drawable) {
         // Set raster position
         glRasterPos2f(0, 0);
@@ -68,7 +66,7 @@ void QtTwoDimensionalGlWidget::resizeGL(int w, int h) {
 }
 
 void QtTwoDimensionalGlWidget::paintGL() {
-    printf("in paint gl \n");
+    //printf("in paint gl \n");
 
     glClear(GL_COLOR_BUFFER_BIT);
 

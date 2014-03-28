@@ -31,8 +31,9 @@ signals:
 };
 
 inline void QtTwoDimensionalGlWidget::setDrawable(irtkColor *drawable) {
-    delete _drawable;
+    //delete _drawable;
     _drawable = drawable;
+    printf("setting drawable\n");
 }
 
 #endif // QTTWODIMENSIONALGLWIDGET_H

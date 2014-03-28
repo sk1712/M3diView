@@ -7,6 +7,7 @@ irtkQtTwoDimensionalViewer::irtkQtTwoDimensionalViewer(irtkViewMode viewMode) {
     _targetTransform = new irtkAffineTransformation;
     _targetInterpolator = new irtkNearestNeighborInterpolateImageFunction;
     _targetLookupTable = new irtkLookupTable;
+    _targetTransformFilter = NULL;
 }
 
 irtkQtTwoDimensionalViewer::~irtkQtTwoDimensionalViewer() {
@@ -14,6 +15,7 @@ irtkQtTwoDimensionalViewer::~irtkQtTwoDimensionalViewer() {
     delete _targetTransform;
     delete _targetInterpolator;
     delete _targetLookupTable;
+    delete _targetTransformFilter;
 }
 
 int irtkQtTwoDimensionalViewer::GetCurrentSlice() {
@@ -76,21 +78,37 @@ void irtkQtTwoDimensionalViewer::InitializeOutputImage() {
     CalculateOutputImage();
 }
 
+void irtkQtTwoDimensionalViewer::InitializeTransformation() {
+    double _targetMin, _targetMax;
+    _targetImage->GetMinMaxAsDouble(&_targetMin, &_targetMax);
+
+   _targetTransformFilter = irtkImageTransformation::New(_targetTransform);
+   _targetTransformFilter->SetInput(_targetImage);
+   _targetTransformFilter->SetOutput(_targetImageOutput);
+   _targetTransformFilter->SetTransformation(_targetTransform);
+   _targetTransformFilter->PutInterpolator(_targetInterpolator);
+   _targetTransformFilter->PutScaleFactorAndOffset(10000.0 / (_targetMax
+   - _targetMin), -_targetMin * 10000.0 / (_targetMax - _targetMin));
+
+   printf("initialized transformation \n");
+}
+
 void irtkQtTwoDimensionalViewer::ResizeImage(int width, int height) {
     printf("in resize event %d, %d\n", width, height);
-    //if ( (width != _width) || (height != _height) ) {
+
     SetDimensions(width, height);
     InitializeOutputImage();
     emit ImageResized(GetDrawable());
-    //}
 }
 
 void irtkQtTwoDimensionalViewer::ChangeSlice(int slice) {
     double x, y, z;
 
     _targetImageOutput->GetOrigin(x, y, z);
+    printf("current origin %f, %f, %f \n", x, y, z);
     _targetImageOutput->WorldToImage(x, y, z);
-    z = slice;
+    z += slice - GetCurrentSlice();
+    printf("new slice is %f \n", z);
     _targetImageOutput->ImageToWorld(x, y, z);
 
     _targetImage->WorldToImage(x, y, z);
@@ -99,6 +117,7 @@ void irtkQtTwoDimensionalViewer::ChangeSlice(int slice) {
     z = round(z);
     _targetImage->ImageToWorld(x, y, z);
 
+    printf("sending new origin %f, %f, %f \n", x, y, z);
     emit OriginChanged(x, y, z);
 }
 
@@ -143,21 +162,10 @@ void irtkQtTwoDimensionalViewer::SetOrientation(const double * xaxis, const doub
 }
 
 void irtkQtTwoDimensionalViewer::CalculateOutputImage() {
-    double _targetMin, _targetMax;
-    _targetImage->GetMinMaxAsDouble(&_targetMin, &_targetMax);
-
-    irtkImageTransformation *_targetTransformFilter;
-   _targetTransformFilter = irtkImageTransformation::New(_targetTransform);
-   _targetTransformFilter->SetInput(_targetImage);
-   _targetTransformFilter->SetOutput(_targetImageOutput);
-   _targetTransformFilter->SetTransformation(_targetTransform);
-   _targetTransformFilter->PutInterpolator(_targetInterpolator);
-   _targetTransformFilter->PutScaleFactorAndOffset(10000.0 / (_targetMax
-   - _targetMin), -_targetMin * 10000.0 / (_targetMax - _targetMin));
    _targetTransformFilter->PutSourcePaddingValue(-1);
    _targetTransformFilter->Run();
 
-   delete _targetTransformFilter;
+   printf("ran transformation \n");
 }
 
 irtkColor* irtkQtTwoDimensionalViewer::GetDrawable() {

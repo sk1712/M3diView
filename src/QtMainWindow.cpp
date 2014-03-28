@@ -8,16 +8,12 @@
 
 #include <QResizeEvent>
 
-#include <QMessageBox>
-
 QtMainWindow::QtMainWindow() {
     clearVectors();
 
     createActions();
     createMenu();
     createOrthogonalView();
-
-    flag = false;
 }
 
 QtMainWindow::~QtMainWindow() {
@@ -55,6 +51,7 @@ void QtMainWindow::showTargetImage() {
         viewers.at(i)->SetTarget(irtkQtViewer::Instance()->GetTargetImage());
         viewers.at(i)->SetDimensions(viewerWidgets.at(i)->getGlWidget()->width(),
                                      viewerWidgets.at(i)->getGlWidget()->height());
+        viewers.at(i)->InitializeTransformation();
         viewers.at(i)->InitializeOutputImage();
 
         viewerWidgets.at(i)->getSlider()->setEnabled(true);
@@ -66,21 +63,15 @@ void QtMainWindow::showTargetImage() {
 
         viewerWidgets.at(i)->setCurrentSlice(viewers.at(i)->GetCurrentSlice());
 
-//        if (flag != true) {
-            connect(viewerWidgets.at(i)->getGlWidget(), SIGNAL(resized(int, int)),
-                    viewers.at(i), SLOT(ResizeImage(int, int)));
-            connect(viewers.at(i), SIGNAL(ImageResized(irtkColor*)),
-                    viewerWidgets.at(i)->getGlWidget(), SLOT(updateDrawable(irtkColor*)));
-            flag = true;
+        connect(viewerWidgets.at(i)->getGlWidget(), SIGNAL(resized(int, int)),
+                viewers.at(i), SLOT(ResizeImage(int, int)));
+        connect(viewers.at(i), SIGNAL(ImageResized(irtkColor*)),
+                viewerWidgets.at(i)->getGlWidget(), SLOT(updateDrawable(irtkColor*)));
 
-//            QMessageBox msgBox;
-//            msgBox.setText("Connecting signals to slots.");
-//            msgBox.exec();
-//        }
-//        connect(viewerWidgets.at(i)->getSlider(), SIGNAL(valueChanged(int)),
-//                viewers.at(i), SLOT(ChangeSlice(int)));
-//        connect(viewers.at(i), SIGNAL(OriginChanged(double, double, double)),
-//                this, SLOT(updateOrigin(double, double, double)));
+        connect(viewerWidgets.at(i)->getSlider(), SIGNAL(valueChanged(int)),
+                viewers.at(i), SLOT(ChangeSlice(int)));
+        connect(viewers.at(i), SIGNAL(OriginChanged(double, double, double)),
+                this, SLOT(updateOrigin(double, double, double)));
     }
 }
 

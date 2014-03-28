@@ -44,34 +44,52 @@ class irtkQtTwoDimensionalViewer : public QObject
 
     irtkImageFunction *_targetInterpolator;
 
+    irtkImageTransformation *_targetTransformFilter;
+
 public:
+
     irtkQtTwoDimensionalViewer(irtkViewMode viewMode);
+
     ~irtkQtTwoDimensionalViewer();
 
     void SetTarget(irtkImage* image);
+
     void SetOrigin(double x, double y, double z);
+
     void SetResolution(double dx, double dy, double dz);
+
     void SetDimensions(int width, int height);
 
     int GetCurrentSlice();
+
     int GetSliceNumber();
+
     irtkViewMode GetViewMode();
+
     irtkColor* GetDrawable();
 
     void InitializeOutputImage();
 
+    void InitializeTransformation();
+
 public slots:
+
     void ResizeImage(int width, int height);
+
     void ChangeSlice(int slice);
 
 protected:
+
     void InitializeOriginOrientation();
 
     void SetOrientation(const double * xaxis, const double * yaxis, const double * zaxis);
+
     void CalculateOutputImage();
 
 signals:
+
     void ImageResized(irtkColor*);
+
     void OriginChanged(double originX, double originY, double originZ);
 };
 
