@@ -38,12 +38,16 @@ class irtkQtTwoDimensionalViewer : public QObject
     /// image output
     irtkGreyImage *_targetImageOutput;
 
+    /// image lookup table
     irtkLookupTable *_targetLookupTable;
 
+    /// image transform
     irtkTransformation *_targetTransform;
 
+    /// image interpolator
     irtkImageFunction *_targetInterpolator;
 
+    /// image transformaton filter
     irtkImageTransformation *_targetTransformFilter;
 
 public:
@@ -68,6 +72,8 @@ public:
 
     irtkColor* GetDrawable();
 
+    void GetLabels(char &top, char &bottom, char &left, char &right);
+
     void InitializeOutputImage();
 
     void InitializeTransformation();
@@ -77,6 +83,8 @@ public slots:
     void ResizeImage(int width, int height);
 
     void ChangeSlice(int slice);
+
+    void ChangeOrigin(int x, int y);
 
 protected:
 

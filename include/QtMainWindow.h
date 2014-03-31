@@ -15,7 +15,6 @@ class QtMainWindow : public QMainWindow
     QMenu *viewMenu;
 
     QAction *openTargetAction;
-    QAction *openSourceAction;
     QAction *viewOrthogonalAction;
 
     QVector<QtViewerWidget*> viewerWidgets;
@@ -28,13 +27,14 @@ public:
 private:
     void createMenu();
     void createActions();
+    void disconnectSignals();
+    void connectSignals();
     void showTargetImage();
     QtViewerWidget* createTwoDimensionalView(irtkViewMode viewMode);
     void clearVectors();
 
 private slots:
     void openTargetImage();
-    void openSourceImage();
 
     void createOrthogonalView();
     void updateOrigin(double x, double y, double z);

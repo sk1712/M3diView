@@ -6,6 +6,7 @@ QtViewerWidget::QtViewerWidget(QWidget *parent) : QWidget(parent) {
     QGridLayout *layout = new QGridLayout;
 
     glWidget = new QtTwoDimensionalGlWidget(this);
+    glWidget->setEnabled(false);
     layout->addWidget(glWidget, 0, 0);
     connect(glWidget, SIGNAL(wheelMoved(int)), this, SLOT(changeSlider(int)));
 

@@ -17,14 +17,13 @@ QtMainWindow::QtMainWindow() {
 }
 
 QtMainWindow::~QtMainWindow() {
-    irtkQtViewer::Destroy();
     clearVectors();
+    irtkQtViewer::Destroy();
 }
 
 void QtMainWindow::createMenu() {
     fileMenu = menuBar()->addMenu(tr("&File"));
     fileMenu->addAction(openTargetAction);
-    fileMenu->addAction(openSourceAction);
 
     viewMenu = menuBar()->addMenu(tr("&View"));
     viewMenu->addAction(viewOrthogonalAction);
@@ -35,44 +34,68 @@ void QtMainWindow::createActions() {
     openTargetAction->setStatusTip(tr("Open target image file"));
     connect(openTargetAction, SIGNAL(triggered()), this, SLOT(openTargetImage()));
 
-    openSourceAction = new QAction(tr("&Open source..."), this);
-    openSourceAction->setStatusTip(tr("Open source image file"));
-    connect(openSourceAction, SIGNAL(triggered()), this, SLOT(openSourceImage()));
-
     viewOrthogonalAction = new QAction(tr("&Orthogonal View"), this);
     viewOrthogonalAction->setStatusTip(tr("Get orthogonal view"));
     connect(viewOrthogonalAction, SIGNAL(triggered()), this, SLOT(createOrthogonalView()));
 }
 
-void QtMainWindow::showTargetImage() {
-    irtkColor *drawn;
-
+void QtMainWindow::disconnectSignals() {
     for (int i = 0; i < viewers.size(); i++) {
-        viewers.at(i)->SetTarget(irtkQtViewer::Instance()->GetTargetImage());
-        viewers.at(i)->SetDimensions(viewerWidgets.at(i)->getGlWidget()->width(),
-                                     viewerWidgets.at(i)->getGlWidget()->height());
-        viewers.at(i)->InitializeTransformation();
-        viewers.at(i)->InitializeOutputImage();
+        disconnect(viewerWidgets.at(i)->getGlWidget(), SIGNAL(resized(int, int)),
+                viewers.at(i), SLOT(ResizeImage(int, int)));
+        disconnect(viewers.at(i), SIGNAL(ImageResized(irtkColor*)),
+                viewerWidgets.at(i)->getGlWidget(), SLOT(updateDrawable(irtkColor*)));
 
-        viewerWidgets.at(i)->getSlider()->setEnabled(true);
-        viewerWidgets.at(i)->setMaximumSlice(viewers.at(i)->GetSliceNumber());
+        disconnect(viewerWidgets.at(i)->getSlider(), SIGNAL(valueChanged(int)),
+                viewers.at(i), SLOT(ChangeSlice(int)));
+        disconnect(viewerWidgets.at(i)->getGlWidget(), SIGNAL(leftButtonPressed(int, int)),
+                   viewers.at(i), SLOT(ChangeOrigin(int, int)));
+        disconnect(viewers.at(i), SIGNAL(OriginChanged(double, double, double)),
+                this, SLOT(updateOrigin(double, double, double)));
+    }
+}
 
-        drawn = viewers.at(i)->GetDrawable();
-        viewerWidgets.at(i)->getGlWidget()->setDrawable(drawn);
-        viewerWidgets.at(i)->getGlWidget()->updateScene();
-
-        viewerWidgets.at(i)->setCurrentSlice(viewers.at(i)->GetCurrentSlice());
-
+void QtMainWindow::connectSignals() {
+    for (int i = 0; i < viewers.size(); i++) {
+        /// update drawable when widgets are resized
         connect(viewerWidgets.at(i)->getGlWidget(), SIGNAL(resized(int, int)),
                 viewers.at(i), SLOT(ResizeImage(int, int)));
         connect(viewers.at(i), SIGNAL(ImageResized(irtkColor*)),
                 viewerWidgets.at(i)->getGlWidget(), SLOT(updateDrawable(irtkColor*)));
 
+        /// update drawable when slice is changed
         connect(viewerWidgets.at(i)->getSlider(), SIGNAL(valueChanged(int)),
                 viewers.at(i), SLOT(ChangeSlice(int)));
+        connect(viewerWidgets.at(i)->getGlWidget(), SIGNAL(leftButtonPressed(int, int)),
+                           viewers.at(i), SLOT(ChangeOrigin(int, int)));
         connect(viewers.at(i), SIGNAL(OriginChanged(double, double, double)),
                 this, SLOT(updateOrigin(double, double, double)));
     }
+}
+
+void QtMainWindow::showTargetImage() {
+    QtTwoDimensionalGlWidget *glWidget;
+
+    disconnectSignals();
+
+    for (int i = 0; i < viewers.size(); i++) {
+        glWidget = viewerWidgets.at(i)->getGlWidget();
+
+        viewers.at(i)->SetTarget(irtkQtViewer::Instance()->GetTargetImage());
+        viewers.at(i)->SetDimensions(glWidget->width(), glWidget->height());
+        viewers.at(i)->InitializeTransformation();
+        viewers.at(i)->InitializeOutputImage();
+
+        glWidget->setEnabled(true);
+        viewerWidgets.at(i)->getSlider()->setEnabled(true);
+        viewerWidgets.at(i)->setMaximumSlice(viewers.at(i)->GetSliceNumber());
+        viewerWidgets.at(i)->setCurrentSlice(viewers.at(i)->GetCurrentSlice());
+
+        glWidget->setDrawable(viewers.at(i)->GetDrawable());
+        glWidget->updateScene();
+    }
+
+    connectSignals();
 }
 
 QtViewerWidget* QtMainWindow::createTwoDimensionalView(irtkViewMode viewMode) {
@@ -84,15 +107,16 @@ QtViewerWidget* QtMainWindow::createTwoDimensionalView(irtkViewMode viewMode) {
     qtViewer = new QtViewerWidget();
     viewerWidgets.push_back(qtViewer);
 
+    char top, bottom, left, right;
+    viewer->GetLabels(top, bottom, left, right);
+    qtViewer->getGlWidget()->setLabels(top, bottom, left, right);
+
     return qtViewer;
 }
 
 void QtMainWindow::clearVectors() {
-    //qDeleteAll(viewers);
-    //qDeleteAll(viewerWidgets);
-
-    viewers.clear();
-    viewerWidgets.clear();
+    qDeleteAll(viewers.begin(), viewers.end());
+    qDeleteAll(viewerWidgets.begin(), viewerWidgets.end());
 }
 
 void QtMainWindow::openTargetImage() {
@@ -106,15 +130,6 @@ void QtMainWindow::openTargetImage() {
     }
 }
 
-void QtMainWindow::openSourceImage() {
-    QString fileName = QFileDialog::getOpenFileName(this);
-
-    if (!fileName.isEmpty()) {
-        irtkQtViewer::Instance()->DestroySourceImage();
-        irtkQtViewer::Instance()->CreateSourceImage(fileName.toStdString());
-    }
-}
-
 void QtMainWindow::createOrthogonalView() {
     clearVectors();
 
@@ -122,23 +137,27 @@ void QtMainWindow::createOrthogonalView() {
     QGridLayout *layout = new QGridLayout();
 
     layout->addWidget(createTwoDimensionalView(VIEW_AXIAL), 0, 0);
-    layout->addWidget(createTwoDimensionalView(VIEW_SAGITTAL), 0, 1);
-    layout->addWidget(createTwoDimensionalView(VIEW_CORONAL), 1, 0);
+    layout->addWidget(createTwoDimensionalView(VIEW_CORONAL), 0, 1);
+        layout->addWidget(createTwoDimensionalView(VIEW_SAGITTAL), 1, 0);
 
     mainWidget->setLayout(layout);
     this->setCentralWidget(mainWidget);
 }
 
 void QtMainWindow::updateOrigin(double x, double y, double z) {
-    printf("new origin is %f, %f, %f \n", x, y, z);
-    irtkColor *drawn;
+    QtTwoDimensionalGlWidget *glWidget;
+
+    disconnectSignals();
 
     for (int i = 0; i < viewers.size(); i++) {
+        glWidget = viewerWidgets.at(i)->getGlWidget();
         viewers.at(i)->SetOrigin(x, y, z);
         viewers.at(i)->InitializeOutputImage();
 
-        drawn = viewers.at(i)->GetDrawable();
-        viewerWidgets.at(i)->getGlWidget()->setDrawable(drawn);
-        viewerWidgets.at(i)->getGlWidget()->updateScene();
+        viewerWidgets.at(i)->setCurrentSlice(viewers.at(i)->GetCurrentSlice());
+        glWidget->setDrawable(viewers.at(i)->GetDrawable());
+        glWidget->updateScene();
     }
+
+    connectSignals();
 }

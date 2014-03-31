@@ -6,7 +6,6 @@ irtkQtViewer* irtkQtViewer::viewInstance = NULL;
 
 irtkQtViewer::irtkQtViewer() {
     _targetImage = NULL;
-    _sourceImage = NULL;
 }
 
 irtkQtViewer* irtkQtViewer::Instance() {
@@ -32,15 +31,6 @@ void irtkQtViewer::CreateTargetImage(string imageFileName) {
 
 void irtkQtViewer::DestroyTargetImage() {
     delete _targetImage;
-}
-
-void irtkQtViewer::CreateSourceImage(string imageFileName) {
-    _sourceImage = irtkImage::New(imageFileName.c_str());
-    printf("Creating source image \n");
-}
-
-void irtkQtViewer::DestroySourceImage() {
-    delete _sourceImage;
 }
 
 irtkQtTwoDimensionalViewer* irtkQtViewer::CreateTwoDimensionalViewer(irtkViewMode viewMode) {

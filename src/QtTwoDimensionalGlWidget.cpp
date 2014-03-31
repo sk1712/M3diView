@@ -10,6 +10,17 @@ QtTwoDimensionalGlWidget::~QtTwoDimensionalGlWidget() {
     delete _drawable;
 }
 
+void QtTwoDimensionalGlWidget::drawImage() {
+    if (_drawable) {
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        // Set raster position
+        glRasterPos2f(0, 0);
+        // Draw pixelmap
+        glDrawPixels(width(), height(), GL_RGB, GL_UNSIGNED_BYTE,
+                _drawable);
+    }
+}
+
 void QtTwoDimensionalGlWidget::drawCursor() {
     qglColor(Qt::green);
     glBegin(GL_LINES);
@@ -22,14 +33,15 @@ void QtTwoDimensionalGlWidget::drawCursor() {
     glEnd();
 }
 
-void QtTwoDimensionalGlWidget::drawImage() {
-    if (_drawable) {
-        // Set raster position
-        glRasterPos2f(0, 0);
-        // Draw pixelmap
-        glDrawPixels(width(), height(), GL_RGB, GL_UNSIGNED_BYTE,
-                _drawable);
-    }
+void QtTwoDimensionalGlWidget::drawLabels() {
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+    qglColor(Qt::green);
+    QFont arialFont("Arial", 12, QFont::Bold, false);
+
+    renderText(width()/2-5, 15, top, arialFont);
+    renderText(width()/2-5, height()-5, bottom, arialFont);
+    renderText(5, height()/2+5, left, arialFont);
+    renderText(width()-15, height()/2+5, right, arialFont);
 }
 
 void QtTwoDimensionalGlWidget::updateScene() {
@@ -42,19 +54,14 @@ void QtTwoDimensionalGlWidget::updateDrawable(irtkColor* drawable) {
 }
 
 void QtTwoDimensionalGlWidget::initializeGL() {
-    printf("Initializing GL \n");
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_COLOR_MATERIAL);
-    glEnable(GL_BLEND);
-    glEnable(GL_POLYGON_SMOOTH);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     qglClearColor(Qt::black);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 }
 
 void QtTwoDimensionalGlWidget::resizeGL(int w, int h) {
-    printf("Resizing GL to width %d and height %d \n", w, h);
+    //printf("Resizing GL to width %d and height %d \n", w, h);
     glViewport(0, 0, w, h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -66,12 +73,11 @@ void QtTwoDimensionalGlWidget::resizeGL(int w, int h) {
 }
 
 void QtTwoDimensionalGlWidget::paintGL() {
-    //printf("in paint gl \n");
-
     glClear(GL_COLOR_BUFFER_BIT);
 
     drawImage();
     drawCursor();
+    drawLabels();
 }
 
 
