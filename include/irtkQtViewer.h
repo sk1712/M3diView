@@ -5,7 +5,7 @@
 
 class irtkQtViewer
 {
-    irtkImage* _targetImage;
+    vector<irtkImage*> _targetImage;
 
     /// image origin in world coordinates
     double _originX, _originY, _originZ;
@@ -26,19 +26,19 @@ public:
     static irtkQtViewer* Instance();
     static void Destroy();
 
-    void CreateTargetImage(string imageName);
-    void DestroyTargetImage();
-    irtkImage* GetTargetImage();
+    void CreateImage(string imageName);
+    void DestroyImages();
+    irtkImage* GetImage(int i);
 
     irtkQtTwoDimensionalViewer* CreateTwoDimensionalViewer(irtkViewMode viewMode);
 
 protected:
-    void InitializeTargetImage();
+    void InitializeImage(int i);
 };
 
 
-inline irtkImage* irtkQtViewer::GetTargetImage() {
-    return _targetImage;
+inline irtkImage* irtkQtViewer::GetImage(int i) {
+    return _targetImage.at(i);
 }
 
 #endif // IRTKQTVIEWER_H

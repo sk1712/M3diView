@@ -3,6 +3,8 @@
 
 #include <QObject>
 
+#include <vector>
+
 #include <irtkImage.h>
 #include <irtkTransformation.h>
 
