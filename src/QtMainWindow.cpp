@@ -32,6 +32,8 @@ QtMainWindow::~QtMainWindow() {
 void QtMainWindow::createToolBar() {
     toolbar = addToolBar(tr("View"));
     toolbar->addAction(viewSelectedImageAction);
+    toolbar->addAction(zoomInAction);
+    toolbar->addAction(zoomOutAction);
 }
 
 void QtMainWindow::createMenu() {
@@ -54,6 +56,14 @@ void QtMainWindow::createActions() {
     viewSelectedImageAction = new QAction(tr("View image"), this);
     viewSelectedImageAction->setStatusTip(tr("View selected image"));
     connect(viewSelectedImageAction, SIGNAL(triggered()), this, SLOT(viewImage()));
+
+    zoomInAction = new QAction(tr("Zoom in"), this);
+    zoomInAction->setEnabled(false);
+    connect(zoomInAction, SIGNAL(triggered()), this, SLOT(zoomIn()));
+
+    zoomOutAction = new QAction(tr("Zoom out"), this);
+    zoomOutAction->setEnabled(false);
+    connect(zoomOutAction, SIGNAL(triggered()), this, SLOT(zoomOut()));
 }
 
 void QtMainWindow::disconnectSignals() {
@@ -135,10 +145,18 @@ void QtMainWindow::clearVectors() {
     qDeleteAll(mainViewWidget->children());
 }
 
+bool QtMainWindow::imageInList(const QString fileName) {
+    for (int i = 0; i < listWidget->count(); i++) {
+        if (listWidget->item(i)->text() == fileName)
+            return true;
+    }
+    return false;
+}
+
 void QtMainWindow::openImage() {
     QString fileName = QFileDialog::getOpenFileName(this);
 
-    if (!fileName.isEmpty()) {
+    if (!fileName.isEmpty() && !imageInList(fileName)) {
         try {
             irtkQtViewer::Instance()->CreateImage(fileName.toStdString());
             QListWidgetItem *newItem = new QListWidgetItem;
@@ -165,6 +183,25 @@ void QtMainWindow::viewImage() {
 
     if ( indexList.size() > 0 )
         showTargetImage(indexList.at(0));
+
+    zoomInAction->setEnabled(true);
+    zoomOutAction->setEnabled(true);
+}
+
+void QtMainWindow::zoomIn() {
+    for (int i = 0; i < viewers.size(); i++) {
+        viewers.at(i)->IncreaseResolution();
+        viewers.at(i)->InitializeOutputImage();
+        viewerWidgets.at(i)->getGlWidget()->updateDrawable(viewers.at(i)->GetDrawable());
+    }
+}
+
+void QtMainWindow::zoomOut() {
+    for (int i = 0; i < viewers.size(); i++) {
+        viewers.at(i)->DecreaseResolution();
+        viewers.at(i)->InitializeOutputImage();
+        viewerWidgets.at(i)->getGlWidget()->updateDrawable(viewers.at(i)->GetDrawable());
+    }
 }
 
 void QtMainWindow::createOrthogonalView() {

@@ -64,6 +64,10 @@ public:
 
     void SetResolution(double dx, double dy, double dz);
 
+    void IncreaseResolution();
+
+    void DecreaseResolution();
+
     void SetDimensions(int width, int height);
 
     int GetCurrentSlice();
@@ -120,6 +124,16 @@ inline void irtkQtTwoDimensionalViewer::SetResolution(double dx, double dy, doub
     _dx = dx;
     _dy = dy;
     _dz = dz;
+}
+
+inline void irtkQtTwoDimensionalViewer::IncreaseResolution() {
+    _dx -= 0.1;
+    _dy -= 0.1;
+}
+
+inline void irtkQtTwoDimensionalViewer::DecreaseResolution() {
+    _dx += 0.1;
+    _dy += 0.1;
 }
 
 inline void irtkQtTwoDimensionalViewer::SetDimensions(int width, int height) {
