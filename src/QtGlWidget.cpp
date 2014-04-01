@@ -7,16 +7,25 @@
 QtGlWidget::QtGlWidget(QWidget *parent)
     : QGLWidget(parent) {
     setMouseTracking(true);
+    pixelRatio = windowHandle()->devicePixelRatio();
 }
 
 QSize QtGlWidget::sizeHint() const {
     return QSize(307, 307);
 }
 
+int QtGlWidget::customWidth() const {
+    return width() * pixelRatio;
+}
+
+int QtGlWidget::customHeight() const {
+    return height() * pixelRatio;
+}
+
 void QtGlWidget::mousePressEvent(QMouseEvent *event) {
     switch(event->button()) {
     case Qt::LeftButton:
-        emit leftButtonPressed(event->x(), event->y());
+        emit leftButtonPressed(event->x()*pixelRatio, event->y()*pixelRatio);
         break;
     default:
         event->ignore();

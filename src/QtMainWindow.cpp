@@ -82,7 +82,7 @@ void QtMainWindow::showTargetImage() {
         glWidget = viewerWidgets.at(i)->getGlWidget();
 
         viewers.at(i)->SetTarget(irtkQtViewer::Instance()->GetTargetImage());
-        viewers.at(i)->SetDimensions(glWidget->width(), glWidget->height());
+        viewers.at(i)->SetDimensions(glWidget->customWidth(), glWidget->customHeight());
         viewers.at(i)->InitializeTransformation();
         viewers.at(i)->InitializeOutputImage();
 

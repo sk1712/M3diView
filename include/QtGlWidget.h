@@ -1,7 +1,8 @@
 #ifndef QTGLWIDGET_H
 #define QTGLWIDGET_H
 
-#include <QtOpenGL/QGLWidget>
+#include <QGLWidget>
+#include <QWindow>
 
 #include <irtkLookupTable.h>
 
@@ -12,11 +13,17 @@ class QtGlWidget : public QGLWidget
 {
     Q_OBJECT // must include this if you use Qt signals/slots
 
+protected:
+    int _width, _height;
+    int pixelRatio;
+
 public:
     QtGlWidget(QWidget *parent = NULL);
     //virtual ~QtGlWidget();
 
     QSize sizeHint() const;
+    int customWidth() const;
+    int customHeight() const;
 
 protected:
     virtual void drawImage() = 0;

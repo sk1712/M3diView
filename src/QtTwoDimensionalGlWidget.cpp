@@ -1,6 +1,7 @@
 #include <QtTwoDimensionalGlWidget.h>
 
 
+
 QtTwoDimensionalGlWidget::QtTwoDimensionalGlWidget(QWidget *parent)
     :QtGlWidget(parent) {
     _drawable = NULL;
@@ -16,7 +17,7 @@ void QtTwoDimensionalGlWidget::drawImage() {
         // Set raster position
         glRasterPos2f(0, 0);
         // Draw pixelmap
-        glDrawPixels(width(), height(), GL_RGB, GL_UNSIGNED_BYTE,
+        glDrawPixels(_width, _height, GL_RGB, GL_UNSIGNED_BYTE,
                 _drawable);
     }
 }
@@ -24,12 +25,12 @@ void QtTwoDimensionalGlWidget::drawImage() {
 void QtTwoDimensionalGlWidget::drawCursor() {
     qglColor(Qt::green);
     glBegin(GL_LINES);
-    glVertex2f(width()/2-10, height()/2);
-    glVertex2f(width()/2+10, height()/2);
+    glVertex2f(_width/2-10, _height/2);
+    glVertex2f(_width/2+10, _height/2);
     glEnd();
     glBegin(GL_LINES);
-    glVertex2f(width()/2, height()/2-10);
-    glVertex2f(width()/2, height()/2+10);
+    glVertex2f(_width/2, _height/2-10);
+    glVertex2f(_width/2, _height/2+10);
     glEnd();
 }
 
@@ -69,11 +70,15 @@ void QtTwoDimensionalGlWidget::resizeGL(int w, int h) {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    emit resized(w, h);
+    if ( (w != _width) || (h != _height) )
+        emit resized(w, h);
 }
 
 void QtTwoDimensionalGlWidget::paintGL() {
     glClear(GL_COLOR_BUFFER_BIT);
+
+    _width = customWidth();
+    _height = customHeight();
 
     drawImage();
     drawCursor();
