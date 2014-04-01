@@ -20,9 +20,7 @@ public:
     void drawCursor();
     void drawLabels();
 
-    void setDrawable(irtkColor* drawable);
     void setLabels(char t, char b, char l, char r);
-    void updateScene();
 
 public slots:
     void updateDrawable(irtkColor* drawable);
@@ -36,10 +34,6 @@ signals:
     void resized(int w, int h);
 };
 
-inline void QtTwoDimensionalGlWidget::setDrawable(irtkColor *drawable) {
-    delete _drawable;
-    _drawable = drawable;
-}
 
 inline void QtTwoDimensionalGlWidget::setLabels(char t, char b, char l, char r) {
     top = QString(QChar(t));

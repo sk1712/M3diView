@@ -5,7 +5,7 @@
 
 class irtkQtViewer
 {
-    vector<irtkImage*> _targetImage;
+    vector<irtkImage*> _images;
 
     /// image origin in world coordinates
     double _originX, _originY, _originZ;
@@ -38,7 +38,7 @@ protected:
 
 
 inline irtkImage* irtkQtViewer::GetImage(int i) {
-    return _targetImage.at(i);
+    return _images.at(i);
 }
 
 #endif // IRTKQTVIEWER_H

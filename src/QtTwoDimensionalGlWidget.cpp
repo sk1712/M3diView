@@ -1,7 +1,5 @@
 #include <QtTwoDimensionalGlWidget.h>
 
-
-
 QtTwoDimensionalGlWidget::QtTwoDimensionalGlWidget(QWidget *parent)
     :QtGlWidget(parent) {
     _drawable = NULL;
@@ -45,13 +43,10 @@ void QtTwoDimensionalGlWidget::drawLabels() {
     renderText(width()-15, height()/2+5, right, arialFont);
 }
 
-void QtTwoDimensionalGlWidget::updateScene() {
-    update();
-}
-
 void QtTwoDimensionalGlWidget::updateDrawable(irtkColor* drawable) {
-    setDrawable(drawable);
-    updateScene();
+    delete _drawable;
+    _drawable = drawable;
+    update();
 }
 
 void QtTwoDimensionalGlWidget::initializeGL() {

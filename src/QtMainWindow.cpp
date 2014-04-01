@@ -1,24 +1,37 @@
 #include <QtMainWindow.h>
 
 #include <QMenuBar>
+#include <QToolBar>
 #include <QFileDialog>
-#include <QStatusBar>
+#include <QMessageBox>
 
 #include <QGridLayout>
 
-#include <QResizeEvent>
-
 QtMainWindow::QtMainWindow() {
-    clearVectors();
+//    mainViewWidget = NULL;
+//    clearVectors();
 
+    splitter = new QSplitter(this);
+
+    listWidget = new QListWidget(splitter);
+    mainViewWidget = new QWidget(splitter);
+
+    createOrthogonalView();
     createActions();
     createMenu();
-    createOrthogonalView();
+    createToolBar();
+
+    setCentralWidget(splitter);
 }
 
 QtMainWindow::~QtMainWindow() {
-    clearVectors();
+    //clearVectors();
     irtkQtViewer::Destroy();
+}
+
+void QtMainWindow::createToolBar() {
+    toolbar = addToolBar(tr("View"));
+    toolbar->addAction(viewSelectedImageAction);
 }
 
 void QtMainWindow::createMenu() {
@@ -30,13 +43,17 @@ void QtMainWindow::createMenu() {
 }
 
 void QtMainWindow::createActions() {
-    openTargetAction = new QAction(tr("&Open target..."), this);
-    openTargetAction->setStatusTip(tr("Open target image file"));
-    connect(openTargetAction, SIGNAL(triggered()), this, SLOT(openTargetImage()));
+    openTargetAction = new QAction(tr("&Load image..."), this);
+    openTargetAction->setStatusTip(tr("Load new image file"));
+    connect(openTargetAction, SIGNAL(triggered()), this, SLOT(openImage()));
 
     viewOrthogonalAction = new QAction(tr("&Orthogonal View"), this);
     viewOrthogonalAction->setStatusTip(tr("Get orthogonal view"));
     connect(viewOrthogonalAction, SIGNAL(triggered()), this, SLOT(createOrthogonalView()));
+
+    viewSelectedImageAction = new QAction(tr("View image"), this);
+    viewSelectedImageAction->setStatusTip(tr("View selected image"));
+    connect(viewSelectedImageAction, SIGNAL(triggered()), this, SLOT(viewImage()));
 }
 
 void QtMainWindow::disconnectSignals() {
@@ -73,7 +90,7 @@ void QtMainWindow::connectSignals() {
     }
 }
 
-void QtMainWindow::showTargetImage() {
+void QtMainWindow::showTargetImage(int j) {
     QtTwoDimensionalGlWidget *glWidget;
 
     disconnectSignals();
@@ -81,7 +98,7 @@ void QtMainWindow::showTargetImage() {
     for (int i = 0; i < viewers.size(); i++) {
         glWidget = viewerWidgets.at(i)->getGlWidget();
 
-        viewers.at(i)->SetTarget(irtkQtViewer::Instance()->GetTargetImage());
+        viewers.at(i)->SetTarget(irtkQtViewer::Instance()->GetImage(j));
         viewers.at(i)->SetDimensions(glWidget->customWidth(), glWidget->customHeight());
         viewers.at(i)->InitializeTransformation();
         viewers.at(i)->InitializeOutputImage();
@@ -91,8 +108,7 @@ void QtMainWindow::showTargetImage() {
         viewerWidgets.at(i)->setMaximumSlice(viewers.at(i)->GetSliceNumber());
         viewerWidgets.at(i)->setCurrentSlice(viewers.at(i)->GetCurrentSlice());
 
-        glWidget->setDrawable(viewers.at(i)->GetDrawable());
-        glWidget->updateScene();
+        glWidget->updateDrawable(viewers.at(i)->GetDrawable());
     }
 
     connectSignals();
@@ -116,32 +132,51 @@ QtViewerWidget* QtMainWindow::createTwoDimensionalView(irtkViewMode viewMode) {
 
 void QtMainWindow::clearVectors() {
     qDeleteAll(viewers.begin(), viewers.end());
-    qDeleteAll(viewerWidgets.begin(), viewerWidgets.end());
+    qDeleteAll(mainViewWidget->children());
 }
 
-void QtMainWindow::openTargetImage() {
+void QtMainWindow::openImage() {
     QString fileName = QFileDialog::getOpenFileName(this);
 
     if (!fileName.isEmpty()) {
-        irtkQtViewer::Instance()->DestroyTargetImage();
-        irtkQtViewer::Instance()->CreateTargetImage(fileName.toStdString());
-        // to do check if image file is valid
-        showTargetImage();
+        try {
+            irtkQtViewer::Instance()->CreateImage(fileName.toStdString());
+            QListWidgetItem *newItem = new QListWidgetItem;
+            newItem->setText(fileName);
+            listWidget->addItem(newItem);
+        }
+        catch (irtkException e)
+        {
+            QMessageBox msgBox;
+            msgBox.setText("Invalid image file.");
+            msgBox.exec();
+        }
     }
+}
+
+void QtMainWindow::viewImage() {
+    QModelIndexList indexes = listWidget->selectionModel()->selectedIndexes();
+
+    vector<int> indexList;
+    foreach(QModelIndex index, indexes)
+    {
+        indexList.push_back(index.row());
+    }
+
+    if ( indexList.size() > 0 )
+        showTargetImage(indexList.at(0));
 }
 
 void QtMainWindow::createOrthogonalView() {
     clearVectors();
 
-    QWidget *mainWidget = new QWidget();
     QGridLayout *layout = new QGridLayout();
 
     layout->addWidget(createTwoDimensionalView(VIEW_AXIAL), 0, 0);
     layout->addWidget(createTwoDimensionalView(VIEW_CORONAL), 0, 1);
         layout->addWidget(createTwoDimensionalView(VIEW_SAGITTAL), 1, 0);
 
-    mainWidget->setLayout(layout);
-    this->setCentralWidget(mainWidget);
+    mainViewWidget->setLayout(layout);
 }
 
 void QtMainWindow::updateOrigin(double x, double y, double z) {
@@ -155,8 +190,7 @@ void QtMainWindow::updateOrigin(double x, double y, double z) {
         viewers.at(i)->InitializeOutputImage();
 
         viewerWidgets.at(i)->setCurrentSlice(viewers.at(i)->GetCurrentSlice());
-        glWidget->setDrawable(viewers.at(i)->GetDrawable());
-        glWidget->updateScene();
+        glWidget->updateDrawable(viewers.at(i)->GetDrawable());
     }
 
     connectSignals();

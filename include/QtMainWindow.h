@@ -6,16 +6,25 @@
 #include <irtkQtViewer.h>
 
 #include <QMainWindow>
+#include <QListWidget>
+#include <QSplitter>
 
 class QtMainWindow : public QMainWindow
 {
     Q_OBJECT
 
+    QSplitter *splitter;
+    QListWidget *listWidget;
+    QWidget *mainViewWidget;
+
     QMenu *fileMenu;
     QMenu *viewMenu;
 
+    QToolBar *toolbar;
+
     QAction *openTargetAction;
     QAction *viewOrthogonalAction;
+    QAction *viewSelectedImageAction;
 
     QVector<QtViewerWidget*> viewerWidgets;
     QVector<irtkQtTwoDimensionalViewer*> viewers;
@@ -25,16 +34,18 @@ public:
     ~QtMainWindow();
 
 private:
+    void createToolBar();
     void createMenu();
     void createActions();
     void disconnectSignals();
     void connectSignals();
-    void showTargetImage();
+    void showTargetImage(int i);
     QtViewerWidget* createTwoDimensionalView(irtkViewMode viewMode);
     void clearVectors();
 
 private slots:
-    void openTargetImage();
+    void openImage();
+    void viewImage();
 
     void createOrthogonalView();
     void updateOrigin(double x, double y, double z);
