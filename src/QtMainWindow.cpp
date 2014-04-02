@@ -118,6 +118,8 @@ void QtMainWindow::showTargetImage(int j) {
         return;
     }
 
+    zoomInAction->setEnabled(true);
+    zoomOutAction->setEnabled(true);
     QtTwoDimensionalGlWidget *glWidget;
 
     disconnectSignals();
@@ -174,12 +176,10 @@ bool QtMainWindow::imageInList(const QString fileName) {
 void QtMainWindow::addToViewWidget(QWidget *widget) {
     QGridLayout *layout = dynamic_cast<QGridLayout*>(mainViewWidget->layout());
 
-    if ( viewers.size() % 2 == 0 ) {
+    if ( viewers.size() % 2 == 0 )
         layout->addWidget(widget, layout->rowCount()-1, 1);
-    }
-    else {
+    else
         layout->addWidget(widget, layout->rowCount(), 0);
-    }
 }
 
 void QtMainWindow::createMessageBox(QString message, QMessageBox::Icon icon) {
@@ -217,13 +217,13 @@ void QtMainWindow::viewImage() {
         indexList.push_back(index.row());
     }
 
-    if ( indexList.size() > 0 ) {
-        showTargetImage(indexList.at(0));
-        zoomInAction->setEnabled(true);
-        zoomOutAction->setEnabled(true);
-    }
-    else
+    if ( indexList.size() == 0 ) {
         createMessageBox("You need to select an image to view.", QMessageBox::Warning);
+        return;
+    }
+    else if ( indexList.size() > 0 ) {
+        showTargetImage(indexList.at(0));
+    }
 }
 
 void QtMainWindow::zoomIn() {
@@ -272,7 +272,7 @@ void QtMainWindow::updateOrigin(double x, double y, double z, int id) {
 
     for (int i = 0; i < viewers.size(); i++) {
         if ( viewerWidgets.at(i)->getGlWidget()->isEnabled() &&
-             ( (viewers.at(i)->GetViewMode() != vmode) || (i == id) ) ) {
+           ( (viewers.at(i)->GetViewMode() != vmode) || (i == id) ) ) {
                 glWidget = viewerWidgets.at(i)->getGlWidget();
                 viewers.at(i)->SetOrigin(x, y, z);
                 viewers.at(i)->InitializeOutputImage();
