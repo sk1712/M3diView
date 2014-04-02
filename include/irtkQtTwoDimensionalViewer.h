@@ -16,6 +16,8 @@ class irtkQtTwoDimensionalViewer : public QObject
 {
     Q_OBJECT
 
+    int _id;
+
     /// image origin
     double _originX, _originY, _originZ;
 
@@ -57,6 +59,8 @@ public:
     irtkQtTwoDimensionalViewer(irtkViewMode viewMode);
 
     ~irtkQtTwoDimensionalViewer();
+
+    void SetId(int id);
 
     void SetTarget(irtkImage* image);
 
@@ -104,9 +108,13 @@ signals:
 
     void ImageResized(irtkColor*);
 
-    void OriginChanged(double originX, double originY, double originZ);
+    void OriginChanged(double originX, double originY, double originZ, int id);
 };
 
+
+inline void irtkQtTwoDimensionalViewer::SetId(int id) {
+    _id = id;
+}
 
 inline void irtkQtTwoDimensionalViewer::SetTarget(irtkImage *image) {
     _targetImage = image;

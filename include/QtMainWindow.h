@@ -8,6 +8,7 @@
 #include <QMainWindow>
 #include <QListWidget>
 #include <QSplitter>
+#include <QMessageBox>
 
 class QtMainWindow : public QMainWindow
 {
@@ -23,6 +24,9 @@ class QtMainWindow : public QMainWindow
     QToolBar *toolbar;
 
     QAction *openTargetAction;
+    QAction *viewAxialAction;
+    QAction *viewCoronalAction;
+    QAction *viewSagittalAction;
     QAction *viewOrthogonalAction;
 
     QAction *viewSelectedImageAction;
@@ -48,6 +52,9 @@ private:
 
     bool imageInList(const QString fileName);
 
+    void addToViewWidget(QWidget *widget);
+    void createMessageBox(QString message, QMessageBox::Icon icon);
+
 private slots:
     void openImage();
     void viewImage();
@@ -55,8 +62,12 @@ private slots:
     void zoomIn();
     void zoomOut();
 
+    void createAxialView();
+    void createCoronalView();
+    void createSagittalView();
     void createOrthogonalView();
-    void updateOrigin(double x, double y, double z);
+
+    void updateOrigin(double x, double y, double z, int i);
 };
 
 #endif // QTMAINWINDOW_H

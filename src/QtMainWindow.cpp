@@ -3,20 +3,17 @@
 #include <QMenuBar>
 #include <QToolBar>
 #include <QFileDialog>
-#include <QMessageBox>
 
 #include <QGridLayout>
 
 QtMainWindow::QtMainWindow() {
-//    mainViewWidget = NULL;
-//    clearVectors();
-
     splitter = new QSplitter(this);
 
     listWidget = new QListWidget(splitter);
     mainViewWidget = new QWidget(splitter);
+    QGridLayout *layout = new QGridLayout();
+    mainViewWidget->setLayout(layout);
 
-    createOrthogonalView();
     createActions();
     createMenu();
     createToolBar();
@@ -25,7 +22,7 @@ QtMainWindow::QtMainWindow() {
 }
 
 QtMainWindow::~QtMainWindow() {
-    //clearVectors();
+    clearVectors();
     irtkQtViewer::Destroy();
 }
 
@@ -42,6 +39,9 @@ void QtMainWindow::createMenu() {
 
     viewMenu = menuBar()->addMenu(tr("&View"));
     viewMenu->addAction(viewOrthogonalAction);
+    viewMenu->addAction(viewAxialAction);
+    viewMenu->addAction(viewCoronalAction);
+    viewMenu->addAction(viewSagittalAction);
 }
 
 void QtMainWindow::createActions() {
@@ -49,8 +49,20 @@ void QtMainWindow::createActions() {
     openTargetAction->setStatusTip(tr("Load new image file"));
     connect(openTargetAction, SIGNAL(triggered()), this, SLOT(openImage()));
 
-    viewOrthogonalAction = new QAction(tr("&Orthogonal View"), this);
-    viewOrthogonalAction->setStatusTip(tr("Get orthogonal view"));
+    viewAxialAction = new QAction(tr("Axial View"), this);
+    viewAxialAction->setStatusTip(tr("Add axial view"));
+    connect(viewAxialAction, SIGNAL(triggered()), this, SLOT(createAxialView()));
+
+    viewCoronalAction = new QAction(tr("Coronal View"), this);
+    viewCoronalAction->setStatusTip(tr("Add coronal view"));
+    connect(viewCoronalAction, SIGNAL(triggered()), this, SLOT(createCoronalView()));
+
+    viewSagittalAction = new QAction(tr("Sagittal View"), this);
+    viewSagittalAction->setStatusTip(tr("Add sagittal view"));
+    connect(viewSagittalAction, SIGNAL(triggered()), this, SLOT(createSagittalView()));
+
+    viewOrthogonalAction = new QAction(tr("Orthogonal View"), this);
+    viewOrthogonalAction->setStatusTip(tr("Add orthogonal view"));
     connect(viewOrthogonalAction, SIGNAL(triggered()), this, SLOT(createOrthogonalView()));
 
     viewSelectedImageAction = new QAction(tr("View image"), this);
@@ -77,8 +89,8 @@ void QtMainWindow::disconnectSignals() {
                 viewers.at(i), SLOT(ChangeSlice(int)));
         disconnect(viewerWidgets.at(i)->getGlWidget(), SIGNAL(leftButtonPressed(int, int)),
                    viewers.at(i), SLOT(ChangeOrigin(int, int)));
-        disconnect(viewers.at(i), SIGNAL(OriginChanged(double, double, double)),
-                this, SLOT(updateOrigin(double, double, double)));
+        disconnect(viewers.at(i), SIGNAL(OriginChanged(double, double, double, int)),
+                this, SLOT(updateOrigin(double, double, double, int)));
     }
 }
 
@@ -95,12 +107,17 @@ void QtMainWindow::connectSignals() {
                 viewers.at(i), SLOT(ChangeSlice(int)));
         connect(viewerWidgets.at(i)->getGlWidget(), SIGNAL(leftButtonPressed(int, int)),
                            viewers.at(i), SLOT(ChangeOrigin(int, int)));
-        connect(viewers.at(i), SIGNAL(OriginChanged(double, double, double)),
-                this, SLOT(updateOrigin(double, double, double)));
+        connect(viewers.at(i), SIGNAL(OriginChanged(double, double, double, int)),
+                this, SLOT(updateOrigin(double, double, double, int)));
     }
 }
 
 void QtMainWindow::showTargetImage(int j) {
+    if ( viewers.size() == 0 ) {
+        createMessageBox("You need to add viewers first.", QMessageBox::Warning);
+        return;
+    }
+
     QtTwoDimensionalGlWidget *glWidget;
 
     disconnectSignals();
@@ -129,6 +146,7 @@ QtViewerWidget* QtMainWindow::createTwoDimensionalView(irtkViewMode viewMode) {
     QtViewerWidget *qtViewer;
 
     viewer = irtkQtViewer::Instance()->CreateTwoDimensionalViewer(viewMode);
+    viewer->SetId(viewers.size());
     viewers.push_back(viewer);
     qtViewer = new QtViewerWidget();
     viewerWidgets.push_back(qtViewer);
@@ -141,7 +159,7 @@ QtViewerWidget* QtMainWindow::createTwoDimensionalView(irtkViewMode viewMode) {
 }
 
 void QtMainWindow::clearVectors() {
-    qDeleteAll(viewers.begin(), viewers.end());
+    qDeleteAll(viewers);
     qDeleteAll(mainViewWidget->children());
 }
 
@@ -153,21 +171,39 @@ bool QtMainWindow::imageInList(const QString fileName) {
     return false;
 }
 
-void QtMainWindow::openImage() {
-    QString fileName = QFileDialog::getOpenFileName(this);
+void QtMainWindow::addToViewWidget(QWidget *widget) {
+    QGridLayout *layout = dynamic_cast<QGridLayout*>(mainViewWidget->layout());
 
-    if (!fileName.isEmpty() && !imageInList(fileName)) {
-        try {
-            irtkQtViewer::Instance()->CreateImage(fileName.toStdString());
-            QListWidgetItem *newItem = new QListWidgetItem;
-            newItem->setText(fileName);
-            listWidget->addItem(newItem);
-        }
-        catch (irtkException e)
-        {
-            QMessageBox msgBox;
-            msgBox.setText("Invalid image file.");
-            msgBox.exec();
+    if ( viewers.size() % 2 == 0 ) {
+        layout->addWidget(widget, layout->rowCount()-1, 1);
+    }
+    else {
+        layout->addWidget(widget, layout->rowCount(), 0);
+    }
+}
+
+void QtMainWindow::createMessageBox(QString message, QMessageBox::Icon icon) {
+    QMessageBox msgBox;
+    msgBox.setText(message);
+    msgBox.setIcon(icon);
+    msgBox.exec();
+}
+
+void QtMainWindow::openImage() {
+    QStringList fileNames = QFileDialog::getOpenFileNames(this);
+
+    QStringList::const_iterator it;
+    for (it = fileNames.constBegin(); it != fileNames.constEnd(); it++) {
+        if ( !imageInList(*it) ) {
+            try {
+                irtkQtViewer::Instance()->CreateImage((*it).toStdString());
+                QListWidgetItem *newItem = new QListWidgetItem;
+                newItem->setText(*it);
+                listWidget->addItem(newItem);
+            }
+            catch (irtkException e) {
+                createMessageBox("Invalid image file " + (*it), QMessageBox::Critical);
+            }
         }
     }
 }
@@ -181,53 +217,69 @@ void QtMainWindow::viewImage() {
         indexList.push_back(index.row());
     }
 
-    if ( indexList.size() > 0 )
+    if ( indexList.size() > 0 ) {
         showTargetImage(indexList.at(0));
-
-    zoomInAction->setEnabled(true);
-    zoomOutAction->setEnabled(true);
+        zoomInAction->setEnabled(true);
+        zoomOutAction->setEnabled(true);
+    }
+    else
+        createMessageBox("You need to select an image to view.", QMessageBox::Warning);
 }
 
 void QtMainWindow::zoomIn() {
     for (int i = 0; i < viewers.size(); i++) {
-        viewers.at(i)->IncreaseResolution();
-        viewers.at(i)->InitializeOutputImage();
-        viewerWidgets.at(i)->getGlWidget()->updateDrawable(viewers.at(i)->GetDrawable());
+        if (viewerWidgets.at(i)->getGlWidget()->isEnabled()) {
+            viewers.at(i)->IncreaseResolution();
+            viewers.at(i)->InitializeOutputImage();
+            viewerWidgets.at(i)->getGlWidget()->updateDrawable(viewers.at(i)->GetDrawable());
+        }
     }
 }
 
 void QtMainWindow::zoomOut() {
     for (int i = 0; i < viewers.size(); i++) {
-        viewers.at(i)->DecreaseResolution();
-        viewers.at(i)->InitializeOutputImage();
-        viewerWidgets.at(i)->getGlWidget()->updateDrawable(viewers.at(i)->GetDrawable());
+        if (viewerWidgets.at(i)->getGlWidget()->isEnabled()) {
+            viewers.at(i)->DecreaseResolution();
+            viewers.at(i)->InitializeOutputImage();
+            viewerWidgets.at(i)->getGlWidget()->updateDrawable(viewers.at(i)->GetDrawable());
+        }
     }
 }
 
-void QtMainWindow::createOrthogonalView() {
-    clearVectors();
-
-    QGridLayout *layout = new QGridLayout();
-
-    layout->addWidget(createTwoDimensionalView(VIEW_AXIAL), 0, 0);
-    layout->addWidget(createTwoDimensionalView(VIEW_CORONAL), 0, 1);
-        layout->addWidget(createTwoDimensionalView(VIEW_SAGITTAL), 1, 0);
-
-    mainViewWidget->setLayout(layout);
+void QtMainWindow::createAxialView() {
+    addToViewWidget(createTwoDimensionalView(VIEW_AXIAL));
 }
 
-void QtMainWindow::updateOrigin(double x, double y, double z) {
+void QtMainWindow::createCoronalView() {
+    addToViewWidget(createTwoDimensionalView(VIEW_CORONAL));
+}
+
+void QtMainWindow::createSagittalView() {
+    addToViewWidget(createTwoDimensionalView(VIEW_SAGITTAL));
+}
+
+void QtMainWindow::createOrthogonalView() {
+    addToViewWidget(createTwoDimensionalView(VIEW_AXIAL));
+    addToViewWidget(createTwoDimensionalView(VIEW_CORONAL));
+    addToViewWidget(createTwoDimensionalView(VIEW_SAGITTAL));
+}
+
+void QtMainWindow::updateOrigin(double x, double y, double z, int id) {
     QtTwoDimensionalGlWidget *glWidget;
+    irtkViewMode vmode = viewers.at(id)->GetViewMode();
 
     disconnectSignals();
 
     for (int i = 0; i < viewers.size(); i++) {
-        glWidget = viewerWidgets.at(i)->getGlWidget();
-        viewers.at(i)->SetOrigin(x, y, z);
-        viewers.at(i)->InitializeOutputImage();
+        if ( viewerWidgets.at(i)->getGlWidget()->isEnabled() &&
+             ( (viewers.at(i)->GetViewMode() != vmode) || (i == id) ) ) {
+                glWidget = viewerWidgets.at(i)->getGlWidget();
+                viewers.at(i)->SetOrigin(x, y, z);
+                viewers.at(i)->InitializeOutputImage();
 
-        viewerWidgets.at(i)->setCurrentSlice(viewers.at(i)->GetCurrentSlice());
-        glWidget->updateDrawable(viewers.at(i)->GetDrawable());
+                viewerWidgets.at(i)->setCurrentSlice(viewers.at(i)->GetCurrentSlice());
+                glWidget->updateDrawable(viewers.at(i)->GetDrawable());
+        }
     }
 
     connectSignals();

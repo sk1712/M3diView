@@ -16,8 +16,10 @@ irtkQtViewer* irtkQtViewer::Instance() {
 }
 
 void irtkQtViewer::Destroy() {
-    viewInstance->DestroyImages();
-    delete viewInstance;
+    if (viewInstance) {
+        viewInstance->DestroyImages();
+        delete viewInstance;
+    }
 }
 
 void irtkQtViewer::CreateImage(string imageFileName) {
