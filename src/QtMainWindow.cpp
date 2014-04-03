@@ -93,8 +93,8 @@ void QtMainWindow::disconnectSignals() {
                 viewers.at(i), SLOT(ChangeSlice(int)));
         disconnect(viewerWidgets.at(i)->getGlWidget(), SIGNAL(leftButtonPressed(int, int)),
                    viewers.at(i), SLOT(ChangeOrigin(int, int)));
-        disconnect(viewers.at(i), SIGNAL(OriginChanged(double, double, double, int)),
-                this, SLOT(updateOrigin(double, double, double, int)));
+        disconnect(viewers.at(i), SIGNAL(OriginChanged(double, double, double)),
+                this, SLOT(updateOrigin(double, double, double)));
     }
 }
 
@@ -111,8 +111,8 @@ void QtMainWindow::connectSignals() {
                 viewers.at(i), SLOT(ChangeSlice(int)));
         connect(viewerWidgets.at(i)->getGlWidget(), SIGNAL(leftButtonPressed(int, int)),
                            viewers.at(i), SLOT(ChangeOrigin(int, int)));
-        connect(viewers.at(i), SIGNAL(OriginChanged(double, double, double, int)),
-                this, SLOT(updateOrigin(double, double, double, int)));
+        connect(viewers.at(i), SIGNAL(OriginChanged(double, double, double)),
+                this, SLOT(updateOrigin(double, double, double)));
     }
 }
 
@@ -162,6 +162,7 @@ QtViewerWidget* QtMainWindow::createTwoDimensionalView(irtkViewMode viewMode) {
     qtViewer->getGlWidget()->setLabels(top, bottom, left, right);
 
     connect(qtViewer, SIGNAL(windowExpanded()), this, SLOT(showOnlyThisWidget()));
+    connect(qtViewer, SIGNAL(windowDeleted()), this, SLOT(deleteThisWidget()));
 
     return qtViewer;
 }
@@ -268,6 +269,18 @@ void QtMainWindow::showOnlyThisWidget() {
     singleViewerInScreen = !singleViewerInScreen;
 }
 
+void QtMainWindow::deleteThisWidget() {
+    QWidget *senderWidget = dynamic_cast<QWidget*>(sender());
+
+    int i = 0;
+    while ( senderWidget != viewerWidgets.at(i) ) {
+        i++;
+    }
+    viewerWidgets.at(i)->hide();
+    viewerWidgets.remove(i);
+    viewers.remove(i);
+}
+
 void QtMainWindow::createAxialView() {
     addToViewWidget(createTwoDimensionalView(VIEW_AXIAL));
 }
@@ -286,16 +299,22 @@ void QtMainWindow::createOrthogonalView() {
     addToViewWidget(createTwoDimensionalView(VIEW_SAGITTAL));
 }
 
-void QtMainWindow::updateOrigin(double x, double y, double z, int id) {
+
+//TO DO: change this slot so that it does not include the last argument
+void QtMainWindow::updateOrigin(double x, double y, double z) {
     QtTwoDimensionalGlWidget *glWidget;
-    irtkViewMode vmode = viewers.at(id)->GetViewMode();
+    irtkQtTwoDimensionalViewer *senderViewer;
+
+    senderViewer = dynamic_cast<irtkQtTwoDimensionalViewer*>(sender());
+    irtkViewMode vmode = senderViewer->GetViewMode();
 
     disconnectSignals();
 
     for (int i = 0; i < viewers.size(); i++) {
-        if ( viewerWidgets.at(i)->getGlWidget()->isEnabled() &&
-           ( (viewers.at(i)->GetViewMode() != vmode) || (i == id) ) ) {
-                glWidget = viewerWidgets.at(i)->getGlWidget();
+        glWidget = viewerWidgets.at(i)->getGlWidget();
+
+        if ( glWidget->isEnabled() &&
+             ( (viewers.at(i)->GetViewMode() != vmode) || (viewers.at(i) == senderViewer) ) ) {
                 viewers.at(i)->SetOrigin(x, y, z);
                 viewers.at(i)->InitializeOutputImage();
 

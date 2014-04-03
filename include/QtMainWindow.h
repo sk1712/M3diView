@@ -66,13 +66,14 @@ private slots:
     void zoomOut();
 
     void showOnlyThisWidget();
+    void deleteThisWidget();
 
     void createAxialView();
     void createCoronalView();
     void createSagittalView();
     void createOrthogonalView();
 
-    void updateOrigin(double x, double y, double z, int i);
+    void updateOrigin(double x, double y, double z);
 };
 
 #endif // QTMAINWINDOW_H

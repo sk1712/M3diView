@@ -22,6 +22,11 @@ QtViewerWidget::QtViewerWidget(QWidget *parent) : QWidget(parent) {
     layout->addWidget(expandToolButton, 1, 0, Qt::AlignLeft);
     connect(expandToolButton, SIGNAL(clicked()), this, SLOT(expandWindow()));
 
+//    deleteToolButton = new QToolButton();
+//    deleteToolButton->setToolTip("Delete view");
+//    layout->addWidget(deleteToolButton, 1, 0);
+//    connect(deleteToolButton, SIGNAL(clicked()), this, SLOT(deleteWindow()));
+
     sliceLabel = new QLabel();
     layout->addWidget(sliceLabel, 1, 0, Qt::AlignRight);
 
@@ -56,4 +61,8 @@ void QtViewerWidget::updateSlice(int slice) {
 
 void QtViewerWidget::expandWindow() {
     emit windowExpanded();
+}
+
+void QtViewerWidget::deleteWindow() {
+    emit windowDeleted();
 }

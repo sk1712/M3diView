@@ -108,7 +108,7 @@ signals:
 
     void ImageResized(irtkColor*);
 
-    void OriginChanged(double originX, double originY, double originZ, int id);
+    void OriginChanged(double originX, double originY, double originZ);
 };
 
 

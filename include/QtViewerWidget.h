@@ -14,6 +14,7 @@ class QtViewerWidget : public QWidget
     QtTwoDimensionalGlWidget *glWidget;
     QSlider *sliceSlider;
     QToolButton *expandToolButton;
+    QToolButton *deleteToolButton;
     QLabel *sliceLabel;
 
 protected:
@@ -40,9 +41,11 @@ private slots:
     void changeSlider(int slice);
     void updateSlice(int slice);
     void expandWindow();
+    void deleteWindow();
 
 signals:
     void windowExpanded();
+    void windowDeleted();
 };
 
 

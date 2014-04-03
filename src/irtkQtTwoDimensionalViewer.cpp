@@ -163,7 +163,7 @@ void irtkQtTwoDimensionalViewer::ChangeSlice(int slice) {
     originZ = round(originZ);
     _targetImage->ImageToWorld(originX, originY, originZ);
 
-    emit OriginChanged(originX, originY, originZ, _id);
+    emit OriginChanged(originX, originY, originZ);
 }
 
 void irtkQtTwoDimensionalViewer::ChangeOrigin(int x, int y) {
@@ -181,7 +181,7 @@ void irtkQtTwoDimensionalViewer::ChangeOrigin(int x, int y) {
     originZ = round(originZ);
     _targetImage->ImageToWorld(originX, originY, originZ);
 
-    emit OriginChanged(originX, originY, originZ, _id);
+    emit OriginChanged(originX, originY, originZ);
 }
 
 void irtkQtTwoDimensionalViewer::InitializeOriginOrientation() {
