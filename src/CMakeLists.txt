@@ -37,7 +37,11 @@ QtMainWindow.cpp
 irtkQtViewer.cpp
 irtkQtTwoDimensionalViewer.cpp)
 
-add_executable(newviewer MACOSX_BUNDLE ${VIEWER_SOURCES} ${VIEWER_HEADERS})
+SET(VIEWER_RESOURCES ../resources.qrc)
+
+qt5_add_resources(ResourceSources ${VIEWER_RESOURCES})
+
+add_executable(newviewer MACOSX_BUNDLE ${VIEWER_SOURCES} ${VIEWER_HEADERS} ${ResourceSources})
 
 # Use the Widgets module from Qt 5.
 qt5_use_modules(newviewer Widgets OpenGL)

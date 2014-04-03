@@ -8,5 +8,6 @@ int main(int argc, char *argv[])
     QtMainWindow window;
     window.show();
 
+    app.setAttribute(Qt::AA_UseHighDpiPixmaps);
     return app.exec();
 }

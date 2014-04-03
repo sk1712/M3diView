@@ -45,8 +45,8 @@ void QtMainWindow::createMenu() {
 }
 
 void QtMainWindow::createActions() {
-    openTargetAction = new QAction(tr("&Load image..."), this);
-    openTargetAction->setStatusTip(tr("Load new image file"));
+    openTargetAction = new QAction(tr("&Open image file(s)..."), this);
+    openTargetAction->setStatusTip(tr("Load new image file(s)"));
     connect(openTargetAction, SIGNAL(triggered()), this, SLOT(openImage()));
 
     viewAxialAction = new QAction(tr("Axial View"), this);
@@ -66,14 +66,17 @@ void QtMainWindow::createActions() {
     connect(viewOrthogonalAction, SIGNAL(triggered()), this, SLOT(createOrthogonalView()));
 
     viewSelectedImageAction = new QAction(tr("View image"), this);
+    viewSelectedImageAction->setIcon(QIcon(":/icons/brain.png"));
     viewSelectedImageAction->setStatusTip(tr("View selected image"));
     connect(viewSelectedImageAction, SIGNAL(triggered()), this, SLOT(viewImage()));
 
     zoomInAction = new QAction(tr("Zoom in"), this);
+    zoomInAction->setIcon(QIcon(":/icons/zoom_in.png"));
     zoomInAction->setEnabled(false);
     connect(zoomInAction, SIGNAL(triggered()), this, SLOT(zoomIn()));
 
     zoomOutAction = new QAction(tr("Zoom out"), this);
+    zoomOutAction->setIcon(QIcon(":/icons/zoom_out.png"));
     zoomOutAction->setEnabled(false);
     connect(zoomOutAction, SIGNAL(triggered()), this, SLOT(zoomOut()));
 }
