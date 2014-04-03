@@ -36,6 +36,8 @@ class QtMainWindow : public QMainWindow
     QVector<QtViewerWidget*> viewerWidgets;
     QVector<irtkQtTwoDimensionalViewer*> viewers;
 
+    bool singleViewerInScreen;
+
 public:
     QtMainWindow();
     ~QtMainWindow();
@@ -53,7 +55,8 @@ private:
     bool imageInList(const QString fileName);
 
     void addToViewWidget(QWidget *widget);
-    void createMessageBox(QString message, QMessageBox::Icon icon);
+    void createMessageBox(QString message,
+                          QMessageBox::Icon icon = QMessageBox::NoIcon);
 
 private slots:
     void openImage();
@@ -61,6 +64,8 @@ private slots:
 
     void zoomIn();
     void zoomOut();
+
+    void showOnlyThisWidget();
 
     void createAxialView();
     void createCoronalView();

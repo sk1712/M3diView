@@ -5,6 +5,7 @@
 
 #include <QSlider>
 #include <QLabel>
+#include <QToolButton>
 
 class QtViewerWidget : public QWidget
 {
@@ -12,6 +13,7 @@ class QtViewerWidget : public QWidget
 
     QtTwoDimensionalGlWidget *glWidget;
     QSlider *sliceSlider;
+    QToolButton *expandToolButton;
     QLabel *sliceLabel;
 
 protected:
@@ -21,9 +23,9 @@ protected:
 public:
     QtViewerWidget(QWidget *parent = 0);
     //~QtViewerWidget();
-    QtTwoDimensionalGlWidget* getGlWidget();
-    QSlider* getSlider();
-    QLabel* getLabel();
+    QtTwoDimensionalGlWidget* getGlWidget() const;
+    QSlider* getSlider() const;
+    QLabel* getLabel() const;
 
     void setCurrentSlice(int current);
     void setMaximumSlice(int maximum);
@@ -37,18 +39,22 @@ private:
 private slots:
     void changeSlider(int slice);
     void updateSlice(int slice);
+    void expandWindow();
+
+signals:
+    void windowExpanded();
 };
 
 
-inline QtTwoDimensionalGlWidget* QtViewerWidget::getGlWidget() {
+inline QtTwoDimensionalGlWidget* QtViewerWidget::getGlWidget() const {
     return glWidget;
 }
 
-inline QSlider* QtViewerWidget::getSlider() {
+inline QSlider* QtViewerWidget::getSlider() const {
     return sliceSlider;
 }
 
-inline QLabel* QtViewerWidget::getLabel() {
+inline QLabel* QtViewerWidget::getLabel() const {
     return sliceLabel;
 }
 

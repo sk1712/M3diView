@@ -16,8 +16,14 @@ QtViewerWidget::QtViewerWidget(QWidget *parent) : QWidget(parent) {
     layout->addWidget(sliceSlider, 0, 1);
     connect(sliceSlider, SIGNAL(valueChanged(int)), this, SLOT(updateSlice(int)));
 
+    expandToolButton = new QToolButton();
+    expandToolButton->setIcon(QIcon(":/icons/expand_window.png"));
+    expandToolButton->setToolTip("Expand window");
+    layout->addWidget(expandToolButton, 1, 0, Qt::AlignLeft);
+    connect(expandToolButton, SIGNAL(clicked()), this, SLOT(expandWindow()));
+
     sliceLabel = new QLabel();
-    layout->addWidget(sliceLabel, 1, 0, 1, 2, Qt::AlignRight);
+    layout->addWidget(sliceLabel, 1, 0, Qt::AlignRight);
 
     this->setLayout(layout);
 }
@@ -46,4 +52,8 @@ void QtViewerWidget::changeSlider(int steps) {
 void QtViewerWidget::updateSlice(int slice) {
     currentSlice = slice;
     updateLabel();
+}
+
+void QtViewerWidget::expandWindow() {
+    emit windowExpanded();
 }

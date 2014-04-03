@@ -3,5 +3,6 @@
         <file>icons/zoom_in.png</file>
         <file>icons/zoom_out.png</file>
         <file>icons/brain.png</file>
+        <file>icons/expand_window.png</file>
     </qresource>
 </RCC>

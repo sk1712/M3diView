@@ -19,6 +19,7 @@ QtMainWindow::QtMainWindow() {
     createToolBar();
 
     setCentralWidget(splitter);
+    singleViewerInScreen = false;
 }
 
 QtMainWindow::~QtMainWindow() {
@@ -160,6 +161,8 @@ QtViewerWidget* QtMainWindow::createTwoDimensionalView(irtkViewMode viewMode) {
     viewer->GetLabels(top, bottom, left, right);
     qtViewer->getGlWidget()->setLabels(top, bottom, left, right);
 
+    connect(qtViewer, SIGNAL(windowExpanded()), this, SLOT(showOnlyThisWidget()));
+
     return qtViewer;
 }
 
@@ -247,6 +250,22 @@ void QtMainWindow::zoomOut() {
             viewerWidgets.at(i)->getGlWidget()->updateDrawable(viewers.at(i)->GetDrawable());
         }
     }
+}
+
+void QtMainWindow::showOnlyThisWidget() {
+    if (singleViewerInScreen) {
+        for (int i = 0; i < viewerWidgets.size(); i++) {
+            viewerWidgets.at(i)->show();
+        }
+    }
+    else {
+        QWidget *senderWidget = dynamic_cast<QWidget*>(sender());
+        for (int i = 0; i < viewerWidgets.size(); i++) {
+            if (viewerWidgets.at(i) != senderWidget)
+                viewerWidgets.at(i)->hide();
+        }
+    }
+    singleViewerInScreen = !singleViewerInScreen;
 }
 
 void QtMainWindow::createAxialView() {
