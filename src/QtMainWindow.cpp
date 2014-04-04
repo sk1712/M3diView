@@ -3,6 +3,7 @@
 #include <QMenuBar>
 #include <QToolBar>
 #include <QFileDialog>
+#include <QFileInfo>
 
 #include <QGridLayout>
 
@@ -43,6 +44,7 @@ void QtMainWindow::createMenu() {
     viewMenu->addAction(viewAxialAction);
     viewMenu->addAction(viewCoronalAction);
     viewMenu->addAction(viewSagittalAction);
+    viewMenu->addAction(clearViewsAction);
 }
 
 void QtMainWindow::createActions() {
@@ -65,6 +67,10 @@ void QtMainWindow::createActions() {
     viewOrthogonalAction = new QAction(tr("Orthogonal View"), this);
     viewOrthogonalAction->setStatusTip(tr("Add orthogonal view"));
     connect(viewOrthogonalAction, SIGNAL(triggered()), this, SLOT(createOrthogonalView()));
+
+    clearViewsAction = new QAction(tr("Clear views"), this);
+    clearViewsAction->setStatusTip(tr("Delete all views"));
+    connect(clearViewsAction, SIGNAL(triggered()), this, SLOT(clearViews()));
 
     viewSelectedImageAction = new QAction(tr("View image"), this);
     viewSelectedImageAction->setIcon(QIcon(":/icons/brain.png"));
@@ -169,12 +175,15 @@ QtViewerWidget* QtMainWindow::createTwoDimensionalView(irtkViewMode viewMode) {
 
 void QtMainWindow::clearVectors() {
     qDeleteAll(viewers);
-    qDeleteAll(mainViewWidget->children());
+    qDeleteAll(viewerWidgets);
+    viewers.clear();
+    viewerWidgets.clear();
+    //qDeleteAll(mainViewWidget->children());
 }
 
 bool QtMainWindow::imageInList(const QString fileName) {
     for (int i = 0; i < listWidget->count(); i++) {
-        if (listWidget->item(i)->text() == fileName)
+        if (listWidget->item(i)->toolTip() == fileName)
             return true;
     }
     return false;
@@ -205,7 +214,9 @@ void QtMainWindow::openImage() {
             try {
                 irtkQtViewer::Instance()->CreateImage((*it).toStdString());
                 QListWidgetItem *newItem = new QListWidgetItem;
-                newItem->setText(*it);
+                QFileInfo file(*it);
+                newItem->setToolTip(*it);
+                newItem->setText(file.fileName());
                 listWidget->addItem(newItem);
             }
             catch (irtkException e) {
@@ -299,8 +310,10 @@ void QtMainWindow::createOrthogonalView() {
     addToViewWidget(createTwoDimensionalView(VIEW_SAGITTAL));
 }
 
+void QtMainWindow::clearViews() {
+    clearVectors();
+}
 
-//TO DO: change this slot so that it does not include the last argument
 void QtMainWindow::updateOrigin(double x, double y, double z) {
     QtTwoDimensionalGlWidget *glWidget;
     irtkQtTwoDimensionalViewer *senderViewer;

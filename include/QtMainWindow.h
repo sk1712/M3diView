@@ -28,6 +28,7 @@ class QtMainWindow : public QMainWindow
     QAction *viewCoronalAction;
     QAction *viewSagittalAction;
     QAction *viewOrthogonalAction;
+    QAction *clearViewsAction;
 
     QAction *viewSelectedImageAction;
     QAction *zoomInAction;
@@ -72,6 +73,7 @@ private slots:
     void createCoronalView();
     void createSagittalView();
     void createOrthogonalView();
+    void clearViews();
 
     void updateOrigin(double x, double y, double z);
 };
