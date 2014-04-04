@@ -6,8 +6,8 @@
 
 QtGlWidget::QtGlWidget(QWidget *parent)
     : QGLWidget(parent) {
-    setMouseTracking(true);
     pixelRatio = windowHandle()->devicePixelRatio();
+    setMouseTracking(true);
 }
 
 QSize QtGlWidget::sizeHint() const {

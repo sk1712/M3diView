@@ -1,6 +1,6 @@
 #include <irtkQtViewer.h>
 
-#include <cstdio>
+//#include <cstdio>
 
 irtkQtViewer* irtkQtViewer::viewInstance = NULL;
 
@@ -25,7 +25,6 @@ void irtkQtViewer::Destroy() {
 void irtkQtViewer::CreateImage(string imageFileName) {
     irtkImage *newImage = irtkImage::New(imageFileName.c_str());
     _images.push_back(newImage);
-    printf("Creating new image \n");
 
     if (_images.size() == 1) {
         newImage->GetOrientation(_axisX, _axisY, _axisZ);

@@ -10,13 +10,13 @@
 
 #include <irtkLookupTable.h>
 
+
+/// view modes
 enum irtkViewMode {VIEW_AXIAL, VIEW_SAGITTAL, VIEW_CORONAL};
 
 class irtkQtTwoDimensionalViewer : public QObject
 {
     Q_OBJECT
-
-    int _id;
 
     /// image origin
     double _originX, _originY, _originZ;
@@ -56,65 +56,82 @@ class irtkQtTwoDimensionalViewer : public QObject
 
 public:
 
+    /// class constructor
     irtkQtTwoDimensionalViewer(irtkViewMode viewMode);
 
+    /// class destructor
     ~irtkQtTwoDimensionalViewer();
 
-    void SetId(int id);
-
+    /// set target image
     void SetTarget(irtkImage* image);
 
+    /// set image origin
     void SetOrigin(double x, double y, double z);
 
+    /// set image resolution
     void SetResolution(double dx, double dy, double dz);
 
+    /// increase image resolution
     void IncreaseResolution();
 
+    /// decrease image resolution
     void DecreaseResolution();
 
+    /// set image dimensions
     void SetDimensions(int width, int height);
 
+    /// get current slice in image coordinates
     int GetCurrentSlice();
 
+    /// get total number of slices
     int GetSliceNumber();
 
+    /// get view mode (axial, sagittal, coronal)
     irtkViewMode GetViewMode();
 
+    /// get the array of RGB values to be drawn on the screen
     irtkColor* GetDrawable();
 
+    /// get the labels displayed on the screen
     void GetLabels(char &top, char &bottom, char &left, char &right);
 
+    /// initialize the parameters of the output image
     void InitializeOutputImage();
 
+    /// initialize the transformation from the input to the output image
     void InitializeTransformation();
 
 public slots:
 
+    /// callback function when image is resized to (width, height)
     void ResizeImage(int width, int height);
 
+    /// callback function when slice is changed
     void ChangeSlice(int slice);
 
+    /// callback function when origin is changed
     void ChangeOrigin(int x, int y);
 
 protected:
 
+    /// initialize image origin and orientation
     void InitializeOriginOrientation();
 
+    /// sets image orientation
     void SetOrientation(const double * xaxis, const double * yaxis, const double * zaxis);
 
+    /// calculate the output image from the transformation
     void CalculateOutputImage();
 
 signals:
 
+    /// signal emitted when image is resized
     void ImageResized(irtkColor*);
 
+    /// signal emitted when image origin changes
     void OriginChanged(double originX, double originY, double originZ);
 };
 
-
-inline void irtkQtTwoDimensionalViewer::SetId(int id) {
-    _id = id;
-}
 
 inline void irtkQtTwoDimensionalViewer::SetTarget(irtkImage *image) {
     _targetImage = image;

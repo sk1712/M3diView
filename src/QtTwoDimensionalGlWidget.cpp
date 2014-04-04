@@ -57,11 +57,11 @@ void QtTwoDimensionalGlWidget::initializeGL() {
 }
 
 void QtTwoDimensionalGlWidget::resizeGL(int w, int h) {
-    //printf("Resizing GL to width %d and height %d \n", w, h);
     glViewport(0, 0, w, h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(0.0, (double) w, 0.0, (double) h, -1.0, 1.0); // set origin to bottom left corner
+    // set origin to bottom left corner
+    glOrtho(0.0, (double) w, 0.0, (double) h, -1.0, 1.0);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 

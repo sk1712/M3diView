@@ -89,35 +89,49 @@ void QtMainWindow::createActions() {
 }
 
 void QtMainWindow::disconnectSignals() {
-    for (int i = 0; i < viewers.size(); i++) {
-        disconnect(viewerWidgets.at(i)->getGlWidget(), SIGNAL(resized(int, int)),
-                viewers.at(i), SLOT(ResizeImage(int, int)));
-        disconnect(viewers.at(i), SIGNAL(ImageResized(irtkColor*)),
-                viewerWidgets.at(i)->getGlWidget(), SLOT(updateDrawable(irtkColor*)));
+    QtViewerWidget *viewerWidget;
+    irtkQtTwoDimensionalViewer *viewer;
 
-        disconnect(viewerWidgets.at(i)->getSlider(), SIGNAL(valueChanged(int)),
-                viewers.at(i), SLOT(ChangeSlice(int)));
-        disconnect(viewerWidgets.at(i)->getGlWidget(), SIGNAL(leftButtonPressed(int, int)),
-                   viewers.at(i), SLOT(ChangeOrigin(int, int)));
+    for (int i = 0; i < viewers.size(); i++) {
+        viewerWidget = viewerWidgets.at(i);
+        viewer = viewers.at(i);
+
+        disconnect(viewerWidget->getGlWidget(), SIGNAL(resized(int, int)),
+                   viewer, SLOT(ResizeImage(int, int)));
+        disconnect(viewer, SIGNAL(ImageResized(irtkColor*)),
+                   viewerWidget->getGlWidget(), SLOT(updateDrawable(irtkColor*)));
+
+        disconnect(viewerWidget->getSlider(), SIGNAL(valueChanged(int)),
+                   viewer, SLOT(ChangeSlice(int)));
+        disconnect(viewerWidget->getGlWidget(), SIGNAL(leftButtonPressed(int, int)),
+                   viewer, SLOT(ChangeOrigin(int, int)));
+
         disconnect(viewers.at(i), SIGNAL(OriginChanged(double, double, double)),
-                this, SLOT(updateOrigin(double, double, double)));
+                   this, SLOT(updateOrigin(double, double, double)));
     }
 }
 
 void QtMainWindow::connectSignals() {
+    QtViewerWidget *viewerWidget;
+    irtkQtTwoDimensionalViewer *viewer;
+
     for (int i = 0; i < viewers.size(); i++) {
+        viewerWidget = viewerWidgets.at(i);
+        viewer = viewers.at(i);
+
         /// update drawable when widgets are resized
-        connect(viewerWidgets.at(i)->getGlWidget(), SIGNAL(resized(int, int)),
-                viewers.at(i), SLOT(ResizeImage(int, int)));
-        connect(viewers.at(i), SIGNAL(ImageResized(irtkColor*)),
-                viewerWidgets.at(i)->getGlWidget(), SLOT(updateDrawable(irtkColor*)));
+        connect(viewerWidget->getGlWidget(), SIGNAL(resized(int, int)),
+                viewer, SLOT(ResizeImage(int, int)));
+        connect(viewer, SIGNAL(ImageResized(irtkColor*)),
+                viewerWidget->getGlWidget(), SLOT(updateDrawable(irtkColor*)));
 
         /// update drawable when slice is changed
-        connect(viewerWidgets.at(i)->getSlider(), SIGNAL(valueChanged(int)),
-                viewers.at(i), SLOT(ChangeSlice(int)));
-        connect(viewerWidgets.at(i)->getGlWidget(), SIGNAL(leftButtonPressed(int, int)),
-                           viewers.at(i), SLOT(ChangeOrigin(int, int)));
-        connect(viewers.at(i), SIGNAL(OriginChanged(double, double, double)),
+        connect(viewerWidget->getSlider(), SIGNAL(valueChanged(int)),
+                viewer, SLOT(ChangeSlice(int)));
+        connect(viewerWidget->getGlWidget(), SIGNAL(leftButtonPressed(int, int)),
+                           viewer, SLOT(ChangeOrigin(int, int)));
+
+        connect(viewer, SIGNAL(OriginChanged(double, double, double)),
                 this, SLOT(updateOrigin(double, double, double)));
     }
 }
@@ -134,20 +148,26 @@ void QtMainWindow::showTargetImage(int j) {
 
     disconnectSignals();
 
-    for (int i = 0; i < viewers.size(); i++) {
-        glWidget = viewerWidgets.at(i)->getGlWidget();
+    QtViewerWidget *viewerWidget;
+    irtkQtTwoDimensionalViewer *viewer;
 
-        viewers.at(i)->SetTarget(irtkQtViewer::Instance()->GetImage(j));
-        viewers.at(i)->SetDimensions(glWidget->customWidth(), glWidget->customHeight());
-        viewers.at(i)->InitializeTransformation();
-        viewers.at(i)->InitializeOutputImage();
+    for (int i = 0; i < viewers.size(); i++) {
+        viewerWidget = viewerWidgets.at(i);
+        viewer = viewers.at(i);
+
+        glWidget = viewerWidget->getGlWidget();
+
+        viewer->SetTarget(irtkQtViewer::Instance()->GetImage(j));
+        viewer->SetDimensions(glWidget->customWidth(), glWidget->customHeight());
+        viewer->InitializeTransformation();
+        viewer->InitializeOutputImage();
 
         glWidget->setEnabled(true);
-        viewerWidgets.at(i)->getSlider()->setEnabled(true);
-        viewerWidgets.at(i)->setMaximumSlice(viewers.at(i)->GetSliceNumber());
-        viewerWidgets.at(i)->setCurrentSlice(viewers.at(i)->GetCurrentSlice());
+        viewerWidget->getSlider()->setEnabled(true);
+        viewerWidget->setMaximumSlice(viewer->GetSliceNumber());
+        viewerWidget->setCurrentSlice(viewer->GetCurrentSlice());
 
-        glWidget->updateDrawable(viewers.at(i)->GetDrawable());
+        glWidget->updateDrawable(viewer->GetDrawable());
     }
 
     connectSignals();
@@ -158,7 +178,6 @@ QtViewerWidget* QtMainWindow::createTwoDimensionalView(irtkViewMode viewMode) {
     QtViewerWidget *qtViewer;
 
     viewer = irtkQtViewer::Instance()->CreateTwoDimensionalViewer(viewMode);
-    viewer->SetId(viewers.size());
     viewers.push_back(viewer);
     qtViewer = new QtViewerWidget();
     viewerWidgets.push_back(qtViewer);
@@ -178,7 +197,6 @@ void QtMainWindow::clearVectors() {
     qDeleteAll(viewerWidgets);
     viewers.clear();
     viewerWidgets.clear();
-    //qDeleteAll(mainViewWidget->children());
 }
 
 bool QtMainWindow::imageInList(const QString fileName) {
@@ -230,8 +248,7 @@ void QtMainWindow::viewImage() {
     QModelIndexList indexes = listWidget->selectionModel()->selectedIndexes();
 
     vector<int> indexList;
-    foreach(QModelIndex index, indexes)
-    {
+    foreach(QModelIndex index, indexes) {
         indexList.push_back(index.row());
     }
 
@@ -245,21 +262,33 @@ void QtMainWindow::viewImage() {
 }
 
 void QtMainWindow::zoomIn() {
+    QtViewerWidget *viewerWidget;
+    irtkQtTwoDimensionalViewer *viewer;
+
     for (int i = 0; i < viewers.size(); i++) {
-        if (viewerWidgets.at(i)->getGlWidget()->isEnabled()) {
-            viewers.at(i)->IncreaseResolution();
-            viewers.at(i)->InitializeOutputImage();
-            viewerWidgets.at(i)->getGlWidget()->updateDrawable(viewers.at(i)->GetDrawable());
+        viewerWidget = viewerWidgets.at(i);
+        viewer = viewers.at(i);
+
+        if (viewerWidget->getGlWidget()->isEnabled()) {
+            viewer->IncreaseResolution();
+            viewer->InitializeOutputImage();
+            viewerWidget->getGlWidget()->updateDrawable(viewer->GetDrawable());
         }
     }
 }
 
 void QtMainWindow::zoomOut() {
+    QtViewerWidget *viewerWidget;
+    irtkQtTwoDimensionalViewer *viewer;
+
     for (int i = 0; i < viewers.size(); i++) {
-        if (viewerWidgets.at(i)->getGlWidget()->isEnabled()) {
-            viewers.at(i)->DecreaseResolution();
-            viewers.at(i)->InitializeOutputImage();
-            viewerWidgets.at(i)->getGlWidget()->updateDrawable(viewers.at(i)->GetDrawable());
+        viewerWidget = viewerWidgets.at(i);
+        viewer = viewers.at(i);
+
+        if (viewerWidget->getGlWidget()->isEnabled()) {
+            viewer->DecreaseResolution();
+            viewer->InitializeOutputImage();
+            viewerWidget->getGlWidget()->updateDrawable(viewer->GetDrawable());
         }
     }
 }
@@ -316,7 +345,8 @@ void QtMainWindow::clearViews() {
 
 void QtMainWindow::updateOrigin(double x, double y, double z) {
     QtTwoDimensionalGlWidget *glWidget;
-    irtkQtTwoDimensionalViewer *senderViewer;
+    irtkQtTwoDimensionalViewer *senderViewer, *viewer;
+    QtViewerWidget *viewerWidget;
 
     senderViewer = dynamic_cast<irtkQtTwoDimensionalViewer*>(sender());
     irtkViewMode vmode = senderViewer->GetViewMode();
@@ -324,15 +354,17 @@ void QtMainWindow::updateOrigin(double x, double y, double z) {
     disconnectSignals();
 
     for (int i = 0; i < viewers.size(); i++) {
-        glWidget = viewerWidgets.at(i)->getGlWidget();
+        viewerWidget = viewerWidgets.at(i);
+        viewer = viewers.at(i);
+        glWidget = viewerWidget->getGlWidget();
 
         if ( glWidget->isEnabled() &&
-             ( (viewers.at(i)->GetViewMode() != vmode) || (viewers.at(i) == senderViewer) ) ) {
-                viewers.at(i)->SetOrigin(x, y, z);
-                viewers.at(i)->InitializeOutputImage();
+             ( (viewer->GetViewMode() != vmode) || (viewer == senderViewer) ) ) {
+                viewer->SetOrigin(x, y, z);
+                viewer->InitializeOutputImage();
 
-                viewerWidgets.at(i)->setCurrentSlice(viewers.at(i)->GetCurrentSlice());
-                glWidget->updateDrawable(viewers.at(i)->GetDrawable());
+                viewerWidget->setCurrentSlice(viewer->GetCurrentSlice());
+                glWidget->updateDrawable(viewer->GetDrawable());
         }
     }
 
