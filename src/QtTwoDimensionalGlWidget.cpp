@@ -15,7 +15,7 @@ void QtTwoDimensionalGlWidget::drawImage() {
         // Set raster position
         glRasterPos2f(0, 0);
         // Draw pixelmap
-        glDrawPixels(_width, _height, GL_RGB, GL_UNSIGNED_BYTE,
+        glDrawPixels(_width, _height, GL_RGBA, GL_UNSIGNED_BYTE,
                 _drawable);
     }
 }
@@ -43,7 +43,8 @@ void QtTwoDimensionalGlWidget::drawLabels() {
     renderText(width()-15, height()/2+5, right, arialFont);
 }
 
-void QtTwoDimensionalGlWidget::updateDrawable(irtkColor* drawable) {
+//void QtTwoDimensionalGlWidget::updateDrawable(irtkColor* drawable) {
+void QtTwoDimensionalGlWidget::updateDrawable(QRgb* drawable) {
     delete _drawable;
     _drawable = drawable;
     update();

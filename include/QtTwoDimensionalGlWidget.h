@@ -9,7 +9,8 @@ class QtTwoDimensionalGlWidget : public QtGlWidget
     Q_OBJECT
 
     /// array of values to be drawn on the screen
-    irtkColor* _drawable;
+    //irtkColor* _drawable;
+    QRgb* _drawable;
 
     /// viewer labels
     QString top, bottom, left, right;
@@ -37,7 +38,8 @@ public:
 public slots:
 
     /// callback function to update drawable
-    void updateDrawable(irtkColor* drawable);
+    //void updateDrawable(irtkColor* drawable);
+    void updateDrawable(QRgb* drawable);
 
 protected:
 

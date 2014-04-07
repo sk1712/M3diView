@@ -26,7 +26,8 @@ set(VIEWER_HEADERS
 ../include/QtViewerWidget.h
 ../include/QtMainWindow.h
 ../include/irtkQtViewer.h
-../include/irtkQtTwoDimensionalViewer.h)
+../include/irtkQtTwoDimensionalViewer.h
+../include/irtkQtLookupTable.h)
 
 SET(VIEWER_SOURCES
 main.cpp
@@ -35,7 +36,8 @@ QtTwoDimensionalGlWidget.cpp
 QtViewerWidget.cpp
 QtMainWindow.cpp
 irtkQtViewer.cpp
-irtkQtTwoDimensionalViewer.cpp)
+irtkQtTwoDimensionalViewer.cpp
+irtkQtLookupTable.cpp)
 
 SET(VIEWER_RESOURCES ../resources.qrc)
 
