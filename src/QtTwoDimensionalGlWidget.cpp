@@ -65,8 +65,7 @@ void QtTwoDimensionalGlWidget::resizeGL(int w, int h) {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    if ( (w != _width) || (h != _height) )
-        emit resized(w, h);
+    emit resized(w, h);
 }
 
 void QtTwoDimensionalGlWidget::paintGL() {
