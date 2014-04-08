@@ -21,7 +21,8 @@ class QtViewerWidget : public QWidget
     /// toolbutton to expand/collapse viewer
     QToolButton *expandToolButton;
 
-    //QToolButton *deleteToolButton;
+    /// toolbutton to delete viewer
+    QToolButton *deleteToolButton;
 
     /// label showing number of slice
     QLabel *sliceLabel;

@@ -21,6 +21,7 @@ set(VIEWER_HEADERS
 ../include/QtTwoDimensionalGlWidget.h
 ../include/QtViewerWidget.h
 ../include/QtMainWindow.h
+#../include/QtFlowLayout.h
 ../include/irtkQtViewer.h
 ../include/irtkQtTwoDimensionalViewer.h
 ../include/irtkQtLookupTable.h)
@@ -31,6 +32,7 @@ QtGlWidget.cpp
 QtTwoDimensionalGlWidget.cpp
 QtViewerWidget.cpp
 QtMainWindow.cpp
+#QtFlowLayout.cpp
 irtkQtViewer.cpp
 irtkQtTwoDimensionalViewer.cpp
 irtkQtLookupTable.cpp)

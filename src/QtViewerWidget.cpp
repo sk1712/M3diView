@@ -1,6 +1,7 @@
 #include <QtViewerWidget.h>
 
 #include <QGridLayout>
+#include <QHBoxLayout>
 
 QtViewerWidget::QtViewerWidget(QWidget *parent) : QWidget(parent) {
     QGridLayout *layout = new QGridLayout;
@@ -16,16 +17,23 @@ QtViewerWidget::QtViewerWidget(QWidget *parent) : QWidget(parent) {
     layout->addWidget(sliceSlider, 0, 1);
     connect(sliceSlider, SIGNAL(valueChanged(int)), this, SLOT(updateSlice(int)));
 
+    QWidget *toolWidget = new QWidget();
+
+    QHBoxLayout *toolLayout = new QHBoxLayout();
     expandToolButton = new QToolButton();
     expandToolButton->setIcon(QIcon(":/icons/expand_window.png"));
     expandToolButton->setToolTip("Expand window");
-    layout->addWidget(expandToolButton, 1, 0, Qt::AlignLeft);
     connect(expandToolButton, SIGNAL(clicked()), this, SLOT(expandWindow()));
+    toolLayout->addWidget(expandToolButton);
 
-//    deleteToolButton = new QToolButton();
-//    deleteToolButton->setToolTip("Delete view");
-//    layout->addWidget(deleteToolButton, 1, 0);
-//    connect(deleteToolButton, SIGNAL(clicked()), this, SLOT(deleteWindow()));
+    deleteToolButton = new QToolButton();
+    deleteToolButton->setIcon(QIcon(":/icons/delete.png"));
+    deleteToolButton->setToolTip("Delete view");
+    connect(deleteToolButton, SIGNAL(clicked()), this, SLOT(deleteWindow()));
+    toolLayout->addWidget(deleteToolButton);
+
+    toolWidget->setLayout(toolLayout);
+    layout->addWidget(toolWidget, 1, 0, Qt::AlignLeft);
 
     sliceLabel = new QLabel();
     layout->addWidget(sliceLabel, 1, 0, Qt::AlignRight);

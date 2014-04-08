@@ -218,6 +218,15 @@ void QtMainWindow::addToViewWidget(QWidget *widget) {
         layout->addWidget(widget, layout->rowCount(), 0);
 }
 
+void QtMainWindow::addToViewWidget(QWidget *widget, int index) {
+    QGridLayout *layout = dynamic_cast<QGridLayout*>(mainViewWidget->layout());
+
+    if ( index % 2 != 0 )
+        layout->addWidget(widget, layout->rowCount()-1, 1);
+    else
+        layout->addWidget(widget, layout->rowCount(), 0);
+}
+
 void QtMainWindow::createMessageBox(QString message, QMessageBox::Icon icon) {
     QMessageBox msgBox;
     msgBox.setText(message);
@@ -314,13 +323,19 @@ void QtMainWindow::showOnlyThisWidget() {
 void QtMainWindow::deleteThisWidget() {
     QWidget *senderWidget = dynamic_cast<QWidget*>(sender());
 
-    int i = 0;
-    while ( senderWidget != viewerWidgets.at(i) ) {
-        i++;
+    QLayout *layout = mainViewWidget->layout();
+
+    for (int i = 0; i < viewerWidgets.size(); i++) {
+        layout->removeWidget(viewerWidgets.at(i));
+        if (senderWidget == viewerWidgets.at(i)) {
+            delete viewerWidgets.takeAt(i);
+            delete viewers.takeAt(i);
+        }
     }
-    viewerWidgets.at(i)->hide();
-    viewerWidgets.remove(i);
-    viewers.remove(i);
+    for (int i = 0; i < viewerWidgets.size(); i++) {
+        addToViewWidget(viewerWidgets.at(i), i);
+        viewerWidgets.at(i)->show();
+    }
 }
 
 void QtMainWindow::createAxialView() {

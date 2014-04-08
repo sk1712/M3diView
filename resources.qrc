@@ -4,5 +4,6 @@
         <file>icons/zoom_out.png</file>
         <file>icons/brain.png</file>
         <file>icons/expand_window.png</file>
+        <file>icons/delete.png</file>
     </qresource>
 </RCC>

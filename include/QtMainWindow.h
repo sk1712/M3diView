@@ -52,10 +52,10 @@ class QtMainWindow : public QMainWindow
     QAction *zoomOutAction;
 
     /// vector of viewer widgets
-    QVector<QtViewerWidget*> viewerWidgets;
+    QList<QtViewerWidget*> viewerWidgets;
 
     /// vector of irtk 2D viewers
-    QVector<irtkQtTwoDimensionalViewer*> viewers;
+    QList<irtkQtTwoDimensionalViewer*> viewers;
 
     /// flag for only one viewer visible
     bool singleViewerInScreen;
@@ -99,6 +99,7 @@ private:
 
     /// add widget to mainViewWidget
     void addToViewWidget(QWidget *widget);
+    void addToViewWidget(QWidget *widget, int index);
 
     /// show message box
     void createMessageBox(QString message,
