@@ -11,6 +11,8 @@ QtMainWindow::QtMainWindow() {
     splitter = new QSplitter(this);
 
     listWidget = new QListWidget(splitter);
+    listWidget->setMaximumWidth(0.5*width());
+
     mainViewWidget = new QWidget(splitter);
     QGridLayout *layout = new QGridLayout();
     mainViewWidget->setLayout(layout);
