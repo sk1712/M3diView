@@ -43,7 +43,6 @@ void QtTwoDimensionalGlWidget::drawLabels() {
     renderText(width()-15, height()/2+5, right, arialFont);
 }
 
-//void QtTwoDimensionalGlWidget::updateDrawable(irtkColor* drawable) {
 void QtTwoDimensionalGlWidget::updateDrawable(QRgb* drawable) {
     delete _drawable;
     _drawable = drawable;

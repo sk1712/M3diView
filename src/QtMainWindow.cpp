@@ -98,8 +98,6 @@ void QtMainWindow::disconnectSignals() {
 
         disconnect(viewerWidget->getGlWidget(), SIGNAL(resized(int, int)),
                    viewer, SLOT(ResizeImage(int, int)));
-//        disconnect(viewer, SIGNAL(ImageResized(irtkColor*)),
-//                   viewerWidget->getGlWidget(), SLOT(updateDrawable(irtkColor*)));
         disconnect(viewer, SIGNAL(ImageResized(QRgb*)),
                    viewerWidget->getGlWidget(), SLOT(updateDrawable(QRgb*)));
 
@@ -124,8 +122,6 @@ void QtMainWindow::connectSignals() {
         /// update drawable when widgets are resized
         connect(viewerWidget->getGlWidget(), SIGNAL(resized(int, int)),
                 viewer, SLOT(ResizeImage(int, int)));
-//        connect(viewer, SIGNAL(ImageResized(irtkColor*)),
-//                viewerWidget->getGlWidget(), SLOT(updateDrawable(irtkColor*)));
         connect(viewer, SIGNAL(ImageResized(QRgb*)),
                 viewerWidget->getGlWidget(), SLOT(updateDrawable(QRgb*)));
 

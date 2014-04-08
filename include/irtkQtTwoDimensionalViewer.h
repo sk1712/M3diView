@@ -8,7 +8,6 @@
 #include <irtkImage.h>
 #include <irtkTransformation.h>
 
-//#include <irtkLookupTable.h>
 #include <irtkQtLookupTable.h>
 
 /// view modes
@@ -43,7 +42,6 @@ class irtkQtTwoDimensionalViewer : public QObject
     irtkGreyImage *_targetImageOutput;
 
     /// image lookup table
-    //irtkLookupTable *_targetLookupTable;
     irtkQtLookupTable *_targetLookupTable;
 
     /// image transform
@@ -91,7 +89,6 @@ public:
     irtkViewMode GetViewMode();
 
     /// get the array of RGB values to be drawn on the screen
-    //irtkColor* GetDrawable();
     QRgb* GetDrawable();
 
     /// get the labels displayed on the screen
@@ -128,7 +125,6 @@ protected:
 signals:
 
     /// signal emitted when image is resized
-    //void ImageResized(irtkColor*);
     void ImageResized(QRgb*);
 
     /// signal emitted when image origin changes

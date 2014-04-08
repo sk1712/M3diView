@@ -6,7 +6,6 @@ irtkQtTwoDimensionalViewer::irtkQtTwoDimensionalViewer(irtkViewMode viewMode) {
     _targetImageOutput = new irtkGreyImage;
     _targetTransform = new irtkAffineTransformation;
     _targetInterpolator = new irtkNearestNeighborInterpolateImageFunction;
-    //_targetLookupTable = new irtkLookupTable;
     _targetLookupTable = new irtkQtLookupTable();
 
     _targetTransformFilter = irtkImageTransformation::New(_targetTransform);
@@ -53,15 +52,11 @@ int irtkQtTwoDimensionalViewer::GetCurrentSlice() {
     return result;
 }
 
-//irtkColor* irtkQtTwoDimensionalViewer::GetDrawable() {
 QRgb* irtkQtTwoDimensionalViewer::GetDrawable() {
-    //irtkColor *drawable = new irtkColor[_targetImageOutput->GetNumberOfVoxels()];
     QRgb *drawable = new QRgb[_targetImageOutput->GetNumberOfVoxels()];
-    //irtkColor _backgroundColor = irtkColor();
-    QRgb _backgroundColor = qRgb(0, 0, 0);
+    QRgb _backgroundColor = qRgba(0, 0, 0, 127);
 
     irtkGreyPixel *original = _targetImageOutput->GetPointerToVoxels();
-    //irtkColor *drawn = drawable;
     QRgb *drawn = drawable;
 
     int i, j;
@@ -143,8 +138,6 @@ void irtkQtTwoDimensionalViewer::InitializeTransformation() {
     _targetImage->GetMinMaxAsDouble(&_targetMin, &_targetMax);
 
    _targetTransformFilter->SetInput(_targetImage);
-//   _targetTransformFilter->PutScaleFactorAndOffset(10000.0 / (_targetMax
-//   - _targetMin), -_targetMin * 10000.0 / (_targetMax - _targetMin));
    _targetTransformFilter->PutScaleFactorAndOffset(255.0 / (_targetMax
         - _targetMin), -_targetMin * 255.0 / (_targetMax - _targetMin));
 }

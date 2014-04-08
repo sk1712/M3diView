@@ -7,16 +7,12 @@ ENDIF()
 
 project(newviewer)
 
-link_libraries(rview++)
-
 # Find includes in corresponding build directories
   SET (CMAKE_INCLUDE_CURRENT_DIR ON)
 # Instruct CMake to run moc automatically when needed.
   SET (CMAKE_AUTOMOC ON)
 
 # Find the QtWidgets library
-#find_package(Qt5Core REQUIRED)
-#find_package(Qt5Gui REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5OpenGL REQUIRED)
 

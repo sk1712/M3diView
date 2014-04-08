@@ -3,12 +3,7 @@
 
 #include <QGLWidget>
 #include <QWindow>
-
-//#include <irtkLookupTable.h>
 #include <QColor>
-
-#include <cstdio>
-
 
 class QtGlWidget : public QGLWidget
 {

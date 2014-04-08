@@ -4,6 +4,8 @@
 #include <QWheelEvent>
 #include <QKeyEvent>
 
+//#include <QDebug>
+
 QtGlWidget::QtGlWidget(QWidget *parent)
     : QGLWidget(parent) {
     pixelRatio = windowHandle()->devicePixelRatio();
@@ -34,7 +36,7 @@ void QtGlWidget::mousePressEvent(QMouseEvent *event) {
 }
 
 void QtGlWidget::mouseMoveEvent(QMouseEvent *event) {
-    //printf("%d, %d \n", event->x(), event->y());
+    //qDebug() << event->x() << "," << event->y();
 }
 
 void QtGlWidget::wheelEvent(QWheelEvent *event) {
