@@ -366,9 +366,13 @@ void QtMainWindow::updateOrigin(double x, double y, double z) {
     QtViewerWidget *viewerWidget;
 
     senderViewer = dynamic_cast<irtkQtTwoDimensionalViewer*>(sender());
-    irtkViewMode vmode = senderViewer->GetViewMode();
 
     disconnectSignals();
+
+    int index = 0;
+    while (viewers.at(index) != senderViewer)
+        index++;
+    bool isSenderLinked = viewerWidgets.at(index)->isLinked();
 
     for (int i = 0; i < viewers.size(); i++) {
         viewerWidget = viewerWidgets.at(i);
@@ -376,7 +380,7 @@ void QtMainWindow::updateOrigin(double x, double y, double z) {
         glWidget = viewerWidget->getGlWidget();
 
         if ( glWidget->isEnabled() &&
-             ( (viewer->GetViewMode() != vmode) || (viewer == senderViewer) ) ) {
+             ( (isSenderLinked && viewerWidget->isLinked()) || (viewer == senderViewer) ) ) {
                 viewer->SetOrigin(x, y, z);
                 viewer->InitializeOutputImage();
 

@@ -32,6 +32,14 @@ QtViewerWidget::QtViewerWidget(QWidget *parent) : QWidget(parent) {
     connect(deleteToolButton, SIGNAL(clicked()), this, SLOT(deleteWindow()));
     toolLayout->addWidget(deleteToolButton);
 
+    linkToolButton = new QToolButton();
+    linkToolButton->setIcon(QIcon(":/icons/link.png"));
+    linkToolButton->setToolTip("Link to other viewers");
+    linkToolButton->setCheckable(true);
+    linkToolButton->setChecked(true);
+    connect(linkToolButton, SIGNAL(toggled(bool)), this, SLOT(changeLinked(bool)));
+    toolLayout->addWidget(linkToolButton);
+
     toolWidget->setLayout(toolLayout);
     layout->addWidget(toolWidget, 1, 0, Qt::AlignLeft);
 
@@ -39,6 +47,8 @@ QtViewerWidget::QtViewerWidget(QWidget *parent) : QWidget(parent) {
     layout->addWidget(sliceLabel, 1, 0, Qt::AlignRight);
 
     this->setLayout(layout);
+
+    linked = true;
 }
 
 void QtViewerWidget::updateLabel() {
@@ -73,4 +83,8 @@ void QtViewerWidget::expandWindow() {
 
 void QtViewerWidget::deleteWindow() {
     emit windowDeleted();
+}
+
+void QtViewerWidget::changeLinked(bool checked) {
+    linked = checked;
 }

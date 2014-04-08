@@ -24,6 +24,9 @@ class QtViewerWidget : public QWidget
     /// toolbutton to delete viewer
     QToolButton *deleteToolButton;
 
+    /// toolbutton to link to other viewers
+    QToolButton *linkToolButton;
+
     /// label showing number of slice
     QLabel *sliceLabel;
 
@@ -34,6 +37,9 @@ protected:
 
     /// maximum number of slices
     int maximumSlice;
+
+    /// flag for viewer linked to other viewers
+    int linked;
 
 public:
 
@@ -54,6 +60,9 @@ public:
 
     /// update maximumSlice
     void setMaximumSlice(int maximum);
+
+    /// get viewer linked
+    bool isLinked() const;
 
 protected:
 
@@ -78,6 +87,9 @@ private slots:
 
     /// callback function for deleteToolButton
     void deleteWindow();
+
+    /// callback function for linkToolButton
+    void changeLinked(bool checked);
 
 signals:
 
@@ -108,6 +120,10 @@ inline void QtViewerWidget::setCurrentSlice(int current) {
 inline void QtViewerWidget::setMaximumSlice(int maximum) {
     maximumSlice = maximum;
     sliceSlider->setMaximum(maximumSlice);
+}
+
+inline bool QtViewerWidget::isLinked() const {
+    return linked;
 }
 
 #endif // QTVIEWERWIDGET_H
