@@ -53,6 +53,8 @@ void QtTwoDimensionalGlWidget::initializeGL() {
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_COLOR_MATERIAL);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
     qglClearColor(Qt::black);
 }
 
