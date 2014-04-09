@@ -2,9 +2,10 @@
     <qresource prefix="/">
         <file>icons/zoom_in.png</file>
         <file>icons/zoom_out.png</file>
-        <file>icons/brain.png</file>
         <file>icons/expand_window.png</file>
         <file>icons/delete.png</file>
         <file>icons/link.png</file>
+        <file>icons/view_image.png</file>
+        <file>icons/opacity.png</file>
     </qresource>
 </RCC>

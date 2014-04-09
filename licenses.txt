@@ -1,0 +1,15 @@
+File: icons/expand_window.png
+License: CC Attribution 3.0
+Commercial usage: Allowed (Backlink to http://shlyapnikova.deviantart.com required)
+
+File: icons/zoom_in.png; icons/zoom_out.png; icons/view_image.png; icons/delete.png
+License: GNU Lesser General Public License
+Commercial usage: Allowed
+
+File: icons/link.png
+License: CC Attribution 3.0
+Commercial usage: Allowed (Backlink to http://p.yusukekamiyamane.com required)
+
+File: icons/opacity.png
+License: Linkware (Backlink to http://www.icons-land.com required)
+Commercial usage: Allowed (Backlink to http://www.icons-land.com required)
