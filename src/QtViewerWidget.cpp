@@ -9,36 +9,20 @@ QtViewerWidget::QtViewerWidget(QWidget *parent) : QWidget(parent) {
     glWidget = new QtTwoDimensionalGlWidget(this);
     glWidget->setEnabled(false);
     layout->addWidget(glWidget, 0, 0);
-    connect(glWidget, SIGNAL(wheelMoved(int)), this, SLOT(changeSlider(int)));
 
     sliceSlider = new QSlider(Qt::Vertical);
     sliceSlider->setMinimum(1);
     sliceSlider->setEnabled(false);
     layout->addWidget(sliceSlider, 0, 1);
-    connect(sliceSlider, SIGNAL(valueChanged(int)), this, SLOT(updateSlice(int)));
 
     QWidget *toolWidget = new QWidget();
+    createToolButtons();
+    connectSignals();
 
     QHBoxLayout *toolLayout = new QHBoxLayout();
-    expandToolButton = new QToolButton();
-    expandToolButton->setIcon(QIcon(":/icons/expand_window.png"));
-    expandToolButton->setToolTip("Expand window");
-    connect(expandToolButton, SIGNAL(clicked()), this, SLOT(expandWindow()));
     toolLayout->addWidget(expandToolButton);
-
-    deleteToolButton = new QToolButton();
-    deleteToolButton->setIcon(QIcon(":/icons/delete.png"));
-    deleteToolButton->setToolTip("Delete view");
-    connect(deleteToolButton, SIGNAL(clicked()), this, SLOT(deleteWindow()));
-    toolLayout->addWidget(deleteToolButton);
-
-    linkToolButton = new QToolButton();
-    linkToolButton->setIcon(QIcon(":/icons/link.png"));
-    linkToolButton->setToolTip("Link to other viewers");
-    linkToolButton->setCheckable(true);
-    linkToolButton->setChecked(true);
-    connect(linkToolButton, SIGNAL(toggled(bool)), this, SLOT(changeLinked(bool)));
     toolLayout->addWidget(linkToolButton);
+    toolLayout->addWidget(deleteToolButton);
 
     toolWidget->setLayout(toolLayout);
     layout->addWidget(toolWidget, 1, 0, Qt::AlignLeft);
@@ -46,18 +30,43 @@ QtViewerWidget::QtViewerWidget(QWidget *parent) : QWidget(parent) {
     sliceLabel = new QLabel();
     layout->addWidget(sliceLabel, 1, 0, Qt::AlignRight);
 
-    this->setLayout(layout);
+    setLayout(layout);
 
     linked = true;
 }
 
 void QtViewerWidget::updateLabel() {
-    sliceLabel->setText(QString::number(currentSlice) + " out of " + QString::number(maximumSlice));
+    sliceLabel->setText(QString::number(currentSlice) + " of " + QString::number(maximumSlice));
 }
 
 void QtViewerWidget::initializeParameters() {
     currentSlice = 0;
     maximumSlice = 0;
+}
+
+void QtViewerWidget::createToolButtons() {
+    expandToolButton = new QToolButton();
+    expandToolButton->setIcon(QIcon(":/icons/expand_window.png"));
+    expandToolButton->setToolTip("Expand/collapse window");
+
+    linkToolButton = new QToolButton();
+    linkToolButton->setIcon(QIcon(":/icons/link.png"));
+    linkToolButton->setToolTip("Link to other viewers");
+    linkToolButton->setCheckable(true);
+    linkToolButton->setChecked(true);
+
+    deleteToolButton = new QToolButton();
+    deleteToolButton->setIcon(QIcon(":/icons/delete.png"));
+    deleteToolButton->setToolTip("Delete view");
+}
+
+void QtViewerWidget::connectSignals() {
+    connect(glWidget, SIGNAL(wheelMoved(int)), this, SLOT(changeSlider(int)));
+    connect(sliceSlider, SIGNAL(valueChanged(int)), this, SLOT(updateSlice(int)));
+
+    connect(expandToolButton, SIGNAL(clicked()), this, SLOT(expandWindow()));
+    connect(linkToolButton, SIGNAL(toggled(bool)), this, SLOT(changeLinked(bool)));
+    connect(deleteToolButton, SIGNAL(clicked()), this, SLOT(deleteWindow()));
 }
 
 void QtViewerWidget::changeSlider(int steps) {

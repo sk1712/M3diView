@@ -13,3 +13,7 @@ Commercial usage: Allowed (Backlink to http://p.yusukekamiyamane.com required)
 File: icons/opacity.png
 License: Linkware (Backlink to http://www.icons-land.com required)
 Commercial usage: Allowed (Backlink to http://www.icons-land.com required)
+
+File: icons/eye.png
+Designer: Yusuke Kamiyamane
+License: Creative Commons Attribution (by) 

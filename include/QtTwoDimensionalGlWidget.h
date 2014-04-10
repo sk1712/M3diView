@@ -3,13 +3,14 @@
 
 #include <QtGlWidget.h>
 
+#include <QVector>
 
 class QtTwoDimensionalGlWidget : public QtGlWidget
 {
     Q_OBJECT
 
     /// array of values to be drawn on the screen
-    QRgb* _drawable;
+    QVector<QRgb*> _drawable;
 
     /// viewer labels
     QString top, bottom, left, right;
@@ -37,7 +38,7 @@ public:
 public slots:
 
     /// callback function to update drawable
-    void updateDrawable(QRgb* drawable);
+    void updateDrawable(QVector<QRgb*> drawable);
 
 protected:
 

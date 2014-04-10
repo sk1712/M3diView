@@ -74,6 +74,12 @@ private:
     /// initialize current and maximum slice
     void initializeParameters();
 
+    /// create tool buttons
+    void createToolButtons();
+
+    /// connect signals
+    void connectSignals();
+
 private slots:
 
     /// callback function for mouse wheel over OpenGL widget

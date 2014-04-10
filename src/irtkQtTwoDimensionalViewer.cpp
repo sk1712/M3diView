@@ -15,12 +15,14 @@ irtkQtTwoDimensionalViewer::irtkQtTwoDimensionalViewer(irtkViewMode viewMode) {
     _targetTransformFilter->PutSourcePaddingValue(0);
 }
 
-irtkQtTwoDimensionalViewer::~irtkQtTwoDimensionalViewer() {
+irtkQtTwoDimensionalViewer::~irtkQtTwoDimensionalViewer() {    
     delete _targetImageOutput;
     delete _targetTransform;
     delete _targetInterpolator;
     delete _targetLookupTable;
     delete _targetTransformFilter;
+
+    displayedImageObjects.clear();
 }
 
 int irtkQtTwoDimensionalViewer::GetCurrentSlice() {
@@ -52,9 +54,9 @@ int irtkQtTwoDimensionalViewer::GetCurrentSlice() {
     return result;
 }
 
-QRgb* irtkQtTwoDimensionalViewer::GetDrawable() {
+QRgb* irtkQtTwoDimensionalViewer::GetDrawable(int alpha) {
     QRgb *drawable = new QRgb[_targetImageOutput->GetNumberOfVoxels()];
-    QRgb _backgroundColor = qRgba(0, 0, 0, 127);
+    QRgb _backgroundColor = qRgba(0, 0, 0, alpha);
 
     irtkGreyPixel *original = _targetImageOutput->GetPointerToVoxels();
     QRgb *drawn = drawable;
@@ -65,7 +67,9 @@ QRgb* irtkQtTwoDimensionalViewer::GetDrawable() {
     for (j = 0; j < _height; j++) {
         for (i = 0; i < _width; i++) {
             if (*original >= 0) {
-                *drawn = _targetLookupTable->lookupTable[*original];
+                QColor color(_targetLookupTable->lookupTable[*original]);
+                color.setAlpha(alpha);
+                *drawn = color.rgba();
             } else {
                 *drawn = _backgroundColor;
             }
@@ -130,7 +134,7 @@ void irtkQtTwoDimensionalViewer::InitializeOutputImage() {
     _targetImageOutput->Initialize(attr);
 
     // calculate the actual output image
-    CalculateOutputImage();
+    //CalculateOutputImage();
 }
 
 void irtkQtTwoDimensionalViewer::InitializeTransformation() {
@@ -142,11 +146,42 @@ void irtkQtTwoDimensionalViewer::InitializeTransformation() {
         - _targetMin), -_targetMin * 255.0 / (_targetMax - _targetMin));
 }
 
+void irtkQtTwoDimensionalViewer::AddToDisplayedImages(irtkQtImageObject *imageObject) {
+    if (displayedImageObjects.size() == 0) {
+        _targetImage = imageObject->GetImage();
+        SetResolution(1, 1, _targetImage->GetZSize());
+        InitializeOriginOrientation();
+    }
+    else {
+        irtkImage *newImage = imageObject->GetImage();
+        if (!((_targetImage->GetX() == newImage->GetX()) &&
+                (_targetImage->GetY() == newImage->GetY()) &&
+                (_targetImage->GetZ() == newImage->GetZ()))) {
+            return;
+        }
+    }
+    displayedImageObjects.push_back(imageObject);
+}
+
+vector<QRgb*> irtkQtTwoDimensionalViewer::CalculateDrawables() {
+    vector<QRgb*> drawables;
+
+    vector<irtkQtImageObject*>::iterator it;
+    for (it = displayedImageObjects.begin(); it != displayedImageObjects.end(); it++) {
+        SetTarget((*it)->GetImage());
+        InitializeTransformation();
+        CalculateOutputImage();
+        drawables.push_back(GetDrawable((*it)->GetOpacity()));
+    }
+
+    return drawables;
+}
+
 void irtkQtTwoDimensionalViewer::ResizeImage(int width, int height) {
     SetDimensions(width, height);
     InitializeOutputImage();
 
-    emit ImageResized(GetDrawable());
+    //emit ImageResized(GetDrawable());
 }
 
 void irtkQtTwoDimensionalViewer::ChangeSlice(int slice) {

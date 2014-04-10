@@ -5,7 +5,7 @@
 irtkQtViewer* irtkQtViewer::viewInstance = NULL;
 
 irtkQtViewer::irtkQtViewer() {
-    _images.clear();
+    _imageObjects.clear();
 }
 
 irtkQtViewer* irtkQtViewer::Instance() {
@@ -22,23 +22,21 @@ void irtkQtViewer::Destroy() {
     }
 }
 
-void irtkQtViewer::CreateImage(string imageFileName) {
-    irtkImage *newImage = irtkImage::New(imageFileName.c_str());
-    _images.push_back(newImage);
+void irtkQtViewer::CreateImage(QString imageFileName) {
+    irtkQtImageObject* newImage = NULL;
 
-    if (_images.size() == 1) {
-        newImage->GetOrientation(_axisX, _axisY, _axisZ);
-        newImage->GetOrigin(_originX, _originY, _originZ);
-        _resolution = 1;
+    try {
+        newImage = new irtkQtImageObject(imageFileName);
+        _imageObjects.append(newImage);
+    } catch (irtkException e) {
+        delete newImage;
+        throw e;
     }
 }
 
 void irtkQtViewer::DestroyImages() {
-    for(vector<irtkImage*>::const_iterator it = _images.begin();
-        it != _images.end(); it++) {
-        delete *it;
-    }
-    _images.clear();
+    while (!_imageObjects.isEmpty())
+        delete _imageObjects.takeFirst();
 }
 
 irtkQtTwoDimensionalViewer* irtkQtViewer::CreateTwoDimensionalViewer(irtkViewMode viewMode) {

@@ -7,5 +7,6 @@
         <file>icons/link.png</file>
         <file>icons/view_image.png</file>
         <file>icons/opacity.png</file>
+        <file>icons/eye.png</file>
     </qresource>
 </RCC>

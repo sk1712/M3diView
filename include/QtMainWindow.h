@@ -4,11 +4,13 @@
 #include <QtViewerWidget.h>
 
 #include <irtkQtViewer.h>
+#include <irtkImageListModel.h>
 
 #include <QMainWindow>
-#include <QListWidget>
+#include <QListView>
 #include <QSplitter>
 #include <QMessageBox>
+#include <QWidgetAction>
 
 
 class QtMainWindow : public QMainWindow
@@ -17,14 +19,13 @@ class QtMainWindow : public QMainWindow
 
     /// main window widgets
     QSplitter *splitter;
-
-    QListWidget *listWidget;
-
+    QListView *imageListView;
     QWidget *mainViewWidget;
+    QSlider *opacitySlider;
+    QLabel *opacityLabel;
 
     /// window menus
     QMenu *fileMenu;
-
     QMenu *viewMenu;
 
     /// window toolbar
@@ -35,27 +36,24 @@ class QtMainWindow : public QMainWindow
 
     /// view actions
     QAction *viewAxialAction;
-
     QAction *viewCoronalAction;
-
     QAction *viewSagittalAction;
-
     QAction *viewOrthogonalAction;
-
     QAction *clearViewsAction;
 
     /// toolbar actions
     QAction *viewSelectedImageAction;
-
     QAction *zoomInAction;
-
     QAction *zoomOutAction;
+    QAction *opacityAction;
 
     /// vector of viewer widgets
     QList<QtViewerWidget*> viewerWidgets;
 
     /// vector of irtk 2D viewers
     QList<irtkQtTwoDimensionalViewer*> viewers;
+
+    irtkImageListModel *imageModel;
 
     /// flag for only one viewer visible
     bool singleViewerInScreen;
@@ -76,8 +74,11 @@ private:
     /// create window menu
     void createMenu();
 
-    /// create window actions
-    void createActions();
+    /// create toolbar actions
+    void createToolBarActions();
+
+    /// create menu actions
+    void createMenuActions();
 
     /// disconnect signals between viewers and viewerWidgets
     void disconnectSignals();
@@ -86,7 +87,7 @@ private:
     void connectSignals();
 
     /// show image(s) on screen
-    void showTargetImage(int i);
+    //void showImages();
 
     /// create new 2D viewer
     QtViewerWidget* createTwoDimensionalView(irtkViewMode viewMode);
@@ -142,6 +143,13 @@ private slots:
 
     /// callback function for updated origin
     void updateOrigin(double x, double y, double z);
+
+    /// callback function for opacity slider changing value
+    void opacityValueChanged(int value);
+
+    void listViewClicked(QModelIndex index);
+
+    void listViewDoubleClicked(QModelIndex index);
 };
 
 #endif // QTMAINWINDOW_H

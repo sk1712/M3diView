@@ -9,6 +9,7 @@
 #include <irtkTransformation.h>
 
 #include <irtkQtLookupTable.h>
+#include <irtkQtImageObject.h>
 
 /// view modes
 enum irtkViewMode {VIEW_AXIAL, VIEW_SAGITTAL, VIEW_CORONAL};
@@ -34,6 +35,9 @@ class irtkQtTwoDimensionalViewer : public QObject
 
     /// view mode (axial, sagittal, coronal)
     irtkViewMode _viewMode;
+
+    /// images to be displayed
+    vector<irtkQtImageObject*> displayedImageObjects;
 
     /// original target image
     irtkImage *_targetImage;
@@ -89,7 +93,7 @@ public:
     irtkViewMode GetViewMode();
 
     /// get the array of RGB values to be drawn on the screen
-    QRgb* GetDrawable();
+    QRgb* GetDrawable(int alpha);
 
     /// get the labels displayed on the screen
     void GetLabels(char &top, char &bottom, char &left, char &right);
@@ -99,6 +103,12 @@ public:
 
     /// initialize the transformation from the input to the output image
     void InitializeTransformation();
+
+    void ClearDisplayedImages();
+
+    void AddToDisplayedImages(irtkQtImageObject *imageObject);
+
+    vector<QRgb*> CalculateDrawables();
 
 public slots:
 
@@ -134,8 +144,6 @@ signals:
 
 inline void irtkQtTwoDimensionalViewer::SetTarget(irtkImage *image) {
     _targetImage = image;
-    SetResolution(1, 1, _targetImage->GetZSize());
-    InitializeOriginOrientation();
 }
 
 inline void irtkQtTwoDimensionalViewer::SetOrigin(double x, double y, double z) {
@@ -175,6 +183,10 @@ inline int irtkQtTwoDimensionalViewer::GetSliceNumber() {
 
 inline irtkViewMode irtkQtTwoDimensionalViewer::GetViewMode() {
     return _viewMode;
+}
+
+inline void irtkQtTwoDimensionalViewer::ClearDisplayedImages() {
+    displayedImageObjects.clear();
 }
 
 #endif // IRTKQTTWODIMENSIONALVIEWER_H

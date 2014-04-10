@@ -2,21 +2,26 @@
 
 QtTwoDimensionalGlWidget::QtTwoDimensionalGlWidget(QWidget *parent)
     :QtGlWidget(parent) {
-    _drawable = NULL;
+    _drawable.clear();
 }
 
 QtTwoDimensionalGlWidget::~QtTwoDimensionalGlWidget() {
-    delete _drawable;
+    qDeleteAll(_drawable);
+    _drawable.clear();
 }
 
 void QtTwoDimensionalGlWidget::drawImage() {
-    if (_drawable) {
+    QVector<QRgb*>::const_iterator rit;
+
+    if (!_drawable.empty()) {
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        // Set raster position
-        glRasterPos2f(0, 0);
-        // Draw pixelmap
-        glDrawPixels(_width, _height, GL_RGBA, GL_UNSIGNED_BYTE,
-                _drawable);
+        for (rit = _drawable.constEnd()-1; rit >= _drawable.constBegin(); rit--) {
+            // Set raster position
+            glRasterPos2f(0, 0);
+            // Draw pixelmap
+            glDrawPixels(_width, _height, GL_RGBA, GL_UNSIGNED_BYTE,
+                         (*rit));
+        }
     }
 }
 
@@ -43,8 +48,9 @@ void QtTwoDimensionalGlWidget::drawLabels() {
     renderText(width()-15, height()/2+5, right, arialFont);
 }
 
-void QtTwoDimensionalGlWidget::updateDrawable(QRgb* drawable) {
-    delete _drawable;
+void QtTwoDimensionalGlWidget::updateDrawable(QVector<QRgb*> drawable) {
+    qDeleteAll(_drawable);
+    _drawable.clear();
     _drawable = drawable;
     update();
 }

@@ -6,23 +6,30 @@
 #include <QFileInfo>
 
 #include <QGridLayout>
+#include <QVBoxLayout>
 
 QtMainWindow::QtMainWindow() {
     splitter = new QSplitter(this);
 
-    listWidget = new QListWidget(splitter);
-    listWidget->setMaximumWidth(0.5*width());
+    imageListView = new QListView(splitter);
+    imageListView->setMaximumWidth(0.5*width());
+    connect(imageListView, SIGNAL(clicked(QModelIndex)),
+            this, SLOT(listViewClicked(QModelIndex)));
+    connect(imageListView, SIGNAL(doubleClicked(QModelIndex)),
+            this, SLOT(listViewDoubleClicked(QModelIndex)));
 
     mainViewWidget = new QWidget(splitter);
     QGridLayout *layout = new QGridLayout();
     mainViewWidget->setLayout(layout);
 
-    createActions();
+    createMenuActions();
+    createToolBarActions();
     createMenu();
     createToolBar();
 
     setCentralWidget(splitter);
     singleViewerInScreen = false;
+    imageModel = NULL;
 }
 
 QtMainWindow::~QtMainWindow() {
@@ -32,9 +39,15 @@ QtMainWindow::~QtMainWindow() {
 
 void QtMainWindow::createToolBar() {
     toolbar = addToolBar(tr("View"));
+
     toolbar->addAction(viewSelectedImageAction);
+    toolbar->addSeparator();
+
     toolbar->addAction(zoomInAction);
     toolbar->addAction(zoomOutAction);
+    toolbar->addSeparator();
+
+    toolbar->addAction(opacityAction);
 }
 
 void QtMainWindow::createMenu() {
@@ -46,10 +59,52 @@ void QtMainWindow::createMenu() {
     viewMenu->addAction(viewAxialAction);
     viewMenu->addAction(viewCoronalAction);
     viewMenu->addAction(viewSagittalAction);
+
+    viewMenu->addSeparator();
     viewMenu->addAction(clearViewsAction);
 }
 
-void QtMainWindow::createActions() {
+void QtMainWindow::createToolBarActions() {
+    viewSelectedImageAction = new QAction(tr("View image"), this);
+    viewSelectedImageAction->setIcon(QIcon(":/icons/view_image.png"));
+    viewSelectedImageAction->setStatusTip(tr("View selected image"));
+    connect(viewSelectedImageAction, SIGNAL(triggered()), this, SLOT(viewImage()));
+
+    zoomInAction = new QAction(tr("Zoom in"), this);
+    zoomInAction->setIcon(QIcon(":/icons/zoom_in.png"));
+    zoomInAction->setEnabled(false);
+    connect(zoomInAction, SIGNAL(triggered()), this, SLOT(zoomIn()));
+
+    zoomOutAction = new QAction(tr("Zoom out"), this);
+    zoomOutAction->setIcon(QIcon(":/icons/zoom_out.png"));
+    zoomOutAction->setEnabled(false);
+    connect(zoomOutAction, SIGNAL(triggered()), this, SLOT(zoomOut()));
+
+    QMenu *opacityMenu = new QMenu();
+    QWidgetAction *widgetAction = new QWidgetAction(opacityMenu);
+
+    QWidget *opacityWidget = new QWidget();
+    QVBoxLayout *menuLayout = new QVBoxLayout();
+    opacityWidget->setLayout(menuLayout);
+    opacitySlider = new QSlider(Qt::Vertical);
+    opacitySlider->setRange(0, 255);
+    menuLayout->addWidget(opacitySlider);
+
+    opacityLabel = new QLabel();
+    opacityLabel->setFixedWidth(30);
+    menuLayout->addWidget(opacityLabel);
+
+    widgetAction->setDefaultWidget(opacityWidget);
+    opacityMenu->addAction(widgetAction);
+    connect(opacitySlider, SIGNAL(valueChanged(int)), this, SLOT(opacityValueChanged(int)));
+    opacitySlider->setValue(255);
+
+    opacityAction = new QAction(tr("Opacity"), this);
+    opacityAction->setIcon(QIcon(":/icons/opacity.png"));
+    opacityAction->setMenu(opacityMenu);
+}
+
+void QtMainWindow::createMenuActions() {
     openTargetAction = new QAction(tr("&Open image file(s)..."), this);
     openTargetAction->setStatusTip(tr("Load new image file(s)"));
     connect(openTargetAction, SIGNAL(triggered()), this, SLOT(openImage()));
@@ -73,107 +128,79 @@ void QtMainWindow::createActions() {
     clearViewsAction = new QAction(tr("Clear views"), this);
     clearViewsAction->setStatusTip(tr("Delete all views"));
     connect(clearViewsAction, SIGNAL(triggered()), this, SLOT(clearViews()));
-
-    viewSelectedImageAction = new QAction(tr("View image"), this);
-    viewSelectedImageAction->setIcon(QIcon(":/icons/brain.png"));
-    viewSelectedImageAction->setStatusTip(tr("View selected image"));
-    connect(viewSelectedImageAction, SIGNAL(triggered()), this, SLOT(viewImage()));
-
-    zoomInAction = new QAction(tr("Zoom in"), this);
-    zoomInAction->setIcon(QIcon(":/icons/zoom_in.png"));
-    zoomInAction->setEnabled(false);
-    connect(zoomInAction, SIGNAL(triggered()), this, SLOT(zoomIn()));
-
-    zoomOutAction = new QAction(tr("Zoom out"), this);
-    zoomOutAction->setIcon(QIcon(":/icons/zoom_out.png"));
-    zoomOutAction->setEnabled(false);
-    connect(zoomOutAction, SIGNAL(triggered()), this, SLOT(zoomOut()));
 }
 
 void QtMainWindow::disconnectSignals() {
     QtViewerWidget *viewerWidget;
     irtkQtTwoDimensionalViewer *viewer;
 
-    for (int i = 0; i < viewers.size(); i++) {
-        viewerWidget = viewerWidgets.at(i);
-        viewer = viewers.at(i);
+//    for (int i = 0; i < viewers.size(); i++) {
+//        viewerWidget = viewerWidgets.at(i);
+//        viewer = viewers.at(i);
 
-        disconnect(viewerWidget->getGlWidget(), SIGNAL(resized(int, int)),
-                   viewer, SLOT(ResizeImage(int, int)));
-        disconnect(viewer, SIGNAL(ImageResized(QRgb*)),
-                   viewerWidget->getGlWidget(), SLOT(updateDrawable(QRgb*)));
+//        disconnect(viewerWidget->getGlWidget(), SIGNAL(resized(int, int)),
+//                   viewer, SLOT(ResizeImage(int, int)));
+//        disconnect(viewer, SIGNAL(ImageResized(QRgb*)),
+//                   viewerWidget->getGlWidget(), SLOT(updateDrawable(QRgb*)));
 
-        disconnect(viewerWidget->getSlider(), SIGNAL(valueChanged(int)),
-                   viewer, SLOT(ChangeSlice(int)));
-        disconnect(viewerWidget->getGlWidget(), SIGNAL(leftButtonPressed(int, int)),
-                   viewer, SLOT(ChangeOrigin(int, int)));
+//        disconnect(viewerWidget->getSlider(), SIGNAL(valueChanged(int)),
+//                   viewer, SLOT(ChangeSlice(int)));
+//        disconnect(viewerWidget->getGlWidget(), SIGNAL(leftButtonPressed(int, int)),
+//                   viewer, SLOT(ChangeOrigin(int, int)));
 
-        disconnect(viewers.at(i), SIGNAL(OriginChanged(double, double, double)),
-                   this, SLOT(updateOrigin(double, double, double)));
-    }
+//        disconnect(viewers.at(i), SIGNAL(OriginChanged(double, double, double)),
+//                   this, SLOT(updateOrigin(double, double, double)));
+//    }
 }
 
 void QtMainWindow::connectSignals() {
     QtViewerWidget *viewerWidget;
     irtkQtTwoDimensionalViewer *viewer;
 
-    for (int i = 0; i < viewers.size(); i++) {
-        viewerWidget = viewerWidgets.at(i);
-        viewer = viewers.at(i);
+//    for (int i = 0; i < viewers.size(); i++) {
+//        viewerWidget = viewerWidgets.at(i);
+//        viewer = viewers.at(i);
 
-        /// update drawable when widgets are resized
-        connect(viewerWidget->getGlWidget(), SIGNAL(resized(int, int)),
-                viewer, SLOT(ResizeImage(int, int)));
-        connect(viewer, SIGNAL(ImageResized(QRgb*)),
-                viewerWidget->getGlWidget(), SLOT(updateDrawable(QRgb*)));
+//        /// update drawable when widgets are resized
+//        connect(viewerWidget->getGlWidget(), SIGNAL(resized(int, int)),
+//                viewer, SLOT(ResizeImage(int, int)));
+//        connect(viewer, SIGNAL(ImageResized(QRgb*)),
+//                viewerWidget->getGlWidget(), SLOT(updateDrawable(QRgb*)));
 
-        /// update drawable when slice is changed
-        connect(viewerWidget->getSlider(), SIGNAL(valueChanged(int)),
-                viewer, SLOT(ChangeSlice(int)));
-        connect(viewerWidget->getGlWidget(), SIGNAL(leftButtonPressed(int, int)),
-                           viewer, SLOT(ChangeOrigin(int, int)));
+//        /// update drawable when slice is changed
+//        connect(viewerWidget->getSlider(), SIGNAL(valueChanged(int)),
+//                viewer, SLOT(ChangeSlice(int)));
+//        connect(viewerWidget->getGlWidget(), SIGNAL(leftButtonPressed(int, int)),
+//                           viewer, SLOT(ChangeOrigin(int, int)));
 
-        connect(viewer, SIGNAL(OriginChanged(double, double, double)),
-                this, SLOT(updateOrigin(double, double, double)));
-    }
+//        connect(viewer, SIGNAL(OriginChanged(double, double, double)),
+//                this, SLOT(updateOrigin(double, double, double)));
+//    }
 }
 
-void QtMainWindow::showTargetImage(int j) {
-    if ( viewers.size() == 0 ) {
-        createMessageBox("You need to add viewers first.", QMessageBox::Warning);
-        return;
-    }
+//void QtMainWindow::showImages() {
 
-    zoomInAction->setEnabled(true);
-    zoomOutAction->setEnabled(true);
-    QtTwoDimensionalGlWidget *glWidget;
+//    for (int i = 0; i < viewers.size(); i++) {
+//        viewerWidget = viewerWidgets.at(i);
+//        viewer = viewers.at(i);
 
-    disconnectSignals();
+//        glWidget = viewerWidget->getGlWidget();
 
-    QtViewerWidget *viewerWidget;
-    irtkQtTwoDimensionalViewer *viewer;
+//        //viewer->SetTarget(irtkQtViewer::Instance()->GetImage(j));
+//        viewer->SetDimensions(glWidget->customWidth(), glWidget->customHeight());
+//        viewer->InitializeTransformation();
+//        viewer->InitializeOutputImage();
 
-    for (int i = 0; i < viewers.size(); i++) {
-        viewerWidget = viewerWidgets.at(i);
-        viewer = viewers.at(i);
+//        glWidget->setEnabled(true);
+//        viewerWidget->getSlider()->setEnabled(true);
+//        viewerWidget->setMaximumSlice(viewer->GetSliceNumber());
+//        viewerWidget->setCurrentSlice(viewer->GetCurrentSlice());
 
-        glWidget = viewerWidget->getGlWidget();
+//        glWidget->updateDrawable(viewer->GetDrawable());
+//    }
 
-        viewer->SetTarget(irtkQtViewer::Instance()->GetImage(j));
-        viewer->SetDimensions(glWidget->customWidth(), glWidget->customHeight());
-        viewer->InitializeTransformation();
-        viewer->InitializeOutputImage();
-
-        glWidget->setEnabled(true);
-        viewerWidget->getSlider()->setEnabled(true);
-        viewerWidget->setMaximumSlice(viewer->GetSliceNumber());
-        viewerWidget->setCurrentSlice(viewer->GetCurrentSlice());
-
-        glWidget->updateDrawable(viewer->GetDrawable());
-    }
-
-    connectSignals();
-}
+//    connectSignals();
+//}
 
 QtViewerWidget* QtMainWindow::createTwoDimensionalView(irtkViewMode viewMode) {
     irtkQtTwoDimensionalViewer* viewer;
@@ -202,8 +229,10 @@ void QtMainWindow::clearVectors() {
 }
 
 bool QtMainWindow::imageInList(const QString fileName) {
-    for (int i = 0; i < listWidget->count(); i++) {
-        if (listWidget->item(i)->toolTip() == fileName)
+    QList<irtkQtImageObject*> list = irtkQtViewer::Instance()->GetImageList();
+    QList<irtkQtImageObject*>::const_iterator it;
+    for (it = list.constBegin(); it != list.constEnd(); it++) {
+        if ((*it)->GetPath() == fileName)
             return true;
     }
     return false;
@@ -241,12 +270,11 @@ void QtMainWindow::openImage() {
     for (it = fileNames.constBegin(); it != fileNames.constEnd(); it++) {
         if ( !imageInList(*it) ) {
             try {
-                irtkQtViewer::Instance()->CreateImage((*it).toStdString());
-                QListWidgetItem *newItem = new QListWidgetItem;
-                QFileInfo file(*it);
-                newItem->setToolTip(*it);
-                newItem->setText(file.fileName());
-                listWidget->addItem(newItem);
+                irtkQtViewer* instance = irtkQtViewer::Instance();
+                instance->CreateImage((*it));
+                delete imageModel;
+                imageModel = new irtkImageListModel(instance->GetImageList());
+                imageListView->setModel(imageModel);
             }
             catch (irtkException e) {
                 createMessageBox("Invalid image file " + (*it), QMessageBox::Critical);
@@ -256,20 +284,45 @@ void QtMainWindow::openImage() {
 }
 
 void QtMainWindow::viewImage() {
-    QModelIndexList indexes = listWidget->selectionModel()->selectedIndexes();
-
-    vector<int> indexList;
-    foreach(QModelIndex index, indexes) {
-        indexList.push_back(index.row());
-    }
-
-    if ( indexList.size() == 0 ) {
-        createMessageBox("You need to select an image to view.", QMessageBox::Warning);
+    if ( viewers.size() == 0 ) {
+        createMessageBox("You need to add viewers first.", QMessageBox::Warning);
         return;
     }
-    else if ( indexList.size() > 0 ) {
-        showTargetImage(indexList.at(0));
+
+    disconnectSignals();
+
+    QtViewerWidget *viewerWidget;
+    irtkQtTwoDimensionalViewer *viewer;
+    QtTwoDimensionalGlWidget *glWidget;
+
+    QList<irtkQtImageObject*> imageList = irtkQtViewer::Instance()->GetImageList();
+    QList<irtkQtImageObject*>::const_iterator it;
+
+    for (int i = 0; i < viewers.size(); i++) {
+        viewerWidget = viewerWidgets.at(i);
+        viewer = viewers.at(i);
+
+        glWidget = viewerWidget->getGlWidget();
+        viewer->ClearDisplayedImages();
+        for (it = imageList.constBegin(); it != imageList.constEnd(); it++) {
+            if ((*it)->IsVisible()) {
+                viewer->AddToDisplayedImages(*it);
+            }
+        }
+
+        viewer->SetDimensions(glWidget->customWidth(), glWidget->customHeight());
+        viewer->InitializeOutputImage();
+
+        glWidget->setEnabled(true);
+        viewerWidget->getSlider()->setEnabled(true);
+        viewerWidget->setMaximumSlice(viewer->GetSliceNumber());
+        viewerWidget->setCurrentSlice(viewer->GetCurrentSlice());
+
+        vector<QRgb*> drawables = viewer->CalculateDrawables();
+        glWidget->updateDrawable(QVector<QRgb*>::fromStdVector(drawables));
     }
+
+    connectSignals();
 }
 
 void QtMainWindow::zoomIn() {
@@ -283,7 +336,7 @@ void QtMainWindow::zoomIn() {
         if (viewerWidget->getGlWidget()->isEnabled()) {
             viewer->IncreaseResolution();
             viewer->InitializeOutputImage();
-            viewerWidget->getGlWidget()->updateDrawable(viewer->GetDrawable());
+            //viewerWidget->getGlWidget()->updateDrawable(viewer->GetDrawable());
         }
     }
 }
@@ -299,7 +352,7 @@ void QtMainWindow::zoomOut() {
         if (viewerWidget->getGlWidget()->isEnabled()) {
             viewer->DecreaseResolution();
             viewer->InitializeOutputImage();
-            viewerWidget->getGlWidget()->updateDrawable(viewer->GetDrawable());
+            //viewerWidget->getGlWidget()->updateDrawable(viewer->GetDrawable());
         }
     }
 }
@@ -385,9 +438,34 @@ void QtMainWindow::updateOrigin(double x, double y, double z) {
                 viewer->InitializeOutputImage();
 
                 viewerWidget->setCurrentSlice(viewer->GetCurrentSlice());
-                glWidget->updateDrawable(viewer->GetDrawable());
+                //glWidget->updateDrawable(viewer->GetDrawable());
         }
     }
 
     connectSignals();
+}
+
+void QtMainWindow::opacityValueChanged(int value) {
+    QList<irtkQtImageObject*> list = irtkQtViewer::Instance()->GetImageList();
+    int index = imageListView->currentIndex().row();
+    if (!list.empty() && index >= 0) {
+        list.at(index)->SetOpacity(value);
+    }
+    opacityLabel->setText(QString::number(value));
+}
+
+void QtMainWindow::listViewClicked(QModelIndex index) {
+    QList<irtkQtImageObject*> list = irtkQtViewer::Instance()->GetImageList();
+    opacitySlider->setValue(list.at(index.row())->GetOpacity());
+}
+
+void QtMainWindow::listViewDoubleClicked(QModelIndex index) {
+    int i = index.row();
+    QList<irtkQtImageObject*> list = irtkQtViewer::Instance()->GetImageList();
+    bool visible = list.at(i)->IsVisible();
+    list.at(i)->SetVisible(!visible);
+
+    delete imageModel;
+    imageModel = new irtkImageListModel(list);
+    imageListView->setModel(imageModel);
 }
