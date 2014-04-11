@@ -134,32 +134,32 @@ void QtMainWindow::disconnectSignals() {
     QtViewerWidget *viewerWidget;
     irtkQtTwoDimensionalViewer *viewer;
 
-//    for (int i = 0; i < viewers.size(); i++) {
-//        viewerWidget = viewerWidgets.at(i);
-//        viewer = viewers.at(i);
+    for (int i = 0; i < viewers.size(); i++) {
+        viewerWidget = viewerWidgets.at(i);
+        viewer = viewers.at(i);
 
 //        disconnect(viewerWidget->getGlWidget(), SIGNAL(resized(int, int)),
 //                   viewer, SLOT(ResizeImage(int, int)));
 //        disconnect(viewer, SIGNAL(ImageResized(QRgb*)),
-//                   viewerWidget->getGlWidget(), SLOT(updateDrawable(QRgb*)));
+//                   viewerWidget->getGlWidget(), SLOT(updateDrawable(QVector<QRgb*>)));
 
-//        disconnect(viewerWidget->getSlider(), SIGNAL(valueChanged(int)),
-//                   viewer, SLOT(ChangeSlice(int)));
-//        disconnect(viewerWidget->getGlWidget(), SIGNAL(leftButtonPressed(int, int)),
-//                   viewer, SLOT(ChangeOrigin(int, int)));
+        disconnect(viewerWidget->getSlider(), SIGNAL(valueChanged(int)),
+                   viewer, SLOT(ChangeSlice(int)));
+        disconnect(viewerWidget->getGlWidget(), SIGNAL(leftButtonPressed(int, int)),
+                   viewer, SLOT(ChangeOrigin(int, int)));
 
-//        disconnect(viewers.at(i), SIGNAL(OriginChanged(double, double, double)),
-//                   this, SLOT(updateOrigin(double, double, double)));
-//    }
+        disconnect(viewers.at(i), SIGNAL(OriginChanged(double, double, double)),
+                   this, SLOT(updateOrigin(double, double, double)));
+    }
 }
 
 void QtMainWindow::connectSignals() {
     QtViewerWidget *viewerWidget;
     irtkQtTwoDimensionalViewer *viewer;
 
-//    for (int i = 0; i < viewers.size(); i++) {
-//        viewerWidget = viewerWidgets.at(i);
-//        viewer = viewers.at(i);
+    for (int i = 0; i < viewers.size(); i++) {
+        viewerWidget = viewerWidgets.at(i);
+        viewer = viewers.at(i);
 
 //        /// update drawable when widgets are resized
 //        connect(viewerWidget->getGlWidget(), SIGNAL(resized(int, int)),
@@ -167,15 +167,15 @@ void QtMainWindow::connectSignals() {
 //        connect(viewer, SIGNAL(ImageResized(QRgb*)),
 //                viewerWidget->getGlWidget(), SLOT(updateDrawable(QRgb*)));
 
-//        /// update drawable when slice is changed
-//        connect(viewerWidget->getSlider(), SIGNAL(valueChanged(int)),
-//                viewer, SLOT(ChangeSlice(int)));
-//        connect(viewerWidget->getGlWidget(), SIGNAL(leftButtonPressed(int, int)),
-//                           viewer, SLOT(ChangeOrigin(int, int)));
+        /// update drawable when slice is changed
+        connect(viewerWidget->getSlider(), SIGNAL(valueChanged(int)),
+                viewer, SLOT(ChangeSlice(int)));
+        connect(viewerWidget->getGlWidget(), SIGNAL(leftButtonPressed(int, int)),
+                           viewer, SLOT(ChangeOrigin(int, int)));
 
-//        connect(viewer, SIGNAL(OriginChanged(double, double, double)),
-//                this, SLOT(updateOrigin(double, double, double)));
-//    }
+        connect(viewer, SIGNAL(OriginChanged(double, double, double)),
+                this, SLOT(updateOrigin(double, double, double)));
+    }
 }
 
 //void QtMainWindow::showImages() {
@@ -295,6 +295,9 @@ void QtMainWindow::viewImage() {
     irtkQtTwoDimensionalViewer *viewer;
     QtTwoDimensionalGlWidget *glWidget;
 
+    zoomInAction->setEnabled(true);
+    zoomOutAction->setEnabled(true);
+
     QList<irtkQtImageObject*> imageList = irtkQtViewer::Instance()->GetImageList();
     QList<irtkQtImageObject*>::const_iterator it;
 
@@ -336,7 +339,9 @@ void QtMainWindow::zoomIn() {
         if (viewerWidget->getGlWidget()->isEnabled()) {
             viewer->IncreaseResolution();
             viewer->InitializeOutputImage();
-            //viewerWidget->getGlWidget()->updateDrawable(viewer->GetDrawable());
+
+            vector<QRgb*> drawables = viewer->CalculateDrawables();
+            viewerWidget->getGlWidget()->updateDrawable(QVector<QRgb*>::fromStdVector(drawables));
         }
     }
 }
@@ -352,7 +357,9 @@ void QtMainWindow::zoomOut() {
         if (viewerWidget->getGlWidget()->isEnabled()) {
             viewer->DecreaseResolution();
             viewer->InitializeOutputImage();
-            //viewerWidget->getGlWidget()->updateDrawable(viewer->GetDrawable());
+
+            vector<QRgb*> drawables = viewer->CalculateDrawables();
+            viewerWidget->getGlWidget()->updateDrawable(QVector<QRgb*>::fromStdVector(drawables));
         }
     }
 }
@@ -438,7 +445,8 @@ void QtMainWindow::updateOrigin(double x, double y, double z) {
                 viewer->InitializeOutputImage();
 
                 viewerWidget->setCurrentSlice(viewer->GetCurrentSlice());
-                //glWidget->updateDrawable(viewer->GetDrawable());
+                vector<QRgb*> drawables = viewer->CalculateDrawables();
+                viewerWidget->getGlWidget()->updateDrawable(QVector<QRgb*>::fromStdVector(drawables));
         }
     }
 

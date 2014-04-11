@@ -56,7 +56,7 @@ int irtkQtTwoDimensionalViewer::GetCurrentSlice() {
 
 QRgb* irtkQtTwoDimensionalViewer::GetDrawable(int alpha) {
     QRgb *drawable = new QRgb[_targetImageOutput->GetNumberOfVoxels()];
-    QRgb _backgroundColor = qRgba(0, 0, 0, alpha);
+    QRgb _backgroundColor = qRgba(0, 0, 0, 0);
 
     irtkGreyPixel *original = _targetImageOutput->GetPointerToVoxels();
     QRgb *drawn = drawable;
@@ -165,6 +165,8 @@ void irtkQtTwoDimensionalViewer::AddToDisplayedImages(irtkQtImageObject *imageOb
 
 vector<QRgb*> irtkQtTwoDimensionalViewer::CalculateDrawables() {
     vector<QRgb*> drawables;
+
+    //InitializeTransformation();
 
     vector<irtkQtImageObject*>::iterator it;
     for (it = displayedImageObjects.begin(); it != displayedImageObjects.end(); it++) {
