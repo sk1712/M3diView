@@ -1,5 +1,7 @@
 #include <QtTwoDimensionalGlWidget.h>
 
+#include <QDebug>
+
 QtTwoDimensionalGlWidget::QtTwoDimensionalGlWidget(QWidget *parent)
     :QtGlWidget(parent) {
     _drawable.clear();
@@ -51,7 +53,9 @@ void QtTwoDimensionalGlWidget::drawLabels() {
 void QtTwoDimensionalGlWidget::updateDrawable(QVector<QRgb*> drawable) {
     qDeleteAll(_drawable);
     _drawable.clear();
+    qDebug() << "deleting drawables";
     _drawable = drawable;
+    qDebug() << "copied drawables" << endl;
     update();
 }
 

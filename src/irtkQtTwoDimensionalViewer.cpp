@@ -3,26 +3,11 @@
 irtkQtTwoDimensionalViewer::irtkQtTwoDimensionalViewer(irtkViewMode viewMode) {
     _viewMode = viewMode;
 
-    _targetImageOutput = new irtkGreyImage;
-    _targetTransform = new irtkAffineTransformation;
-    _targetInterpolator = new irtkNearestNeighborInterpolateImageFunction;
-    _targetLookupTable = new irtkQtLookupTable();
-
-    _targetTransformFilter = irtkImageTransformation::New(_targetTransform);
-    _targetTransformFilter->SetOutput(_targetImageOutput);
-    _targetTransformFilter->SetTransformation(_targetTransform);
-    _targetTransformFilter->PutInterpolator(_targetInterpolator);
-    _targetTransformFilter->PutSourcePaddingValue(0);
+    ClearDisplayedImages();
 }
 
 irtkQtTwoDimensionalViewer::~irtkQtTwoDimensionalViewer() {    
-    delete _targetImageOutput;
-    delete _targetTransform;
-    delete _targetInterpolator;
-    delete _targetLookupTable;
-    delete _targetTransformFilter;
-
-    displayedImageObjects.clear();
+    ClearDisplayedImages();
 }
 
 int irtkQtTwoDimensionalViewer::GetCurrentSlice() {
@@ -54,31 +39,36 @@ int irtkQtTwoDimensionalViewer::GetCurrentSlice() {
     return result;
 }
 
-QRgb* irtkQtTwoDimensionalViewer::GetDrawable(int alpha) {
-    QRgb *drawable = new QRgb[_targetImageOutput->GetNumberOfVoxels()];
-    QRgb _backgroundColor = qRgba(0, 0, 0, 0);
+vector<QRgb*> irtkQtTwoDimensionalViewer::GetDrawable() {
+    vector<QRgb*> allDrawables;
+    allDrawables.clear();
 
-    irtkGreyPixel *original = _targetImageOutput->GetPointerToVoxels();
-    QRgb *drawn = drawable;
+    for (unsigned int index = 0; index < _image.size(); index++) {
+        QRgb *drawable = new QRgb[_imageOutput[index]->GetNumberOfVoxels()];
+        QRgb _backgroundColor = qRgba(0, 0, 0, 0);
 
-    int i, j;
+        irtkGreyPixel *original = _imageOutput[index]->GetPointerToVoxels();
+        QRgb *drawn = drawable;
 
-    // Only display the target image
-    for (j = 0; j < _height; j++) {
-        for (i = 0; i < _width; i++) {
-            if (*original >= 0) {
-                QColor color(_targetLookupTable->lookupTable[*original]);
-                color.setAlpha(alpha);
-                *drawn = color.rgba();
-            } else {
-                *drawn = _backgroundColor;
+        int i, j;
+
+        // Only display the target image
+        for (j = 0; j < _height; j++) {
+            for (i = 0; i < _width; i++) {
+                if (*original >= 0) {
+                    *drawn = _lookupTable[index]->lookupTable[*original];
+                } else {
+                    *drawn = _backgroundColor;
+                }
+                original++;
+                drawn++;
             }
-            original++;
-            drawn++;
         }
+
+        allDrawables.push_back(drawable);
     }
 
-    return drawable;
+    return allDrawables;
 }
 
 void irtkQtTwoDimensionalViewer::GetLabels(char &top, char &bottom, char &left, char &right) {
@@ -131,52 +121,63 @@ void irtkQtTwoDimensionalViewer::InitializeOutputImage() {
     attr._zaxis[1] = _axisZ[1];
     attr._zaxis[2] = _axisZ[2];
 
-    _targetImageOutput->Initialize(attr);
+    vector<irtkGreyImage*>::iterator it;
+    for (it = _imageOutput.begin(); it != _imageOutput.end(); it++) {
+        (*it)->Initialize(attr);
+    }
 
+    cout << "Initialized output images" << endl;
     // calculate the actual output image
-    //CalculateOutputImage();
+    CalculateOutputImage();
 }
 
 void irtkQtTwoDimensionalViewer::InitializeTransformation() {
     double _targetMin, _targetMax;
-    _targetImage->GetMinMaxAsDouble(&_targetMin, &_targetMax);
 
-   _targetTransformFilter->SetInput(_targetImage);
-   _targetTransformFilter->PutScaleFactorAndOffset(255.0 / (_targetMax
-        - _targetMin), -_targetMin * 255.0 / (_targetMax - _targetMin));
+    //_transformFilter.front()->_output->Print();
+
+    for (unsigned int i = 0; i < _image.size(); i++) {
+        _image[i]->GetMinMaxAsDouble(&_targetMin, &_targetMax);
+
+        _transformFilter[i]->SetInput(_image[i]);
+        cout << "setting input " << i << endl;
+        _transformFilter[i]->PutScaleFactorAndOffset(255.0 / (_targetMax
+            - _targetMin), -_targetMin * 255.0 / (_targetMax - _targetMin));
+       cout << "setting scale factor " << i << endl;
+    }
 }
 
 void irtkQtTwoDimensionalViewer::AddToDisplayedImages(irtkQtImageObject *imageObject) {
-    if (displayedImageObjects.size() == 0) {
-        _targetImage = imageObject->GetImage();
+    irtkImage *newImage = imageObject->GetImage();
+
+    if (_image.size() == 0) {
+        _targetImage = newImage;
         SetResolution(1, 1, _targetImage->GetZSize());
         InitializeOriginOrientation();
     }
     else {
-        irtkImage *newImage = imageObject->GetImage();
         if (!((_targetImage->GetX() == newImage->GetX()) &&
                 (_targetImage->GetY() == newImage->GetY()) &&
                 (_targetImage->GetZ() == newImage->GetZ()))) {
             return;
         }
     }
-    displayedImageObjects.push_back(imageObject);
-}
 
-vector<QRgb*> irtkQtTwoDimensionalViewer::CalculateDrawables() {
-    vector<QRgb*> drawables;
+    _image.push_back(newImage);
+    _imageOutput.push_back(new irtkGreyImage);
+    _transform.push_back(new irtkAffineTransformation);
+    _interpolator.push_back(new irtkNearestNeighborInterpolateImageFunction);
+    _lookupTable.push_back(new irtkQtLookupTable());
+    _transformFilter.push_back(new irtkImageTransformation);
 
-    //InitializeTransformation();
+    _transformFilter.back()->SetOutput(_imageOutput.back());
+    _transformFilter.back()->SetTransformation(_transform.back());
+    _transformFilter.back()->PutInterpolator(_interpolator.back());
+    _transformFilter.back()->PutSourcePaddingValue(0);
 
-    vector<irtkQtImageObject*>::iterator it;
-    for (it = displayedImageObjects.begin(); it != displayedImageObjects.end(); it++) {
-        SetTarget((*it)->GetImage());
-        InitializeTransformation();
-        CalculateOutputImage();
-        drawables.push_back(GetDrawable((*it)->GetOpacity()));
-    }
+    _lookupTable.back()->SetAlpha(imageObject->GetOpacity());
 
-    return drawables;
+    _transformFilter[0]->_output->Print();
 }
 
 void irtkQtTwoDimensionalViewer::ResizeImage(int width, int height) {
@@ -188,6 +189,8 @@ void irtkQtTwoDimensionalViewer::ResizeImage(int width, int height) {
 
 void irtkQtTwoDimensionalViewer::ChangeSlice(int slice) {
     double originX, originY, originZ;
+
+    irtkGreyImage *_targetImageOutput = _imageOutput[0];
 
     _targetImageOutput->GetOrigin(originX, originY, originZ);
     _targetImageOutput->WorldToImage(originX, originY, originZ);
@@ -205,6 +208,8 @@ void irtkQtTwoDimensionalViewer::ChangeSlice(int slice) {
 
 void irtkQtTwoDimensionalViewer::ChangeOrigin(int x, int y) {
     double originX, originY, originZ;
+
+    irtkGreyImage *_targetImageOutput = _imageOutput[0];
 
     originX = x;
     originY = _height - y;
@@ -262,8 +267,12 @@ void irtkQtTwoDimensionalViewer::SetOrientation(const double * xaxis, const doub
 }
 
 void irtkQtTwoDimensionalViewer::CalculateOutputImage() {
-   _targetTransformFilter->PutSourcePaddingValue(-1);
-   _targetTransformFilter->Run();
+    vector<irtkImageTransformation*>::iterator it;
+    for (it = _transformFilter.begin(); it != _transformFilter.end(); it++) {
+        (*it)->PutSourcePaddingValue(-1);
+        (*it)->Run();
+    }
+    cout << "Calculated output images" << endl;
 }
 
 

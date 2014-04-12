@@ -5,6 +5,8 @@
 
 class irtkQtLookupTable
 {
+    int alpha;
+
 public:
 
     QRgb *lookupTable;
@@ -12,6 +14,10 @@ public:
     irtkQtLookupTable(int min = 0, int max = 255);
 
     ~irtkQtLookupTable();
+
+    void SetAlpha(int a);
+
+    void Initialize();
 };
 
 

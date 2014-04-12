@@ -36,26 +36,26 @@ class irtkQtTwoDimensionalViewer : public QObject
     /// view mode (axial, sagittal, coronal)
     irtkViewMode _viewMode;
 
-    /// images to be displayed
-    vector<irtkQtImageObject*> displayedImageObjects;
+    ///
+    irtkImage * _targetImage;
 
-    /// original target image
-    irtkImage *_targetImage;
+    /// original image
+    vector<irtkImage *> _image;
 
     /// image output
-    irtkGreyImage *_targetImageOutput;
+    vector<irtkGreyImage *> _imageOutput;
 
     /// image lookup table
-    irtkQtLookupTable *_targetLookupTable;
+    vector<irtkQtLookupTable *> _lookupTable;
 
     /// image transform
-    irtkTransformation *_targetTransform;
+    vector<irtkTransformation *> _transform;
 
     /// image interpolator
-    irtkImageFunction *_targetInterpolator;
+    vector<irtkImageFunction *> _interpolator;
 
     /// image transformaton filter
-    irtkImageTransformation *_targetTransformFilter;
+    vector<irtkImageTransformation *> _transformFilter;
 
 public:
 
@@ -93,7 +93,7 @@ public:
     irtkViewMode GetViewMode();
 
     /// get the array of RGB values to be drawn on the screen
-    QRgb* GetDrawable(int alpha);
+    vector<QRgb*> GetDrawable();
 
     /// get the labels displayed on the screen
     void GetLabels(char &top, char &bottom, char &left, char &right);
@@ -107,8 +107,6 @@ public:
     void ClearDisplayedImages();
 
     void AddToDisplayedImages(irtkQtImageObject *imageObject);
-
-    vector<QRgb*> CalculateDrawables();
 
 public slots:
 
@@ -131,6 +129,8 @@ protected:
 
     /// calculate the output image from the transformation
     void CalculateOutputImage();
+
+    template<class T> void DeleteVector(vector<T> vec);
 
 signals:
 
@@ -186,7 +186,18 @@ inline irtkViewMode irtkQtTwoDimensionalViewer::GetViewMode() {
 }
 
 inline void irtkQtTwoDimensionalViewer::ClearDisplayedImages() {
-    displayedImageObjects.clear();
+    _image.clear();
+    DeleteVector(_imageOutput);
+    DeleteVector(_lookupTable);
+    DeleteVector(_transform);
+    DeleteVector(_interpolator);
+    DeleteVector(_transformFilter);
+}
+
+template<class T>
+inline void irtkQtTwoDimensionalViewer::DeleteVector(vector<T> vec) {
+    qDeleteAll(vec);
+    vec.clear();
 }
 
 #endif // IRTKQTTWODIMENSIONALVIEWER_H

@@ -302,8 +302,8 @@ void QtMainWindow::viewImage() {
     QList<irtkQtImageObject*>::const_iterator it;
 
     for (int i = 0; i < viewers.size(); i++) {
-        viewerWidget = viewerWidgets.at(i);
-        viewer = viewers.at(i);
+        viewerWidget = viewerWidgets[i];
+        viewer = viewers[i];
 
         glWidget = viewerWidget->getGlWidget();
         viewer->ClearDisplayedImages();
@@ -314,6 +314,7 @@ void QtMainWindow::viewImage() {
         }
 
         viewer->SetDimensions(glWidget->customWidth(), glWidget->customHeight());
+        viewer->InitializeTransformation();
         viewer->InitializeOutputImage();
 
         glWidget->setEnabled(true);
@@ -321,7 +322,8 @@ void QtMainWindow::viewImage() {
         viewerWidget->setMaximumSlice(viewer->GetSliceNumber());
         viewerWidget->setCurrentSlice(viewer->GetCurrentSlice());
 
-        vector<QRgb*> drawables = viewer->CalculateDrawables();
+        vector<QRgb*> drawables = viewer->GetDrawable();
+        cout << "Got drawables" << endl;
         glWidget->updateDrawable(QVector<QRgb*>::fromStdVector(drawables));
     }
 
@@ -333,15 +335,14 @@ void QtMainWindow::zoomIn() {
     irtkQtTwoDimensionalViewer *viewer;
 
     for (int i = 0; i < viewers.size(); i++) {
-        viewerWidget = viewerWidgets.at(i);
-        viewer = viewers.at(i);
+        viewerWidget = viewerWidgets[i];
+        viewer = viewers[i];
 
         if (viewerWidget->getGlWidget()->isEnabled()) {
             viewer->IncreaseResolution();
             viewer->InitializeOutputImage();
-
-            vector<QRgb*> drawables = viewer->CalculateDrawables();
-            viewerWidget->getGlWidget()->updateDrawable(QVector<QRgb*>::fromStdVector(drawables));
+            viewerWidget->getGlWidget()->updateDrawable(
+                        QVector<QRgb*>::fromStdVector(viewer->GetDrawable()));
         }
     }
 }
@@ -357,9 +358,8 @@ void QtMainWindow::zoomOut() {
         if (viewerWidget->getGlWidget()->isEnabled()) {
             viewer->DecreaseResolution();
             viewer->InitializeOutputImage();
-
-            vector<QRgb*> drawables = viewer->CalculateDrawables();
-            viewerWidget->getGlWidget()->updateDrawable(QVector<QRgb*>::fromStdVector(drawables));
+            viewerWidget->getGlWidget()->updateDrawable(
+                        QVector<QRgb*>::fromStdVector(viewer->GetDrawable()));
         }
     }
 }
@@ -393,8 +393,8 @@ void QtMainWindow::deleteThisWidget() {
         }
     }
     for (int i = 0; i < viewerWidgets.size(); i++) {
-        addToViewWidget(viewerWidgets.at(i), i);
-        viewerWidgets.at(i)->show();
+        addToViewWidget(viewerWidgets[i], i);
+        viewerWidgets[i]->show();
     }
 }
 
@@ -443,10 +443,8 @@ void QtMainWindow::updateOrigin(double x, double y, double z) {
              ( (isSenderLinked && viewerWidget->isLinked()) || (viewer == senderViewer) ) ) {
                 viewer->SetOrigin(x, y, z);
                 viewer->InitializeOutputImage();
-
-                viewerWidget->setCurrentSlice(viewer->GetCurrentSlice());
-                vector<QRgb*> drawables = viewer->CalculateDrawables();
-                viewerWidget->getGlWidget()->updateDrawable(QVector<QRgb*>::fromStdVector(drawables));
+                viewerWidget->getGlWidget()->updateDrawable(
+                            QVector<QRgb*>::fromStdVector(viewer->GetDrawable()));
         }
     }
 
