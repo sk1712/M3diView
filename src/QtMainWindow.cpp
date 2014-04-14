@@ -3,11 +3,10 @@
 #include <QMenuBar>
 #include <QToolBar>
 #include <QFileDialog>
+#include <QDir>
 
 #include <QGridLayout>
 #include <QVBoxLayout>
-
-#include <QtConcurrent>
 
 QtMainWindow::QtMainWindow() {
     splitter = new QSplitter(this);
@@ -179,30 +178,6 @@ void QtMainWindow::connectSignals() {
     }
 }
 
-//void QtMainWindow::showImages() {
-
-//    for (int i = 0; i < viewers.size(); i++) {
-//        viewerWidget = viewerWidgets.at(i);
-//        viewer = viewers.at(i);
-
-//        glWidget = viewerWidget->getGlWidget();
-
-//        //viewer->SetTarget(irtkQtViewer::Instance()->GetImage(j));
-//        viewer->SetDimensions(glWidget->customWidth(), glWidget->customHeight());
-//        viewer->InitializeTransformation();
-//        viewer->InitializeOutputImage();
-
-//        glWidget->setEnabled(true);
-//        viewerWidget->getSlider()->setEnabled(true);
-//        viewerWidget->setMaximumSlice(viewer->GetSliceNumber());
-//        viewerWidget->setCurrentSlice(viewer->GetCurrentSlice());
-
-//        glWidget->updateDrawable(viewer->GetDrawable());
-//    }
-
-//    connectSignals();
-//}
-
 QtViewerWidget* QtMainWindow::createTwoDimensionalView(irtkViewMode viewMode) {
     irtkQtTwoDimensionalViewer* viewer;
     QtViewerWidget *qtViewer;
@@ -265,21 +240,21 @@ void QtMainWindow::createMessageBox(QString message, QMessageBox::Icon icon) {
 }
 
 void QtMainWindow::openImage() {
-    QStringList fileNames = QFileDialog::getOpenFileNames(this);
+    QString selfilter = tr("IMG (*.gipl *.gipl.z *.hdr *.hdr.gz *.nii *.nii.gz)");
+    QStringList fileNames = QFileDialog::getOpenFileNames(this,
+                                                          tr("Open File"),
+                                                          QDir::homePath(),
+                                                          tr("All files (*.*);;IMG (*.gipl *.gipl.z *.hdr *.hdr.gz *.nii *.nii.gz)" ),
+                                                          &selfilter);
 
     QStringList::const_iterator it;
     for (it = fileNames.constBegin(); it != fileNames.constEnd(); it++) {
         if ( !imageInList(*it) ) {
-            try {
-                irtkQtViewer* instance = irtkQtViewer::Instance();
-                instance->CreateImage((*it));
-                delete imageModel;
-                imageModel = new irtkImageListModel(instance->GetImageList());
-                imageListView->setModel(imageModel);
-            }
-            catch (irtkException e) {
-                createMessageBox("Invalid image file " + (*it), QMessageBox::Critical);
-            }
+            irtkQtViewer* instance = irtkQtViewer::Instance();
+            instance->CreateImage((*it));
+            delete imageModel;
+            imageModel = new irtkImageListModel(instance->GetImageList());
+            imageListView->setModel(imageModel);
         }
     }
 }
@@ -310,7 +285,12 @@ void QtMainWindow::viewImage() {
         viewer->ClearDisplayedImages();
         for (it = imageList.constBegin(); it != imageList.constEnd(); it++) {
             if ((*it)->IsVisible()) {
-                viewer->AddToDisplayedImages(*it);
+                try {
+                    viewer->AddToDisplayedImages(*it);
+                }
+                catch (irtkException e) {
+                    createMessageBox("Invalid image file " + (*it)->GetPath(), QMessageBox::Critical);
+                }
             }
         }
 
@@ -324,7 +304,6 @@ void QtMainWindow::viewImage() {
         viewerWidget->setCurrentSlice(viewer->GetCurrentSlice());
 
         vector<QRgb*> drawables = viewer->GetDrawable();
-        cout << "Got drawables" << endl;
         glWidget->updateDrawable(QVector<QRgb*>::fromStdVector(drawables));
     }
 
@@ -421,32 +400,42 @@ void QtMainWindow::clearViews() {
     clearVectors();
 }
 
-void QtMainWindow::updateOrigin(double x, double y, double z) {
-    QtTwoDimensionalGlWidget *glWidget;
-    irtkQtTwoDimensionalViewer *senderViewer, *viewer;
-    QtViewerWidget *viewerWidget;
+void QtMainWindow::updateView(int i, double x, double y, double z) {
+    irtkQtTwoDimensionalViewer *viewer = viewers[i];
+    QtViewerWidget *viewerWidget = viewerWidgets[i];
 
+    viewer->SetOrigin(x, y, z);
+    viewer->InitializeOutputImage();
+    viewerWidget->getGlWidget()->updateDrawable(
+                QVector<QRgb*>::fromStdVector(viewer->GetDrawable()));
+}
+
+void QtMainWindow::updateOrigin(double x, double y, double z) {
+    irtkQtTwoDimensionalViewer *senderViewer;
     senderViewer = dynamic_cast<irtkQtTwoDimensionalViewer*>(sender());
 
     disconnectSignals();
 
     int index = 0;
-    while (viewers.at(index) != senderViewer)
+    while (viewers[index] != senderViewer)
         index++;
-    bool isSenderLinked = viewerWidgets.at(index)->isLinked();
+    bool isSenderLinked = viewerWidgets[index]->isLinked();
+
+    QVector< QFuture<void> > threads;
+    QFuture<void> future;
 
     for (int i = 0; i < viewers.size(); i++) {
-        viewerWidget = viewerWidgets.at(i);
-        viewer = viewers.at(i);
-        glWidget = viewerWidget->getGlWidget();
-
-        if ( glWidget->isEnabled() &&
-             ( (isSenderLinked && viewerWidget->isLinked()) || (viewer == senderViewer) ) ) {
-                viewer->SetOrigin(x, y, z);
-                viewer->InitializeOutputImage();
-                viewerWidget->getGlWidget()->updateDrawable(
-                            QVector<QRgb*>::fromStdVector(viewer->GetDrawable()));
+        if ( viewerWidgets[i]->getGlWidget()->isEnabled() &&
+             ( (isSenderLinked && viewerWidgets[i]->isLinked()) || (viewers[i] == senderViewer) ) ) {
+            future = QtConcurrent::run(&(*this), &QtMainWindow::updateView, i, x, y, z);
+            threads.push_back(future);
         }
+    }
+
+    QVector< QFuture<void> >::const_iterator it = threads.constBegin();
+    while (it != threads.constEnd()) {
+        if ((*it).isFinished())
+            it++;
     }
 
     connectSignals();

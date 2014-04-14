@@ -3,9 +3,8 @@
 #include <QFileInfo>
 
 irtkQtImageObject::irtkQtImageObject(const QString &path)
-    : image(NULL), _path(path)
+    : _path(path)
 {
-    image = irtkImage::New(path.toStdString().c_str());
     QFileInfo file(path);
     _fileName = file.fileName();
 
@@ -14,5 +13,5 @@ irtkQtImageObject::irtkQtImageObject(const QString &path)
 }
 
 irtkQtImageObject::~irtkQtImageObject() {
-    delete image;
+
 }

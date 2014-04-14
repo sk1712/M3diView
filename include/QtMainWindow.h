@@ -141,6 +141,8 @@ private slots:
     /// callback function for clearing views
     void clearViews();
 
+    void updateView(int i, double x, double y, double z);
+
     /// callback function for updated origin
     void updateOrigin(double x, double y, double z);
 

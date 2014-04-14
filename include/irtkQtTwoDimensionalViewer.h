@@ -2,8 +2,9 @@
 #define IRTKQTTWODIMENSIONALVIEWER_H
 
 #include <QObject>
-
+#include <QtConcurrentRun>
 #include <QVector>
+
 #include <vector>
 
 #include <irtkImage.h>
@@ -105,6 +106,8 @@ public:
     /// initialize the transformation from the input to the output image
     void InitializeTransformation();
 
+    void InitializeSingleTransformation(int i);
+
     void ClearDisplayedImages();
 
     void AddToDisplayedImages(irtkQtImageObject *imageObject);
@@ -129,7 +132,9 @@ protected:
     void SetOrientation(const double * xaxis, const double * yaxis, const double * zaxis);
 
     /// calculate the output image from the transformation
-    void CalculateOutputImage();
+    void CalculateOutputImages(irtkImageAttributes attr);
+
+    void CalculateSingleOutput(int i, irtkImageAttributes attr);
 
     template<class T> void DeleteVector(vector<T> & vec);
 
@@ -187,7 +192,7 @@ inline irtkViewMode irtkQtTwoDimensionalViewer::GetViewMode() {
 }
 
 inline void irtkQtTwoDimensionalViewer::ClearDisplayedImages() {
-    _image.clear();
+    DeleteVector(_image);
     DeleteVector(_imageOutput);
     DeleteVector(_lookupTable);
     DeleteVector(_transform);

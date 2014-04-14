@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 2.8.9)
 
 IF(APPLE)
   set(CMAKE_PREFIX_PATH "/Users/ira/Qt5.1.1/5.1.1/clang_64/lib/cmake")
-  #set(CMAKE_CXX_FLAGS "-framework OpenGL")
 ENDIF()
 
 project(newviewer)
@@ -13,6 +12,7 @@ project(newviewer)
   SET (CMAKE_AUTOMOC ON)
 
 # Find the QtWidgets library
+find_package(Qt5Concurrent REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5OpenGL REQUIRED)
 
@@ -21,7 +21,6 @@ set(VIEWER_HEADERS
 ../include/QtTwoDimensionalGlWidget.h
 ../include/QtViewerWidget.h
 ../include/QtMainWindow.h
-#../include/QtFlowLayout.h
 ../include/irtkImageListModel.h
 ../include/irtkQtImageObject.h
 ../include/irtkQtViewer.h
@@ -34,7 +33,6 @@ QtGlWidget.cpp
 QtTwoDimensionalGlWidget.cpp
 QtViewerWidget.cpp
 QtMainWindow.cpp
-#QtFlowLayout.cpp
 irtkImageListModel.cpp
 irtkQtImageObject.cpp
 irtkQtViewer.cpp
@@ -48,4 +46,4 @@ qt5_add_resources(ResourceSources ${VIEWER_RESOURCES})
 add_executable(newviewer MACOSX_BUNDLE ${VIEWER_SOURCES} ${VIEWER_HEADERS} ${ResourceSources})
 
 # Use the Widgets module from Qt 5.
-qt5_use_modules(newviewer Widgets OpenGL)
+qt5_use_modules(newviewer Widgets Concurrent OpenGL)

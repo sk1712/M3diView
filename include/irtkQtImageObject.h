@@ -4,12 +4,9 @@
 #include <irtkImage.h>
 
 #include <QString>
-#include <QList>
-#include <QColor>
 
 class irtkQtImageObject
 {
-    irtkImage* image;
 
     /// flag showing if image is visible
     bool _visible;
@@ -22,9 +19,6 @@ class irtkQtImageObject
 
     /// image file name
     QString _fileName;
-
-    /// image drawable
-    QList<QRgb*> drawables;
 
 public:
 
@@ -39,8 +33,6 @@ public:
     bool IsVisible() const;
 
     void SetVisible(bool visible);
-
-    irtkImage* GetImage() const;
 
     QString GetFileName() const;
 
@@ -62,10 +54,6 @@ inline bool irtkQtImageObject::IsVisible() const {
 
 inline void irtkQtImageObject::SetVisible(bool visible) {
     _visible = visible;
-}
-
-inline irtkImage* irtkQtImageObject::GetImage() const {
-    return image;
 }
 
 inline QString irtkQtImageObject::GetFileName() const {
