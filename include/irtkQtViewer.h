@@ -40,11 +40,11 @@ public:
     irtkQtTwoDimensionalViewer* CreateTwoDimensionalViewer(irtkViewMode viewMode);
 
     /// get image list
-    const QList<irtkQtImageObject*> & GetImageList() const;
+    QList<irtkQtImageObject*> & GetImageList();
 };
 
 
-inline const QList<irtkQtImageObject*> & irtkQtViewer::GetImageList() const {
+inline QList<irtkQtImageObject*> & irtkQtViewer::GetImageList() {
     return _imageObjects;
 }
 

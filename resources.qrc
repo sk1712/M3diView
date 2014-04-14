@@ -8,5 +8,7 @@
         <file>icons/view_image.png</file>
         <file>icons/opacity.png</file>
         <file>icons/eye.png</file>
+        <file>icons/arrow_down.png</file>
+        <file>icons/arrow_up.png</file>
     </qresource>
 </RCC>

@@ -1,8 +1,6 @@
 #ifndef IRTKQTIMAGEOBJECT_H
 #define IRTKQTIMAGEOBJECT_H
 
-#include <irtkImage.h>
-
 #include <QString>
 
 class irtkQtImageObject

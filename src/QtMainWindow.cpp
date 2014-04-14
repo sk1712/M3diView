@@ -41,6 +41,8 @@ void QtMainWindow::createToolBar() {
     toolbar = addToolBar(tr("View"));
 
     toolbar->addAction(viewSelectedImageAction);
+    toolbar->addAction(moveUpAction);
+    toolbar->addAction(moveDownAction);
     toolbar->addSeparator();
 
     toolbar->addAction(zoomInAction);
@@ -102,6 +104,14 @@ void QtMainWindow::createToolBarActions() {
     opacityAction = new QAction(tr("Opacity"), this);
     opacityAction->setIcon(QIcon(":/icons/opacity.png"));
     opacityAction->setMenu(opacityMenu);
+
+    moveUpAction = new QAction(tr("Move image up"), this);
+    moveUpAction->setIcon(QIcon(":/icons/arrow_up.png"));
+    connect(moveUpAction, SIGNAL(triggered()), this, SLOT(moveImageUp()));
+
+    moveDownAction = new QAction(tr("Move image down"), this);
+    moveDownAction->setIcon(QIcon(":/icons/arrow_down.png"));
+    connect(moveDownAction, SIGNAL(triggered()), this, SLOT(moveImageDown()));
 }
 
 void QtMainWindow::createMenuActions() {
@@ -464,4 +474,32 @@ void QtMainWindow::listViewDoubleClicked(QModelIndex index) {
     delete imageModel;
     imageModel = new irtkImageListModel(list);
     imageListView->setModel(imageModel);
+}
+
+void QtMainWindow::moveImageUp() {
+    QList<irtkQtImageObject*> & list = irtkQtViewer::Instance()->GetImageList();
+    int index = imageListView->currentIndex().row();
+    if (!list.empty() && index > 0) {
+        list.move(index, index-1);
+
+        delete imageModel;
+        imageModel = new irtkImageListModel(list);
+        imageListView->setModel(imageModel);
+
+        imageListView->setCurrentIndex(imageModel->index(index-1, 0));
+    }
+}
+
+void QtMainWindow::moveImageDown() {
+    QList<irtkQtImageObject*> & list = irtkQtViewer::Instance()->GetImageList();
+    int index = imageListView->currentIndex().row();
+    if (!list.empty() && index >= 0 && (index < list.size() - 1)) {
+        list.move(index, index+1);
+
+        delete imageModel;
+        imageModel = new irtkImageListModel(list);
+        imageListView->setModel(imageModel);
+
+        imageListView->setCurrentIndex(imageModel->index(index+1, 0));
+    }
 }

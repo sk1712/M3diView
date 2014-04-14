@@ -147,10 +147,8 @@ void irtkQtTwoDimensionalViewer::InitializeSingleTransformation(int i) {
     _image[i]->GetMinMaxAsDouble(&_targetMin, &_targetMax);
 
     _transformFilter[i]->SetInput(_image[i]);
-    cout << "setting input " << i << endl;
     _transformFilter[i]->PutScaleFactorAndOffset(255.0 / (_targetMax
         - _targetMin), -_targetMin * 255.0 / (_targetMax - _targetMin));
-    cout << "setting scale factor " << i << endl;
 }
 
 void irtkQtTwoDimensionalViewer::AddToDisplayedImages(irtkQtImageObject *imageObject) {

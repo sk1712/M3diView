@@ -46,6 +46,8 @@ class QtMainWindow : public QMainWindow
     QAction *zoomInAction;
     QAction *zoomOutAction;
     QAction *opacityAction;
+    QAction *moveUpAction;
+    QAction *moveDownAction;
 
     /// vector of viewer widgets
     QList<QtViewerWidget*> viewerWidgets;
@@ -152,6 +154,10 @@ private slots:
     void listViewClicked(QModelIndex index);
 
     void listViewDoubleClicked(QModelIndex index);
+
+    void moveImageUp();
+
+    void moveImageDown();
 };
 
 #endif // QTMAINWINDOW_H
