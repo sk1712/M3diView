@@ -184,7 +184,7 @@ void irtkQtTwoDimensionalViewer::ResizeImage(int width, int height) {
     SetDimensions(width, height);
     InitializeOutputImage();
 
-    //emit ImageResized(GetDrawable());
+    emit ImageResized(QVector<QRgb*>::fromStdVector(GetDrawable()));
 }
 
 void irtkQtTwoDimensionalViewer::ChangeSlice(int slice) {

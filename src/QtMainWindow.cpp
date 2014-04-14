@@ -3,10 +3,11 @@
 #include <QMenuBar>
 #include <QToolBar>
 #include <QFileDialog>
-#include <QFileInfo>
 
 #include <QGridLayout>
 #include <QVBoxLayout>
+
+#include <QtConcurrent>
 
 QtMainWindow::QtMainWindow() {
     splitter = new QSplitter(this);
@@ -138,10 +139,10 @@ void QtMainWindow::disconnectSignals() {
         viewerWidget = viewerWidgets.at(i);
         viewer = viewers.at(i);
 
-//        disconnect(viewerWidget->getGlWidget(), SIGNAL(resized(int, int)),
-//                   viewer, SLOT(ResizeImage(int, int)));
-//        disconnect(viewer, SIGNAL(ImageResized(QRgb*)),
-//                   viewerWidget->getGlWidget(), SLOT(updateDrawable(QVector<QRgb*>)));
+        disconnect(viewerWidget->getGlWidget(), SIGNAL(resized(int, int)),
+                   viewer, SLOT(ResizeImage(int, int)));
+        disconnect(viewer, SIGNAL(ImageResized(QVector<QRgb*>)),
+                   viewerWidget->getGlWidget(), SLOT(updateDrawable(QVector<QRgb*>)));
 
         disconnect(viewerWidget->getSlider(), SIGNAL(valueChanged(int)),
                    viewer, SLOT(ChangeSlice(int)));
@@ -161,11 +162,11 @@ void QtMainWindow::connectSignals() {
         viewerWidget = viewerWidgets.at(i);
         viewer = viewers.at(i);
 
-//        /// update drawable when widgets are resized
-//        connect(viewerWidget->getGlWidget(), SIGNAL(resized(int, int)),
-//                viewer, SLOT(ResizeImage(int, int)));
-//        connect(viewer, SIGNAL(ImageResized(QRgb*)),
-//                viewerWidget->getGlWidget(), SLOT(updateDrawable(QRgb*)));
+        /// update drawable when widgets are resized
+        connect(viewerWidget->getGlWidget(), SIGNAL(resized(int, int)),
+                viewer, SLOT(ResizeImage(int, int)));
+        connect(viewer, SIGNAL(ImageResized(QVector<QRgb*>)),
+                viewerWidget->getGlWidget(), SLOT(updateDrawable(QVector<QRgb*>)));
 
         /// update drawable when slice is changed
         connect(viewerWidget->getSlider(), SIGNAL(valueChanged(int)),
@@ -386,8 +387,8 @@ void QtMainWindow::deleteThisWidget() {
     QLayout *layout = mainViewWidget->layout();
 
     for (int i = 0; i < viewerWidgets.size(); i++) {
-        layout->removeWidget(viewerWidgets.at(i));
-        if (senderWidget == viewerWidgets.at(i)) {
+        layout->removeWidget(viewerWidgets[i]);
+        if (senderWidget == viewerWidgets[i]) {
             delete viewerWidgets.takeAt(i);
             delete viewers.takeAt(i);
         }

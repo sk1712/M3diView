@@ -3,6 +3,7 @@
 
 #include <QObject>
 
+#include <QVector>
 #include <vector>
 
 #include <irtkImage.h>
@@ -130,12 +131,12 @@ protected:
     /// calculate the output image from the transformation
     void CalculateOutputImage();
 
-    template<class T> void DeleteVector(vector<T> vec);
+    template<class T> void DeleteVector(vector<T> & vec);
 
 signals:
 
     /// signal emitted when image is resized
-    void ImageResized(QRgb*);
+    void ImageResized(QVector<QRgb*>);
 
     /// signal emitted when image origin changes
     void OriginChanged(double originX, double originY, double originZ);
@@ -195,7 +196,7 @@ inline void irtkQtTwoDimensionalViewer::ClearDisplayedImages() {
 }
 
 template<class T>
-inline void irtkQtTwoDimensionalViewer::DeleteVector(vector<T> vec) {
+inline void irtkQtTwoDimensionalViewer::DeleteVector(vector<T> & vec) {
     qDeleteAll(vec);
     vec.clear();
 }
