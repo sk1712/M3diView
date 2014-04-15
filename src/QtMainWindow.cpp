@@ -250,7 +250,12 @@ void QtMainWindow::createMessageBox(QString message, QMessageBox::Icon icon) {
 }
 
 void QtMainWindow::openImage() {
+#ifdef Q_OS_MAC
+    QString selfilter = tr("IMG (*.gipl *.z *.hdr *.gz *.nii)");
+#else
     QString selfilter = tr("IMG (*.gipl *.gipl.z *.hdr *.hdr.gz *.nii *.nii.gz)");
+#endif
+
     QStringList fileNames = QFileDialog::getOpenFileNames(this,
                                                           tr("Open File"),
                                                           QDir::homePath(),
