@@ -231,6 +231,9 @@ void QtMainWindow::addToViewWidget(QWidget *widget) {
         layout->addWidget(widget, layout->rowCount()-1, 1);
     else
         layout->addWidget(widget, layout->rowCount(), 0);
+
+    if (singleViewerInScreen)
+        widget->hide();
 }
 
 void QtMainWindow::addToViewWidget(QWidget *widget, int index) {
@@ -269,6 +272,11 @@ void QtMainWindow::openImage() {
     }
 }
 
+void InitializeViewers(irtkQtTwoDimensionalViewer* &viewer) {
+    viewer->InitializeTransformation();
+    viewer->InitializeOutputImage();
+}
+
 void QtMainWindow::viewImage() {
     if ( viewers.size() == 0 ) {
         createMessageBox("You need to add viewers first.", QMessageBox::Warning);
@@ -290,8 +298,8 @@ void QtMainWindow::viewImage() {
     for (int i = 0; i < viewers.size(); i++) {
         viewerWidget = viewerWidgets[i];
         viewer = viewers[i];
-
         glWidget = viewerWidget->getGlWidget();
+
         viewer->ClearDisplayedImages();
         for (it = imageList.constBegin(); it != imageList.constEnd(); it++) {
             if ((*it)->IsVisible()) {
@@ -305,8 +313,14 @@ void QtMainWindow::viewImage() {
         }
 
         viewer->SetDimensions(glWidget->customWidth(), glWidget->customHeight());
-        viewer->InitializeTransformation();
-        viewer->InitializeOutputImage();
+    }
+
+    QtConcurrent::blockingMap(viewers, &InitializeViewers);
+
+    for (int i = 0; i < viewers.size(); i++) {
+        viewerWidget = viewerWidgets[i];
+        viewer = viewers[i];
+        glWidget = viewerWidget->getGlWidget();
 
         glWidget->setEnabled(true);
         viewerWidget->getSlider()->setEnabled(true);
@@ -357,14 +371,14 @@ void QtMainWindow::zoomOut() {
 void QtMainWindow::showOnlyThisWidget() {
     if (singleViewerInScreen) {
         for (int i = 0; i < viewerWidgets.size(); i++) {
-            viewerWidgets.at(i)->show();
+            viewerWidgets[i]->show();
         }
     }
     else {
         QWidget *senderWidget = dynamic_cast<QWidget*>(sender());
         for (int i = 0; i < viewerWidgets.size(); i++) {
-            if (viewerWidgets.at(i) != senderWidget)
-                viewerWidgets.at(i)->hide();
+            if (viewerWidgets[i] != senderWidget)
+                viewerWidgets[i]->hide();
         }
     }
     singleViewerInScreen = !singleViewerInScreen;
@@ -410,43 +424,46 @@ void QtMainWindow::clearViews() {
     clearVectors();
 }
 
-void QtMainWindow::updateView(int i, double x, double y, double z) {
-    irtkQtTwoDimensionalViewer *viewer = viewers[i];
-    QtViewerWidget *viewerWidget = viewerWidgets[i];
-
-    viewer->SetOrigin(x, y, z);
+void InitializeImage(irtkQtTwoDimensionalViewer* &viewer) {
     viewer->InitializeOutputImage();
-    viewerWidget->getGlWidget()->updateDrawable(
-                QVector<QRgb*>::fromStdVector(viewer->GetDrawable()));
 }
 
 void QtMainWindow::updateOrigin(double x, double y, double z) {
+    clock_t t, t2;
+
     irtkQtTwoDimensionalViewer *senderViewer;
     senderViewer = dynamic_cast<irtkQtTwoDimensionalViewer*>(sender());
 
     disconnectSignals();
+    t = clock();
 
     int index = 0;
     while (viewers[index] != senderViewer)
         index++;
     bool isSenderLinked = viewerWidgets[index]->isLinked();
 
-    QVector< QFuture<void> > threads;
-    QFuture<void> future;
+    for (int i = 0; i < viewers.size(); i++) {
+        if ( viewerWidgets[i]->getGlWidget()->isEnabled() &&
+             ( (isSenderLinked && viewerWidgets[i]->isLinked()) || (viewers[i] == senderViewer) ) ) {
+            viewers[i]->SetOrigin(x, y, z);
+            viewers[i]->InitializeOutputImage();
+        }
+    }
+
+    //QtConcurrent::blockingMap(viewers, &InitializeImage);
 
     for (int i = 0; i < viewers.size(); i++) {
         if ( viewerWidgets[i]->getGlWidget()->isEnabled() &&
              ( (isSenderLinked && viewerWidgets[i]->isLinked()) || (viewers[i] == senderViewer) ) ) {
-            future = QtConcurrent::run(&(*this), &QtMainWindow::updateView, i, x, y, z);
-            threads.push_back(future);
+            viewerWidgets[i]->setCurrentSlice(viewers[i]->GetCurrentSlice());
+            viewerWidgets[i]->getGlWidget()->updateDrawable(
+                        QVector<QRgb*>::fromStdVector(viewers[i]->GetDrawable()));
         }
     }
 
-    QVector< QFuture<void> >::const_iterator it = threads.constBegin();
-    while (it != threads.constEnd()) {
-        if ((*it).isFinished())
-            it++;
-    }
+    t2 = clock() - t;
+    qDebug() << "Main thread: " << QThread::currentThreadId()
+             << "It took me " << ((float)t2)/CLOCKS_PER_SEC << " seconds";
 
     connectSignals();
 }

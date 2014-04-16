@@ -1,7 +1,6 @@
 #ifndef IRTKQTVIEWER_H
 #define IRTKQTVIEWER_H
 
-#include <irtkQtImageObject.h>
 #include <irtkQtTwoDimensionalViewer.h>
 
 
@@ -29,17 +28,17 @@ public:
     /// delete instance of class
     static void Destroy();
 
-    /// create irtkImage* from the given file name
+    /// create image object from the given file name
     void CreateImage(QString imageFileName);
 
-    /// delete all images in _images vector
+    /// delete all image objects
     void DestroyImages();
 
     /// create an 2D viewer of certain view (axial, sagittal, coronal)
-    ///defined by viewMode
+    /// defined by viewMode
     irtkQtTwoDimensionalViewer* CreateTwoDimensionalViewer(irtkViewMode viewMode);
 
-    /// get image list
+    /// get reference to image list
     QList<irtkQtImageObject*> & GetImageList();
 };
 

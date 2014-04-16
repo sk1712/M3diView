@@ -49,12 +49,13 @@ class QtMainWindow : public QMainWindow
     QAction *moveUpAction;
     QAction *moveDownAction;
 
-    /// vector of viewer widgets
+    /// list of viewer widgets
     QList<QtViewerWidget*> viewerWidgets;
 
-    /// vector of irtk 2D viewers
+    /// list of irtk 2D viewers
     QList<irtkQtTwoDimensionalViewer*> viewers;
 
+    /// model for list view
     irtkImageListModel *imageModel;
 
     /// flag for only one viewer visible
@@ -87,9 +88,6 @@ private:
 
     /// connect signals between viewers and viewerWidgets
     void connectSignals();
-
-    /// show image(s) on screen
-    //void showImages();
 
     /// create new 2D viewer
     QtViewerWidget* createTwoDimensionalView(irtkViewMode viewMode);
@@ -142,8 +140,6 @@ private slots:
 
     /// callback function for clearing views
     void clearViews();
-
-    void updateView(int i, double x, double y, double z);
 
     /// callback function for updated origin
     void updateOrigin(double x, double y, double z);

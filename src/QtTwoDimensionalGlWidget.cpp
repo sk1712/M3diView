@@ -13,6 +13,7 @@ QtTwoDimensionalGlWidget::~QtTwoDimensionalGlWidget() {
 void QtTwoDimensionalGlWidget::drawImage() {
     QVector<QRgb*>::const_iterator rit;
 
+    // draw last image in the list first and the others on top of it
     if (!_drawable.empty()) {
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         for (rit = _drawable.constEnd()-1; rit >= _drawable.constBegin(); rit--) {

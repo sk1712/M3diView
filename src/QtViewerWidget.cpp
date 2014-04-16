@@ -4,6 +4,7 @@
 #include <QHBoxLayout>
 
 QtViewerWidget::QtViewerWidget(QWidget *parent) : QWidget(parent) {
+    linked = true;
     QGridLayout *layout = new QGridLayout;
 
     glWidget = new QtTwoDimensionalGlWidget(this);
@@ -31,8 +32,6 @@ QtViewerWidget::QtViewerWidget(QWidget *parent) : QWidget(parent) {
     layout->addWidget(sliceLabel, 1, 0, Qt::AlignRight);
 
     setLayout(layout);
-
-    linked = true;
 }
 
 void QtViewerWidget::updateLabel() {

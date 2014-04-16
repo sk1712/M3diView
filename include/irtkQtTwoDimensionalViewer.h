@@ -1,17 +1,16 @@
 #ifndef IRTKQTTWODIMENSIONALVIEWER_H
 #define IRTKQTTWODIMENSIONALVIEWER_H
 
-#include <QObject>
-#include <QtConcurrentRun>
-#include <QVector>
-
-#include <vector>
-
 #include <irtkImage.h>
 #include <irtkTransformation.h>
 
 #include <irtkQtLookupTable.h>
 #include <irtkQtImageObject.h>
+
+#include <QObject>
+#include <QVector>
+#include <QtConcurrentMap>
+
 
 /// view modes
 enum irtkViewMode {VIEW_AXIAL, VIEW_SAGITTAL, VIEW_CORONAL};
@@ -38,25 +37,25 @@ class irtkQtTwoDimensionalViewer : public QObject
     /// view mode (axial, sagittal, coronal)
     irtkViewMode _viewMode;
 
-    ///
+    /// image against which all other images are transformed
     irtkImage * _targetImage;
 
-    /// original image
+    /// original image vector
     vector<irtkImage *> _image;
 
-    /// image output
+    /// image output vector
     vector<irtkGreyImage *> _imageOutput;
 
-    /// image lookup table
+    /// image lookup table vector
     vector<irtkQtLookupTable *> _lookupTable;
 
-    /// image transform
+    /// image transform vector
     vector<irtkTransformation *> _transform;
 
-    /// image interpolator
+    /// image interpolator vector
     vector<irtkImageFunction *> _interpolator;
 
-    /// image transformaton filter
+    /// image transformaton filter vector
     vector<irtkImageTransformation *> _transformFilter;
 
 public:
@@ -106,10 +105,10 @@ public:
     /// initialize the transformation from the input to the output image
     void InitializeTransformation();
 
-    void InitializeSingleTransformation(int i);
-
+    /// delete all vector elements and clear vectors
     void ClearDisplayedImages();
 
+    /// add image object to the vector of images to be displayed
     void AddToDisplayedImages(irtkQtImageObject *imageObject);
 
 public slots:
@@ -128,14 +127,16 @@ protected:
     /// initialize image origin and orientation
     void InitializeOriginOrientation();
 
+    /// add new image and corresponding tools to vectors
+    void AddToVectors(irtkImage* newImage);
+
     /// sets image orientation
     void SetOrientation(const double * xaxis, const double * yaxis, const double * zaxis);
 
     /// calculate the output image from the transformation
     void CalculateOutputImages(irtkImageAttributes attr);
 
-    void CalculateSingleOutput(int i, irtkImageAttributes attr);
-
+    /// delete all elements of a vector first and then clear
     template<class T> void DeleteVector(vector<T> & vec);
 
 signals:

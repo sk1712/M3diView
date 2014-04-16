@@ -1,8 +1,10 @@
 #include <irtkQtTwoDimensionalViewer.h>
 
+#include <time.h>
+#include <QDebug>
+
 irtkQtTwoDimensionalViewer::irtkQtTwoDimensionalViewer(irtkViewMode viewMode) {
     _viewMode = viewMode;
-
     ClearDisplayedImages();
 }
 
@@ -125,35 +127,21 @@ void irtkQtTwoDimensionalViewer::InitializeOutputImage() {
 }
 
 void irtkQtTwoDimensionalViewer::InitializeTransformation() {
-    QVector< QFuture<void> > threads;
-    QFuture<void> future;
-
-    for (unsigned int i = 0; i < _image.size(); i++) {
-        future = QtConcurrent::run(&(*this),
-                                   &irtkQtTwoDimensionalViewer::InitializeSingleTransformation, i);
-        threads.push_back(future);
-    }
-
-    QVector< QFuture<void> >::const_iterator it = threads.constBegin();
-    while (it != threads.constEnd()) {
-        if ((*it).isFinished())
-            it++;
-    }
-}
-
-void irtkQtTwoDimensionalViewer::InitializeSingleTransformation(int i) {
     double _targetMin, _targetMax;
 
-    _image[i]->GetMinMaxAsDouble(&_targetMin, &_targetMax);
+    for (unsigned int i = 0; i < _image.size(); i++) {
+        _image[i]->GetMinMaxAsDouble(&_targetMin, &_targetMax);
 
-    _transformFilter[i]->SetInput(_image[i]);
-    _transformFilter[i]->PutScaleFactorAndOffset(255.0 / (_targetMax
-        - _targetMin), -_targetMin * 255.0 / (_targetMax - _targetMin));
+        _transformFilter[i]->SetInput(_image[i]);
+        _transformFilter[i]->PutScaleFactorAndOffset(255.0 / (_targetMax
+            - _targetMin), -_targetMin * 255.0 / (_targetMax - _targetMin));
+    }
 }
 
 void irtkQtTwoDimensionalViewer::AddToDisplayedImages(irtkQtImageObject *imageObject) {
     irtkImage *newImage = NULL;
 
+    // check if image object can be constructed from the file
     try {
         newImage = irtkImage::New(imageObject->GetPath().toStdString().c_str());
     }
@@ -162,32 +150,23 @@ void irtkQtTwoDimensionalViewer::AddToDisplayedImages(irtkQtImageObject *imageOb
         return;
     }
 
+    // if first image to be displayed make it target, otherwise check if attributes agree
     if (_image.size() == 0) {
         _targetImage = newImage;
         SetResolution(1, 1, _targetImage->GetZSize());
         InitializeOriginOrientation();
     }
     else {
-        if (!((_targetImage->GetX() == newImage->GetX()) &&
-                (_targetImage->GetY() == newImage->GetY()) &&
-                (_targetImage->GetZ() == newImage->GetZ()))) {
+        if (!(_targetImage->GetImageAttributes() == newImage->GetImageAttributes())) {
+            delete newImage;
             return;
         }
     }
 
-    _image.push_back(newImage);
-    _imageOutput.push_back(new irtkGreyImage);
-    _transform.push_back(new irtkAffineTransformation);
-    _interpolator.push_back(new irtkNearestNeighborInterpolateImageFunction);
+    // if everything is fine add to vectors
+    AddToVectors(newImage);
     _lookupTable.push_back(new irtkQtLookupTable());
-     _lookupTable.back()->SetAlpha(imageObject->GetOpacity());
-
-    irtkImageTransformation *transformation = new irtkImageTransformation;
-    transformation->SetOutput(_imageOutput.back());
-    transformation->SetTransformation(_transform.back());
-    transformation->PutInterpolator(_interpolator.back());
-    transformation->PutSourcePaddingValue(0);
-    _transformFilter.push_back(transformation);
+    _lookupTable.back()->SetAlpha(imageObject->GetOpacity());
 }
 
 void irtkQtTwoDimensionalViewer::ResizeImage(int width, int height) {
@@ -262,6 +241,20 @@ void irtkQtTwoDimensionalViewer::InitializeOriginOrientation() {
     }
 }
 
+void irtkQtTwoDimensionalViewer::AddToVectors(irtkImage* newImage) {
+    _image.push_back(newImage);
+    _imageOutput.push_back(new irtkGreyImage);
+    _transform.push_back(new irtkAffineTransformation);
+    _interpolator.push_back(new irtkNearestNeighborInterpolateImageFunction);
+
+    irtkImageTransformation *transformation = new irtkImageTransformation;
+    transformation->SetOutput(_imageOutput.back());
+    transformation->SetTransformation(_transform.back());
+    transformation->PutInterpolator(_interpolator.back());
+    transformation->PutSourcePaddingValue(0);
+    _transformFilter.push_back(transformation);
+}
+
 void irtkQtTwoDimensionalViewer::SetOrientation(const double * xaxis, const double * yaxis, const double * zaxis) {
     _axisX[0] = xaxis[0];
     _axisX[1] = xaxis[1];
@@ -276,24 +269,29 @@ void irtkQtTwoDimensionalViewer::SetOrientation(const double * xaxis, const doub
     _axisZ[2] = zaxis[2];
 }
 
+/// free function used to parallelize the transformations of images
+void CalculateSingleTransform(irtkImageTransformation* &transform) {
+    transform->PutSourcePaddingValue(-1);
+    transform->Run();
+}
+
 void irtkQtTwoDimensionalViewer::CalculateOutputImages(irtkImageAttributes attr) {
-    QVector< QFuture<void> > threads;
-    QFuture<void> future;
+    clock_t t, t2;
 
-    for (unsigned int i = 0; i < _imageOutput.size(); i++) {
-        future = QtConcurrent::run(&(*this), &irtkQtTwoDimensionalViewer::CalculateSingleOutput, i, attr);
-        threads.push_back(future);
+    t = clock();
+
+    vector<irtkGreyImage *>::iterator it;
+    for (it = _imageOutput.begin(); it != _imageOutput.end(); it++) {
+        (*it)->Initialize(attr);
     }
 
-    QVector< QFuture<void> >::const_iterator it = threads.constBegin();
-    while (it != threads.constEnd()) {
-        if ((*it).isFinished())
-            it++;
-    }
+    // apply transformation to every item in the container, modifying the items in-place
+    QtConcurrent::blockingMap(_transformFilter, &CalculateSingleTransform);
+
+    t2 = clock() - t;
+    qDebug() << "Now running thread: " << QThread::currentThreadId()
+             << " and it took me " << ((float)t2)/CLOCKS_PER_SEC
+             << " seconds to calculate output images.\n";
 }
 
-void irtkQtTwoDimensionalViewer::CalculateSingleOutput(int i, irtkImageAttributes attr) {
-    _imageOutput[i]->Initialize(attr);
-    _transformFilter[i]->PutSourcePaddingValue(-1);
-    _transformFilter[i]->Run();
-}
+

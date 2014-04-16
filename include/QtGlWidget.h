@@ -55,6 +55,8 @@ signals:
 
     /// signal emitted when left button is pressed
     void leftButtonPressed(int x, int y);
+
+    /// signal emitted when mouse wheel moves
     void wheelMoved(int steps);
 };
 

@@ -26,6 +26,7 @@ QVariant irtkImageListModel::data(const QModelIndex &index, int role) const {
     switch (role) {
         case Qt::DisplayRole :
             return _imageList.at(index.row())->GetFileName();
+            break;
         case Qt::DecorationRole :
             if (_imageList.at(index.row())->IsVisible())
                 return QIcon(":/icons/eye.png");
@@ -35,8 +36,10 @@ QVariant irtkImageListModel::data(const QModelIndex &index, int role) const {
                 QIcon icon(pixmap);
                 return icon;
             }
+            break;
         case Qt::ToolTipRole :
             return _imageList.at(index.row())->GetPath();
+            break;
     }
 
     return QVariant();

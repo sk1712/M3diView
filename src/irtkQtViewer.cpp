@@ -1,7 +1,5 @@
 #include <irtkQtViewer.h>
 
-//#include <cstdio>
-
 irtkQtViewer* irtkQtViewer::viewInstance = NULL;
 
 irtkQtViewer::irtkQtViewer() {
@@ -25,13 +23,8 @@ void irtkQtViewer::Destroy() {
 void irtkQtViewer::CreateImage(QString imageFileName) {
     irtkQtImageObject* newImage = NULL;
 
-    try {
-        newImage = new irtkQtImageObject(imageFileName);
-        _imageObjects.append(newImage);
-    } catch (irtkException e) {
-        delete newImage;
-        throw e;
-    }
+    newImage = new irtkQtImageObject(imageFileName);
+    _imageObjects.append(newImage);
 }
 
 void irtkQtViewer::DestroyImages() {
