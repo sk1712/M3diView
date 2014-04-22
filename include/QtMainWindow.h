@@ -83,11 +83,14 @@ private:
     /// create menu actions
     void createMenuActions();
 
+    /// connect window signals that won't be disconnected
+    void connectWindowSignals();
+
     /// disconnect signals between viewers and viewerWidgets
-    void disconnectSignals();
+    void disconnectViewerSignals();
 
     /// connect signals between viewers and viewerWidgets
-    void connectSignals();
+    void connectViewerSignals();
 
     /// create new 2D viewer
     QtViewerWidget* createTwoDimensionalView(irtkViewMode viewMode);
@@ -102,9 +105,12 @@ private:
     void addToViewWidget(QWidget *widget);
     void addToViewWidget(QWidget *widget, int index);
 
-    /// show message box
+    /// show message box with message and icon
     void createMessageBox(QString message,
                           QMessageBox::Icon icon = QMessageBox::NoIcon);
+
+    /// set up viewers with images to be displayed
+    void setDisplayedImages();
 
 private slots:
 
@@ -141,18 +147,22 @@ private slots:
     /// callback function for clearing views
     void clearViews();
 
-    /// callback function for updated origin
+    /// callback function for updating origin
     void updateOrigin(double x, double y, double z);
 
     /// callback function for opacity slider changing value
     void opacityValueChanged(int value);
 
+    /// callback function for list view being clicked
     void listViewClicked(QModelIndex index);
 
+    /// callback function for list view double clicked
     void listViewDoubleClicked(QModelIndex index);
 
+    /// callback function for moving image up in the list
     void moveImageUp();
 
+    /// callback function for moving image down in the list
     void moveImageDown();
 };
 
