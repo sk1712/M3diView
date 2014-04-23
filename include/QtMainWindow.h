@@ -1,7 +1,8 @@
 #ifndef QTMAINWINDOW_H
 #define QTMAINWINDOW_H
 
-#include <QtViewerWidget.h>
+#include <Qt2dViewerWidget.h>
+#include <Qt3dViewerWidget.h>
 
 #include <irtkQtViewer.h>
 #include <irtkImageListModel.h>
@@ -39,6 +40,7 @@ class QtMainWindow : public QMainWindow
     QAction *viewCoronalAction;
     QAction *viewSagittalAction;
     QAction *viewOrthogonalAction;
+    QAction *view3DAction;
     QAction *clearViewsAction;
 
     /// toolbar actions
@@ -93,7 +95,10 @@ private:
     void connectViewerSignals();
 
     /// create new 2D viewer
-    QtViewerWidget* createTwoDimensionalView(irtkViewMode viewMode);
+    Qt2dViewerWidget* createTwoDimensionalView(irtkViewMode viewMode);
+
+    /// create new 3D viewer
+    Qt3dViewerWidget* createThreeDimensionalView();
 
     /// clear viewers and viewerWidgets
     void clearVectors();
@@ -110,7 +115,7 @@ private:
                           QMessageBox::Icon icon = QMessageBox::NoIcon);
 
     /// set up viewers with images to be displayed
-    void setDisplayedImages();
+    bool setDisplayedImages();
 
 private slots:
 
@@ -141,8 +146,11 @@ private slots:
     /// callback functon for adding sagittal view
     void createSagittalView();
 
-    /// callback functon for adding
+    /// callback functon for adding orthogonal view
     void createOrthogonalView();
+
+    /// callback function for adding 3D view
+    void create3dView();
 
     /// callback function for clearing views
     void clearViews();

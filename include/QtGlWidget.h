@@ -34,16 +34,13 @@ public:
     /// get height in physical pixels
     int customHeight() const;
 
-protected:
-
     /// function to be implemented by all derived classes
     virtual void drawImage() = 0;
 
+protected:
+
     /// function handling mouse press events
     void mousePressEvent(QMouseEvent *event);
-
-    /// function handling mouse move events
-    void mouseMoveEvent(QMouseEvent *event);
 
     /// function handling mouse wheel events
     void wheelEvent(QWheelEvent *event);
@@ -58,6 +55,13 @@ signals:
 
     /// signal emitted when mouse wheel moves
     void wheelMoved(int steps);
+
+    /// signals emitted when arrow buttons are pressed
+    void leftKeyPressed();
+    void rightKeyPressed();
+    void upKeyPressed();
+    void downKeyPressed();
+
 };
 
 #endif // QTGLWIDGET_H

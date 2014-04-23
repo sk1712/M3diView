@@ -9,7 +9,6 @@
 QtGlWidget::QtGlWidget(QWidget *parent)
     : QGLWidget(parent) {
     pixelRatio = windowHandle()->devicePixelRatio();
-    setMouseTracking(true);
 }
 
 QSize QtGlWidget::sizeHint() const {
@@ -35,10 +34,6 @@ void QtGlWidget::mousePressEvent(QMouseEvent *event) {
     }
 }
 
-void QtGlWidget::mouseMoveEvent(QMouseEvent *event) {
-    //qDebug() << event->x() << "," << event->y();
-}
-
 void QtGlWidget::wheelEvent(QWheelEvent *event) {
     int numDegrees = event->delta() /8;
     int numSteps = numDegrees / 15;
@@ -48,7 +43,18 @@ void QtGlWidget::wheelEvent(QWheelEvent *event) {
 
 void QtGlWidget::keyPressEvent(QKeyEvent *event) {
     switch(event->key()) {
-
+    case Qt::Key_Left:
+        emit leftKeyPressed();
+        break;
+    case Qt::Key_Right:
+        emit rightKeyPressed();
+        break;
+    case Qt::Key_Up:
+        emit upKeyPressed();
+        break;
+    case Qt::Key_Down:
+        emit downKeyPressed();
+        break;
     default:
         event->ignore();
         break;

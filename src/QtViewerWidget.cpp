@@ -5,16 +5,8 @@
 
 QtViewerWidget::QtViewerWidget(QWidget *parent) : QWidget(parent) {
     linked = true;
-    QGridLayout *layout = new QGridLayout;
 
-    glWidget = new QtTwoDimensionalGlWidget(this);
-    glWidget->setEnabled(false);
-    layout->addWidget(glWidget, 0, 0);
-
-    sliceSlider = new QSlider(Qt::Vertical);
-    sliceSlider->setMinimum(1);
-    sliceSlider->setEnabled(false);
-    layout->addWidget(sliceSlider, 0, 1);
+    QGridLayout *layout = new QGridLayout();
 
     QWidget *toolWidget = new QWidget();
     createToolButtons();
@@ -28,19 +20,7 @@ QtViewerWidget::QtViewerWidget(QWidget *parent) : QWidget(parent) {
     toolWidget->setLayout(toolLayout);
     layout->addWidget(toolWidget, 1, 0, Qt::AlignLeft);
 
-    sliceLabel = new QLabel();
-    layout->addWidget(sliceLabel, 1, 0, Qt::AlignRight);
-
     setLayout(layout);
-}
-
-void QtViewerWidget::updateLabel() {
-    sliceLabel->setText(QString::number(currentSlice) + " of " + QString::number(maximumSlice));
-}
-
-void QtViewerWidget::initializeParameters() {
-    currentSlice = 0;
-    maximumSlice = 0;
 }
 
 void QtViewerWidget::createToolButtons() {
@@ -60,29 +40,9 @@ void QtViewerWidget::createToolButtons() {
 }
 
 void QtViewerWidget::connectSignals() {
-    connect(glWidget, SIGNAL(wheelMoved(int)), this, SLOT(changeSlider(int)));
-    connect(sliceSlider, SIGNAL(valueChanged(int)), this, SLOT(updateSlice(int)));
-
     connect(expandToolButton, SIGNAL(clicked()), this, SLOT(expandWindow()));
     connect(linkToolButton, SIGNAL(toggled(bool)), this, SLOT(changeLinked(bool)));
     connect(deleteToolButton, SIGNAL(clicked()), this, SLOT(deleteWindow()));
-}
-
-void QtViewerWidget::changeSlider(int steps) {
-    int newSlice = currentSlice + steps;
-
-    if (newSlice < 1)
-        newSlice = 1;
-
-    if (newSlice > maximumSlice)
-        newSlice = maximumSlice;
-
-    sliceSlider->setValue(newSlice);
-}
-
-void QtViewerWidget::updateSlice(int slice) {
-    currentSlice = slice;
-    updateLabel();
 }
 
 void QtViewerWidget::expandWindow() {

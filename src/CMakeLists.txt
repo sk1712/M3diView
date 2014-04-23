@@ -19,7 +19,10 @@ find_package(Qt5OpenGL REQUIRED)
 set(VIEWER_HEADERS
 ../include/QtGlWidget.h
 ../include/QtTwoDimensionalGlWidget.h
+../include/QtThreeDimensionalGlWidget.h
 ../include/QtViewerWidget.h
+../include/Qt2dViewerWidget.h
+../include/Qt3dViewerWidget.h
 ../include/QtMainWindow.h
 ../include/irtkImageListModel.h
 ../include/irtkQtImageObject.h
@@ -31,7 +34,10 @@ SET(VIEWER_SOURCES
 main.cpp
 QtGlWidget.cpp 
 QtTwoDimensionalGlWidget.cpp
+QtThreeDimensionalGlWidget.cpp
 QtViewerWidget.cpp
+Qt2dViewerWidget.cpp
+Qt3dViewerWidget.cpp
 QtMainWindow.cpp
 irtkImageListModel.cpp
 irtkQtImageObject.cpp
