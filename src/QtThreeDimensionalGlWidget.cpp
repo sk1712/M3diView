@@ -1,13 +1,14 @@
 #include <QtThreeDimensionalGlWidget.h>
 
+#ifdef Q_OS_MAC
+#include "OpenGL/glu.h"
+#else
 #include "GL/glu.h"
-
-#include <cmath>
+#endif
 
 #include <QMouseEvent>
 #include <QDebug>
 
-#define PI 3.14159265
 
 QtThreeDimensionalGlWidget::QtThreeDimensionalGlWidget(QWidget *parent)
     :QtGlWidget(parent) {
@@ -82,30 +83,16 @@ void QtThreeDimensionalGlWidget::paintGL() {
 
 void QtThreeDimensionalGlWidget::rotate() {
     glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glTranslatef(0.0f, 0.0f, -7.0f);  // Move into the screen
 
-    float xrot, yrot;
-    xrot = verticalRotation * PI / 180.0;
-    yrot = horizontalRotation * PI / 180.0;
-
-    float rotateX[16] =
-    {
-        1, 0, 0, 0,
-        0, (float) cos(xrot), (float) -sin(xrot), 0.0,
-        0, (float) sin(xrot), (float) cos(xrot), 0.0,
-        0, 0, 0, 1
-    };
-    float rotateY[16] =
-    {
-        (float) cos(yrot), 0, (float) sin(yrot), 0,
-        0, 1, 0, 0,
-        (float) -sin(yrot), 0, (float) cos(yrot), 0,
-        0, 0, 0, 1
-    };
-
-    glMultMatrixf(rotateX);
-    glMultMatrixf(rotateY);
+    GLfloat currentModelViewMatrix[16];
+    glGetFloatv(GL_MODELVIEW_MATRIX, currentModelViewMatrix);
+    // x axis rotation
+    glRotatef(horizontalRotation, currentModelViewMatrix[1], currentModelViewMatrix[5], currentModelViewMatrix[9]);
+    glGetFloatv(GL_MODELVIEW_MATRIX, currentModelViewMatrix);
+    // y axis rotation
+    glRotatef(verticalRotation, currentModelViewMatrix[0], currentModelViewMatrix[4], currentModelViewMatrix[8]);
+    glGetFloatv(GL_MODELVIEW_MATRIX, currentModelViewMatrix);
+    glLoadMatrixf(currentModelViewMatrix);
 
     update();
 }
@@ -134,29 +121,33 @@ void QtThreeDimensionalGlWidget::mouseReleaseEvent(QMouseEvent *event) {
 }
 
 void QtThreeDimensionalGlWidget::mouseMoveEvent(QMouseEvent *event) {
-    horizontalRotation += (event->pos().x() - lastPosition.x()) * 1.0f;
-    verticalRotation += (event->pos().y() - lastPosition.y()) * 1.0;
+    horizontalRotation = (event->pos().x() - lastPosition.x()) * 1.0f;
+    verticalRotation = (event->pos().y() - lastPosition.y()) * 1.0;
 
     lastPosition = event->pos();
     rotate();
 }
 
 void QtThreeDimensionalGlWidget::rotateLeft() {
-    horizontalRotation -= 5.0;
+    horizontalRotation = -5.0;
+    verticalRotation = 0.0;
     rotate();
 }
 
 void QtThreeDimensionalGlWidget::rotateRight() {
-    horizontalRotation += 5.0;
+    horizontalRotation = 5.0;
+    verticalRotation = 0.0;
     rotate();
 }
 
 void QtThreeDimensionalGlWidget::rotateUp() {
-    verticalRotation -= 5.0;
+    verticalRotation = -5.0;
+    horizontalRotation = 0;
     rotate();
 }
 
 void QtThreeDimensionalGlWidget::rotateDown() {
-    verticalRotation += 5.0;
+    verticalRotation = 5.0;
+    horizontalRotation = 0.0;
     rotate();
 }
