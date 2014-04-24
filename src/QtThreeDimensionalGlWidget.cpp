@@ -22,6 +22,7 @@ QtThreeDimensionalGlWidget::QtThreeDimensionalGlWidget(QWidget *parent)
 }
 
 void QtThreeDimensionalGlWidget::drawImage() {
+    // put the texture stuff here
     glBegin(GL_QUADS);                // Begin drawing the perpendicular surfaces
 
     // Top face (y = 1.0f)
