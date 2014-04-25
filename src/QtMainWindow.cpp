@@ -237,6 +237,12 @@ Qt3dViewerWidget* QtMainWindow::createThreeDimensionalView() {
     qtViewer = new Qt3dViewerWidget();
     viewerWidgets.push_back(qtViewer);
 
+    //////
+    irtkQtTwoDimensionalViewer* viewer;
+    viewer = irtkQtViewer::Instance()->CreateTwoDimensionalViewer(VIEW_SAGITTAL);
+    viewers.push_back(viewer);
+    //////
+
     // register signals to expand or delete the viewer
     connect(qtViewer, SIGNAL(windowExpanded()), this, SLOT(showOnlyThisWidget()));
     connect(qtViewer, SIGNAL(windowDeleted()), this, SLOT(deleteThisWidget()));
@@ -344,9 +350,13 @@ bool QtMainWindow::setDisplayedImages() {
                         createMessageBox("Invalid image file " + (*it)->GetPath(), QMessageBox::Critical);
                         break;
                     }
-                }
 
-                viewer->SetDimensions(glWidget->customWidth(), glWidget->customHeight());
+                    viewer->SetDimensions(glWidget->customWidth(), glWidget->customHeight());
+                }
+                //////
+                else
+                    atLeastOneImageVisible = true;
+                /////
             }
         }
     }

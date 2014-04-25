@@ -157,10 +157,10 @@ void irtkQtTwoDimensionalViewer::AddToDisplayedImages(irtkQtImageObject *imageOb
         InitializeOriginOrientation();
     }
     else {
-        if (!(_targetImage->GetImageAttributes() == newImage->GetImageAttributes())) {
-            delete newImage;
-            return;
-        }
+//        if (!(_targetImage->GetImageAttributes() == newImage->GetImageAttributes())) {
+//            delete newImage;
+//            return;
+//        }
     }
 
     // if everything is fine add to vectors
