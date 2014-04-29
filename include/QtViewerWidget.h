@@ -32,6 +32,8 @@ public:
     /// get viewer linked
     bool isLinked() const;
 
+    virtual QtGlWidget* getGlWidget() const = 0;
+
 protected:
 
     /// create tool buttons

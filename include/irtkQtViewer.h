@@ -2,6 +2,7 @@
 #define IRTKQTVIEWER_H
 
 #include <irtkQtTwoDimensionalViewer.h>
+#include <irtkQtThreeDimensionalViewer.h>
 
 
 class irtkQtViewer
@@ -37,6 +38,9 @@ public:
     /// create an 2D viewer of certain view (axial, sagittal, coronal)
     /// defined by viewMode
     irtkQtTwoDimensionalViewer* CreateTwoDimensionalViewer(irtkViewMode viewMode);
+
+    /// create a 3D viewer
+    irtkQtThreeDimensionalViewer* CreateThreeDimensionalViewer();
 
     /// get reference to image list
     QList<irtkQtImageObject*> & GetImageList();

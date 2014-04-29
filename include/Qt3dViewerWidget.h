@@ -17,10 +17,16 @@ public:
 
     QtGlWidget* getGlWidget() const;
 
+    void setDimensions(int *dim);
+
 };
 
 inline QtGlWidget* Qt3dViewerWidget::getGlWidget() const {
     return glWidget;
+}
+
+inline void Qt3dViewerWidget::setDimensions(int *dim) {
+    glWidget->setDimensions(dim);
 }
 
 #endif // QT3DVIEWERWIDGET_H

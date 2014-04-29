@@ -4,15 +4,18 @@
 #include <QDebug>
 
 irtkQtTwoDimensionalViewer::irtkQtTwoDimensionalViewer(irtkViewMode viewMode) {
-    _viewMode = viewMode;
     ClearDisplayedImages();
+    _viewMode = viewMode;
+    currentSlice = new int[1];
+    sliceNum = new int[1];
 }
 
 irtkQtTwoDimensionalViewer::~irtkQtTwoDimensionalViewer() {    
     ClearDisplayedImages();
+    delete currentSlice;
 }
 
-int irtkQtTwoDimensionalViewer::GetCurrentSlice() {
+int* irtkQtTwoDimensionalViewer::GetCurrentSlice() {
     double x, y, z;
 
     x = _originX;
@@ -21,35 +24,33 @@ int irtkQtTwoDimensionalViewer::GetCurrentSlice() {
 
     _targetImage->WorldToImage(x, y, z);
 
-    int result;
-
     switch (_viewMode) {
     case VIEW_AXIAL :
-        result = (int) round(z);
+        *currentSlice = (int) round(z);
         break;
     case VIEW_SAGITTAL :
-        result = (int) round(x);
+        *currentSlice = (int) round(x);
         break;
     case VIEW_CORONAL :
-        result = (int) round(y);
+        *currentSlice = (int) round(y);
         break;
     default:
-        result = 0;
+        currentSlice = 0;
         break;
     }
 
-    return result;
+    return currentSlice;
 }
 
-vector<QRgb*> irtkQtTwoDimensionalViewer::GetDrawable() {
-    vector<QRgb*> allDrawables;
+vector<QRgb**> irtkQtTwoDimensionalViewer::GetDrawable() {
+    vector<QRgb**> allDrawables;
+    QRgb _backgroundColor = qRgba(0, 0, 0, 0);
 
     for (unsigned int index = 0; index < _image.size(); index++) {
-        QRgb *drawable = new QRgb[_imageOutput[index]->GetNumberOfVoxels()];
-        QRgb _backgroundColor = qRgba(0, 0, 0, 0);
-
+        QRgb** drawable = new QRgb*[1];
+        drawable[0] = new QRgb[_imageOutput[index]->GetNumberOfVoxels()];
         irtkGreyPixel *original = _imageOutput[index]->GetPointerToVoxels();
-        QRgb *drawn = drawable;
+        QRgb *drawn = drawable[0];
 
         int i, j;
 
@@ -97,8 +98,6 @@ void irtkQtTwoDimensionalViewer::GetLabels(char &top, char &bottom, char &left, 
     }
 }
 
-
-
 void irtkQtTwoDimensionalViewer::InitializeTransformation() {
     double _targetMin, _targetMax;
 
@@ -111,13 +110,11 @@ void irtkQtTwoDimensionalViewer::InitializeTransformation() {
     }
 }
 
-
-
 void irtkQtTwoDimensionalViewer::ResizeImage(int width, int height) {
     SetDimensions(width, height);
-    InitializeOutputImage();
+    CalculateOutputImages();
 
-    emit ImageResized(QVector<QRgb*>::fromStdVector(GetDrawable()));
+    emit ImageResized(QVector<QRgb**>::fromStdVector(GetDrawable()));
 }
 
 void irtkQtTwoDimensionalViewer::ChangeSlice(int slice) {
@@ -127,7 +124,7 @@ void irtkQtTwoDimensionalViewer::ChangeSlice(int slice) {
 
     _targetImageOutput->GetOrigin(originX, originY, originZ);
     _targetImageOutput->WorldToImage(originX, originY, originZ);
-    originZ += slice - GetCurrentSlice();
+    originZ += slice - *GetCurrentSlice();
     _targetImageOutput->ImageToWorld(originX, originY, originZ);
 
     _targetImage->WorldToImage(originX, originY, originZ);
@@ -159,8 +156,6 @@ void irtkQtTwoDimensionalViewer::ChangeOrigin(int x, int y) {
     emit OriginChanged(originX, originY, originZ);
 }
 
-
-
 void irtkQtTwoDimensionalViewer::AddToVectors(irtkImage* newImage) {
     _image.push_back(newImage);
     _imageOutput.push_back(new irtkGreyImage);
@@ -175,18 +170,17 @@ void irtkQtTwoDimensionalViewer::AddToVectors(irtkImage* newImage) {
     _transformFilter.push_back(transformation);
 }
 
-
-
 /// free function used to parallelize the transformations of images
 void CalculateSingleTransform(irtkImageTransformation* &transform) {
     transform->PutSourcePaddingValue(-1);
     transform->Run();
 }
 
-void irtkQtTwoDimensionalViewer::CalculateOutputImages(irtkImageAttributes attr) {
-    clock_t t, t2;
+void irtkQtTwoDimensionalViewer::CalculateOutputImages() {
+//    clock_t t, t2;
 
-    t = clock();
+//    t = clock();
+    irtkImageAttributes attr = InitializeAttributes();
 
     vector<irtkGreyImage *>::iterator it;
     for (it = _imageOutput.begin(); it != _imageOutput.end(); it++) {
@@ -196,10 +190,10 @@ void irtkQtTwoDimensionalViewer::CalculateOutputImages(irtkImageAttributes attr)
     // apply transformation to every item in the container, modifying the items in-place
     QtConcurrent::blockingMap(_transformFilter, &CalculateSingleTransform);
 
-    t2 = clock() - t;
-    qDebug() << "Now running thread: " << QThread::currentThreadId()
-             << " and it took me " << ((float)t2)/CLOCKS_PER_SEC
-             << " seconds to calculate output images.\n";
+//    t2 = clock() - t;
+//    qDebug() << "Now running thread: " << QThread::currentThreadId()
+//             << " and it took me " << ((float)t2)/CLOCKS_PER_SEC
+//             << " seconds to calculate output images.\n";
 }
 
 

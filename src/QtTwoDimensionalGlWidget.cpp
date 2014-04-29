@@ -6,12 +6,11 @@ QtTwoDimensionalGlWidget::QtTwoDimensionalGlWidget(QWidget *parent)
 }
 
 QtTwoDimensionalGlWidget::~QtTwoDimensionalGlWidget() {
-    qDeleteAll(_drawable);
-    _drawable.clear();
+    deleteDrawable();
 }
 
 void QtTwoDimensionalGlWidget::drawImage() {
-    QVector<QRgb*>::const_iterator rit;
+    QVector<QRgb**>::const_iterator rit;
 
     // draw last image in the list first and the others on top of it
     if (!_drawable.empty()) {
@@ -21,7 +20,7 @@ void QtTwoDimensionalGlWidget::drawImage() {
             glRasterPos2f(0, 0);
             // Draw pixelmap
             glDrawPixels(_width, _height, GL_RGBA, GL_UNSIGNED_BYTE,
-                         (*rit));
+                         (*rit)[0]);
         }
     }
 }
@@ -49,15 +48,17 @@ void QtTwoDimensionalGlWidget::drawLabels() {
     renderText(width()-15, height()/2+5, right, arialFont);
 }
 
-void QtTwoDimensionalGlWidget::updateDrawable(QVector<QRgb*> drawable) {
-    qDeleteAll(_drawable);
+void QtTwoDimensionalGlWidget::deleteDrawable() {
+    QVector<QRgb**>::iterator it;
+
+    for (it = _drawable.begin(); it != _drawable.end(); it++)
+        delete [] (it[0]);
+
     _drawable.clear();
-    _drawable = drawable;
-    update();
 }
 
 void QtTwoDimensionalGlWidget::initializeGL() {
-    glDisable(GL_TEXTURE_2D);
+    //glDisable(GL_TEXTURE_2D);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_COLOR_MATERIAL);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

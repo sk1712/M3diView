@@ -31,7 +31,7 @@ public:
 
     Qt2dViewerWidget(QWidget *parent = 0);
 
-    QtTwoDimensionalGlWidget* getGlWidget() const;
+    QtGlWidget* getGlWidget() const;
 
     /// getter for slice slider
     QSlider* getSlider() const;
@@ -44,6 +44,8 @@ public:
 
     /// update maximumSlice
     void setMaximumSlice(int maximum);
+
+    void setLabels(const char t, const char b, const char l, const char r);
 
 protected:
 
@@ -69,7 +71,7 @@ private slots:
 };
 
 
-inline QtTwoDimensionalGlWidget* Qt2dViewerWidget::getGlWidget() const {
+inline QtGlWidget* Qt2dViewerWidget::getGlWidget() const {
     return glWidget;
 }
 
@@ -88,6 +90,10 @@ inline void Qt2dViewerWidget::setCurrentSlice(int current) {
 inline void Qt2dViewerWidget::setMaximumSlice(int maximum) {
     maximumSlice = maximum;
     sliceSlider->setMaximum(maximumSlice);
+}
+
+inline void Qt2dViewerWidget::setLabels(const char t, const char b, const char l, const char r) {
+    glWidget->setLabels(t, b, l, r);
 }
 
 #endif // QT2DVIEWERWIDGET_H

@@ -27,7 +27,9 @@ set(VIEWER_HEADERS
 ../include/irtkImageListModel.h
 ../include/irtkQtImageObject.h
 ../include/irtkQtViewer.h
+../include/irtkQtBaseViewer.h
 ../include/irtkQtTwoDimensionalViewer.h
+../include/irtkQtThreeDimensionalViewer.h
 ../include/irtkQtLookupTable.h)
 
 SET(VIEWER_SOURCES
@@ -42,7 +44,9 @@ QtMainWindow.cpp
 irtkImageListModel.cpp
 irtkQtImageObject.cpp
 irtkQtViewer.cpp
+irtkQtBaseViewer.cpp
 irtkQtTwoDimensionalViewer.cpp
+irtkQtThreeDimensionalViewer.cpp
 irtkQtLookupTable.cpp)
 
 SET(VIEWER_RESOURCES ../resources.qrc)

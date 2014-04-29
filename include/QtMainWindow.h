@@ -55,7 +55,7 @@ class QtMainWindow : public QMainWindow
     QList<QtViewerWidget*> viewerWidgets;
 
     /// list of irtk 2D viewers
-    QList<irtkQtTwoDimensionalViewer*> viewers;
+    QList<irtkQtBaseViewer*> viewers;
 
     /// model for list view
     irtkImageListModel *imageModel;

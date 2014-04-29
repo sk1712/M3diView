@@ -11,6 +11,9 @@ class QtGlWidget : public QGLWidget
 
 protected:
 
+    /// array of values to be drawn on the screen
+    QVector<QRgb**> _drawable;
+
     /// width and height in physical pixels
     int _width, _height;
 
@@ -37,7 +40,14 @@ public:
     /// function to be implemented by all derived classes
     virtual void drawImage() = 0;
 
+public slots:
+
+    /// callback function to update drawable
+    virtual void updateDrawable(QVector<QRgb**> drawable);
+
 protected:
+
+    virtual void deleteDrawable() = 0;
 
     /// function handling mouse press events
     void mousePressEvent(QMouseEvent *event);

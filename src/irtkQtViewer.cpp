@@ -36,3 +36,8 @@ irtkQtTwoDimensionalViewer* irtkQtViewer::CreateTwoDimensionalViewer(irtkViewMod
     irtkQtTwoDimensionalViewer* twoDViewer = new irtkQtTwoDimensionalViewer(viewMode);
     return twoDViewer;
 }
+
+irtkQtThreeDimensionalViewer* irtkQtViewer::CreateThreeDimensionalViewer() {
+    irtkQtThreeDimensionalViewer* threeDViewer = new irtkQtThreeDimensionalViewer();
+    return threeDViewer;
+}

@@ -1,34 +1,34 @@
-#ifndef IRTKQTTWODIMENSIONALVIEWER_H
-#define IRTKQTTWODIMENSIONALVIEWER_H
+#ifndef IRTKQTTHREEDIMENSIONALVIEWER_H
+#define IRTKQTTHREEDIMENSIONALVIEWER_H
 
 #include <irtkQtBaseViewer.h>
 
 #include <QtConcurrentMap>
 
 
-class irtkQtTwoDimensionalViewer : public irtkQtBaseViewer
+class irtkQtThreeDimensionalViewer : public irtkQtBaseViewer
 {
     Q_OBJECT
 
     /// image output vector
-    vector<irtkGreyImage *> _imageOutput;
+    vector<irtkGreyImage **> _imageOutput;
 
     /// image transform vector
-    vector<irtkTransformation *> _transform;
+    vector<irtkTransformation **> _transform;
 
     /// image interpolator vector
-    vector<irtkImageFunction *> _interpolator;
+    vector<irtkImageFunction **> _interpolator;
 
     /// image transformaton filter vector
-    vector<irtkImageTransformation *> _transformFilter;
+    vector<irtkImageTransformation **> _transformFilter;
 
 public:
 
     /// class constructor
-    irtkQtTwoDimensionalViewer(irtkViewMode viewMode);
+    irtkQtThreeDimensionalViewer();
 
     /// class destructor
-    ~irtkQtTwoDimensionalViewer();
+    ~irtkQtThreeDimensionalViewer();
 
     /// get current slice in image coordinates
     int* GetCurrentSlice();
@@ -41,9 +41,6 @@ public:
 
     /// calculate the output image from the transformation
     void CalculateOutputImages();
-
-    /// get the labels displayed on the screen
-    void GetLabels(char &top, char &bottom, char &left, char &right);
 
     /// delete all vector elements and clear vectors
     void ClearDisplayedImages();
@@ -63,16 +60,31 @@ protected:
 
     /// add new image and corresponding tools to vectors
     void AddToVectors(irtkImage* newImage);
+
+private:
+
+    template<class T> void DeleteArrayVector(vector<T> & vec);
 };
 
 
-inline void irtkQtTwoDimensionalViewer::ClearDisplayedImages() {
+inline void irtkQtThreeDimensionalViewer::ClearDisplayedImages() {
     DeleteVector(_image);
-    DeleteVector(_imageOutput);
+    DeleteArrayVector(_imageOutput);
     DeleteVector(_lookupTable);
-    DeleteVector(_transform);
-    DeleteVector(_interpolator);
-    DeleteVector(_transformFilter);
+    DeleteArrayVector(_transform);
+    DeleteArrayVector(_interpolator);
+    DeleteArrayVector(_transformFilter);
 }
 
-#endif // IRTKQTTWODIMENSIONALVIEWER_H
+template<class T>
+inline void irtkQtThreeDimensionalViewer::DeleteArrayVector(vector<T> & vec) {
+    typename vector<T>::iterator it;
+
+    for (it = vec.begin(); it != vec.end(); it++) {
+        delete [] (*it);
+    }
+
+    vec.clear();
+}
+
+#endif // IRTKQTTHREEDIMENSIONALVIEWER_H

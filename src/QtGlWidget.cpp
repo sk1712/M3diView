@@ -23,6 +23,12 @@ int QtGlWidget::customHeight() const {
     return height() * pixelRatio;
 }
 
+void QtGlWidget::updateDrawable(QVector<QRgb**> drawable) {
+    deleteDrawable();
+    _drawable = drawable;
+    update();
+}
+
 void QtGlWidget::mousePressEvent(QMouseEvent *event) {
     switch(event->button()) {
     case Qt::LeftButton:

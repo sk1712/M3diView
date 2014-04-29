@@ -1,7 +1,14 @@
 #include <irtkQtBaseViewer.h>
 
+irtkQtBaseViewer::irtkQtBaseViewer() {
 
-void irtkQtBaseViewer::InitializeOutputImage() {
+}
+
+irtkQtBaseViewer::~irtkQtBaseViewer() {
+    delete [] sliceNum;
+}
+
+irtkImageAttributes irtkQtBaseViewer::InitializeAttributes() {
     irtkImageAttributes attr;
 
     attr._x = _width;
@@ -27,7 +34,7 @@ void irtkQtBaseViewer::InitializeOutputImage() {
     attr._zaxis[2] = _axisZ[2];
 
     // calculate the actual output images
-    CalculateOutputImages(attr);
+    return attr;
 }
 
 void irtkQtBaseViewer::AddToDisplayedImages(irtkQtImageObject *imageObject) {
@@ -42,17 +49,19 @@ void irtkQtBaseViewer::AddToDisplayedImages(irtkQtImageObject *imageObject) {
         return;
     }
 
-    // if first image to be displayed make it target, otherwise check if attributes agree
+    // if first image to be displayed make it target
     if (_image.size() == 0) {
         _targetImage = newImage;
+        // TO DO : write seperate functions in derived classes
         SetResolution(1, 1, _targetImage->GetZSize());
         InitializeOriginOrientation();
     }
     else {
-        if (!(_targetImage->GetImageAttributes() == newImage->GetImageAttributes())) {
-            delete newImage;
-            return;
-        }
+        /// check image dimensions agree instead
+//        if (!(_targetImage->GetImageAttributes() == newImage->GetImageAttributes())) {
+//            delete newImage;
+//            return;
+//        }
     }
 
     // if everything is fine add to vectors
@@ -69,16 +78,21 @@ void irtkQtBaseViewer::InitializeOriginOrientation() {
 
     switch (_viewMode) {
     case VIEW_AXIAL :
-        sliceNum = _targetImage->GetZ();
+        *sliceNum = _targetImage->GetZ();
         SetOrientation(x, y, z);
         break;
     case VIEW_SAGITTAL :
-        sliceNum = _targetImage->GetX();
+        *sliceNum = _targetImage->GetX();
         SetOrientation(y, z, x);
         break;
     case VIEW_CORONAL :
-        sliceNum = _targetImage->GetY();
+        *sliceNum = _targetImage->GetY();
         SetOrientation(x, z, y);
+        break;
+    case VIEW_NONE:
+        sliceNum[0] = _targetImage->GetX();
+        sliceNum[1] = _targetImage->GetY();
+        sliceNum[2] = _targetImage->GetZ();
         break;
     default:
         cerr << "Not a valid type of two dimensional viewer" << endl;

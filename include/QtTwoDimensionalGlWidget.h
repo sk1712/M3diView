@@ -9,9 +9,6 @@ class QtTwoDimensionalGlWidget : public QtGlWidget
 {
     Q_OBJECT
 
-    /// array of values to be drawn on the screen
-    QVector<QRgb*> _drawable;
-
     /// viewer labels
     QString top, bottom, left, right;
 
@@ -35,20 +32,17 @@ public:
     /// set viewer labels
     void setLabels(const char t, const char b, const char l, const char r);
 
-public slots:
-
-    /// callback function to update drawable
-    void updateDrawable(QVector<QRgb*> drawable);
-
 protected:
 
-    /// function to initialize OpenGL
+    void deleteDrawable();
+
+    /// function to initialize OpenGL inherited from QGLWidget
     void initializeGL();
 
-    /// function called whenever OpenGL scene is resized
+    /// function called whenever OpenGL scene is resized inherited from QGLWidget
     void resizeGL(int w, int h);
 
-    /// function called whenever scene is painted
+    /// function called whenever scene is painted inherited from QGLWidget
     void paintGL();
 
 signals:

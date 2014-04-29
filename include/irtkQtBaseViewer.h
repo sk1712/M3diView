@@ -8,12 +8,15 @@
 #include <irtkQtImageObject.h>
 
 #include <QObject>
+#include <QVector>
 
 
 /// view modes
-enum irtkViewMode {VIEW_AXIAL, VIEW_SAGITTAL, VIEW_CORONAL};
+enum irtkViewMode {VIEW_AXIAL, VIEW_SAGITTAL, VIEW_CORONAL, VIEW_NONE};
 
-class irtkQtBaseViewer : public QObject {
+class irtkQtBaseViewer : public QObject
+{
+    Q_OBJECT
 
 protected:
 
@@ -29,22 +32,31 @@ protected:
     /// dimensions
     int _width, _height;
 
+    /// view mode (axial, sagittal, coronal)
+    irtkViewMode _viewMode;
+
     /// number of slices
-    int sliceNum;
+    int* sliceNum;
+
+    /// slices currently visible
+    int* currentSlice;
 
     /// image against which all other images are transformed
-    irtkImage * _targetImage;
+    irtkImage* _targetImage;
 
     /// original image vector
-    vector<irtkImage *> _image;
+    vector<irtkImage*> _image;
+
+    /// image lookup table vector
+    vector<irtkQtLookupTable *> _lookupTable;
 
 public:
 
     /// class constructor
-    void irtkQtBaseViewer();
+    irtkQtBaseViewer();
 
     /// class destructor
-    virtual void ~irtkQtBaseViewer();
+    virtual ~irtkQtBaseViewer();
 
     /// set target image
     void SetTarget(irtkImage* image);
@@ -64,14 +76,23 @@ public:
     /// set image dimensions
     void SetDimensions(int width, int height);
 
-    /// get the array of RGB values to be drawn on the screen
-    vector<QRgb*> GetDrawable();
+    /// get view mode (axial, sagittal, coronal)
+    irtkViewMode GetViewMode();
 
-    /// initialize the parameters of the output image
-    void InitializeOutputImage();
+    /// get total number of slices
+    int* GetSliceNumber();
+
+    /// get current slice in image coordinates
+    virtual int* GetCurrentSlice() = 0;
+
+    /// get the array of RGB values to be drawn on the screen
+    virtual vector<QRgb**> GetDrawable() = 0;
+
+    /// calculate the output image from the transformation
+    virtual void CalculateOutputImages() = 0;
 
     /// initialize the transformation from the input to the output image
-    void InitializeTransformation();
+    virtual void InitializeTransformation() = 0;
 
     /// delete all vector elements and clear vectors
     virtual void ClearDisplayedImages() = 0;
@@ -79,19 +100,31 @@ public:
     /// add image object to the vector of images to be displayed
     void AddToDisplayedImages(irtkQtImageObject *imageObject);
 
+public slots:
+
+    /// callback function when image is resized to (width, height)
+    virtual void ResizeImage(int width, int height) = 0;
+
+    /// callback function when slice is changed
+    virtual void ChangeSlice(int slice) = 0;
+
+    /// callback function when origin is changed
+    virtual void ChangeOrigin(int x, int y) = 0;
+
 protected:
+
+    /// initialize the parameters of the output image
+    irtkImageAttributes InitializeAttributes();
 
     /// initialize image origin and orientation
     void InitializeOriginOrientation();
 
     /// add new image and corresponding tools to vectors
-    void AddToVectors(irtkImage* newImage);
+    virtual void AddToVectors(irtkImage* newImage) = 0;
 
     /// sets image orientation
     void SetOrientation(const double * xaxis, const double * yaxis, const double * zaxis);
 
-    /// calculate the output image from the transformation
-    void CalculateOutputImages(irtkImageAttributes attr);
 
     /// delete all elements of a vector first and then clear
     template<class T> void DeleteVector(vector<T> & vec);
@@ -99,7 +132,7 @@ protected:
 signals:
 
     /// signal emitted when image is resized
-    void ImageResized(QVector<QRgb*>);
+    void ImageResized(QVector<QRgb**>);
 
     /// signal emitted when image origin changes
     void OriginChanged(double originX, double originY, double originZ);
@@ -140,6 +173,14 @@ inline void irtkQtBaseViewer::DecreaseResolution() {
 inline void irtkQtBaseViewer::SetDimensions(int width, int height) {
     _width = width;
     _height = height;
+}
+
+inline irtkViewMode irtkQtBaseViewer::GetViewMode() {
+    return _viewMode;
+}
+
+inline int* irtkQtBaseViewer::GetSliceNumber() {
+    return sliceNum;
 }
 
 template<class T>

@@ -160,7 +160,7 @@ void QtMainWindow::connectWindowSignals() {
 
 void QtMainWindow::disconnectViewerSignals() {
     Qt2dViewerWidget *viewerWidget;
-    irtkQtTwoDimensionalViewer *viewer;
+    irtkQtBaseViewer *viewer;
 
     for (int i = 0; i < viewers.size(); i++) {
         viewerWidget = dynamic_cast<Qt2dViewerWidget*>(viewerWidgets[i]);
@@ -169,8 +169,8 @@ void QtMainWindow::disconnectViewerSignals() {
         if (viewerWidget != 0) {
             disconnect(viewerWidget->getGlWidget(), SIGNAL(resized(int, int)),
                        viewer, SLOT(ResizeImage(int, int)));
-            disconnect(viewer, SIGNAL(ImageResized(QVector<QRgb*>)),
-                       viewerWidget->getGlWidget(), SLOT(updateDrawable(QVector<QRgb*>)));
+            disconnect(viewer, SIGNAL(ImageResized(QVector<QRgb**>)),
+                       viewerWidget->getGlWidget(), SLOT(updateDrawable(QVector<QRgb**>)));
 
             disconnect(viewerWidget->getSlider(), SIGNAL(valueChanged(int)),
                        viewer, SLOT(ChangeSlice(int)));
@@ -185,7 +185,7 @@ void QtMainWindow::disconnectViewerSignals() {
 
 void QtMainWindow::connectViewerSignals() {
     Qt2dViewerWidget *viewerWidget;
-    irtkQtTwoDimensionalViewer *viewer;
+    irtkQtBaseViewer *viewer;
 
     for (int i = 0; i < viewers.size(); i++) {
         viewerWidget = dynamic_cast<Qt2dViewerWidget*>(viewerWidgets[i]);
@@ -195,8 +195,8 @@ void QtMainWindow::connectViewerSignals() {
             // update drawable when widgets are resized
             connect(viewerWidget->getGlWidget(), SIGNAL(resized(int, int)),
                     viewer, SLOT(ResizeImage(int, int)));
-            connect(viewer, SIGNAL(ImageResized(QVector<QRgb*>)),
-                    viewerWidget->getGlWidget(), SLOT(updateDrawable(QVector<QRgb*>)));
+            connect(viewer, SIGNAL(ImageResized(QVector<QRgb**>)),
+                    viewerWidget->getGlWidget(), SLOT(updateDrawable(QVector<QRgb**>)));
 
             // update drawable when origin is changed
             connect(viewerWidget->getSlider(), SIGNAL(valueChanged(int)),
@@ -222,7 +222,7 @@ Qt2dViewerWidget* QtMainWindow::createTwoDimensionalView(irtkViewMode viewMode) 
     // define the labels that appear on the viewer widget for orientation information
     char top, bottom, left, right;
     viewer->GetLabels(top, bottom, left, right);
-    qtViewer->getGlWidget()->setLabels(top, bottom, left, right);
+    qtViewer->setLabels(top, bottom, left, right);
 
     // register signals to expand or delete the viewer
     connect(qtViewer, SIGNAL(windowExpanded()), this, SLOT(showOnlyThisWidget()));
@@ -232,10 +232,13 @@ Qt2dViewerWidget* QtMainWindow::createTwoDimensionalView(irtkViewMode viewMode) 
 }
 
 Qt3dViewerWidget* QtMainWindow::createThreeDimensionalView() {
+    irtkQtThreeDimensionalViewer* viewer;
     Qt3dViewerWidget *qtViewer;
 
+    viewer = irtkQtViewer::Instance()->CreateThreeDimensionalViewer();
+    viewers.push_back(viewer);
     qtViewer = new Qt3dViewerWidget();
-    viewerWidgets.push_back(qtViewer);
+    viewerWidgets.push_back(qtViewer); 
 
     // register signals to expand or delete the viewer
     connect(qtViewer, SIGNAL(windowExpanded()), this, SLOT(showOnlyThisWidget()));
@@ -314,9 +317,9 @@ void QtMainWindow::openImage() {
 }
 
 bool QtMainWindow::setDisplayedImages() {
-    Qt2dViewerWidget *viewerWidget;
-    irtkQtTwoDimensionalViewer *viewer;
-    QtTwoDimensionalGlWidget *glWidget;
+    QtViewerWidget *viewerWidget;
+    irtkQtBaseViewer *viewer;
+    QtGlWidget *glWidget;
 
     bool atLeastOneImageVisible = false;
 
@@ -330,20 +333,18 @@ bool QtMainWindow::setDisplayedImages() {
     for (it = imageList.constBegin(); it != imageList.constEnd(); it++) {
         if ((*it)->IsVisible()) {
             for (int i = 0; i < viewerWidgets.size(); i++) {
-                viewerWidget = dynamic_cast<Qt2dViewerWidget*>(viewerWidgets[i]);
+                viewerWidget = viewerWidgets[i];
                 viewer = viewers[i];
 
-                if (viewerWidget != 0) {
-                    glWidget = viewerWidget->getGlWidget();
+                glWidget = viewerWidget->getGlWidget();
 
-                    try {
-                        viewer->AddToDisplayedImages(*it);
-                        atLeastOneImageVisible = true;
-                    }
-                    catch (irtkException) {
-                        createMessageBox("Invalid image file " + (*it)->GetPath(), QMessageBox::Critical);
-                        break;
-                    }
+                try {
+                    viewer->AddToDisplayedImages(*it);
+                    atLeastOneImageVisible = true;
+                }
+                catch (irtkException) {
+                    createMessageBox("Invalid image file " + (*it)->GetPath(), QMessageBox::Critical);
+                    break;
                 }
 
                 viewer->SetDimensions(glWidget->customWidth(), glWidget->customHeight());
@@ -355,9 +356,9 @@ bool QtMainWindow::setDisplayedImages() {
 }
 
 /// free function to parallelize initializing viewers
-void InitializeViewer(irtkQtTwoDimensionalViewer* &viewer) {
+void InitializeViewer(irtkQtBaseViewer* &viewer) {
     viewer->InitializeTransformation();
-    viewer->InitializeOutputImage();
+    viewer->CalculateOutputImages();
 }
 
 void QtMainWindow::viewImage() {
@@ -383,24 +384,31 @@ void QtMainWindow::viewImage() {
     QtConcurrent::blockingMap(viewers, &InitializeViewer);
 
     // update the viewers
-    Qt2dViewerWidget *viewerWidget;
-    irtkQtTwoDimensionalViewer *viewer;
-    QtTwoDimensionalGlWidget *glWidget;
+    Qt2dViewerWidget *twoDviewerWidget;
+    Qt3dViewerWidget *threeDviewerWidget;
+    irtkQtBaseViewer *viewer;
+    QtGlWidget *glWidget;
 
     for (int i = 0; i < viewers.size(); i++) {
-        viewerWidget = dynamic_cast<Qt2dViewerWidget*>(viewerWidgets[i]);
+        twoDviewerWidget = dynamic_cast<Qt2dViewerWidget*>(viewerWidgets[i]);
+        threeDviewerWidget = dynamic_cast<Qt3dViewerWidget*>(viewerWidgets[i]);
+
         viewer = viewers[i];
 
-        if (viewerWidget != 0) {
-            glWidget = viewerWidget->getGlWidget();
+        glWidget = viewerWidgets[i]->getGlWidget();
+        glWidget->setEnabled(true);
 
-            glWidget->setEnabled(true);
-            viewerWidget->getSlider()->setEnabled(true);
-            viewerWidget->setMaximumSlice(viewer->GetSliceNumber());
-            viewerWidget->setCurrentSlice(viewer->GetCurrentSlice());
-            glWidget->updateDrawable(QVector<QRgb*>::fromStdVector(
-                                         viewer->GetDrawable()));
+        if (twoDviewerWidget != 0) {
+            twoDviewerWidget->getSlider()->setEnabled(true);
+            twoDviewerWidget->setMaximumSlice(viewer->GetSliceNumber()[0]);
+            twoDviewerWidget->setCurrentSlice(viewer->GetCurrentSlice()[0]);
         }
+        else if (threeDviewerWidget != 0) {
+            threeDviewerWidget->setDimensions(viewer->GetSliceNumber());
+        }
+
+        glWidget->updateDrawable(QVector<QRgb**>::fromStdVector(
+                                     viewer->GetDrawable()));
     }
 
     // re-register the viewers' signals
@@ -409,7 +417,7 @@ void QtMainWindow::viewImage() {
 
 void QtMainWindow::zoomIn() {
     Qt2dViewerWidget *viewerWidget;
-    irtkQtTwoDimensionalViewer *viewer;
+    irtkQtBaseViewer *viewer;
 
     for (int i = 0; i < viewers.size(); i++) {
         viewerWidget = dynamic_cast<Qt2dViewerWidget*>(viewerWidgets[i]);
@@ -418,9 +426,9 @@ void QtMainWindow::zoomIn() {
         if (viewerWidget != 0) {
             if (viewerWidget->getGlWidget()->isEnabled()) {
                 viewer->IncreaseResolution();
-                viewer->InitializeOutputImage();
+                viewer->CalculateOutputImages();
                 viewerWidget->getGlWidget()->updateDrawable(
-                            QVector<QRgb*>::fromStdVector(viewer->GetDrawable()));
+                            QVector<QRgb**>::fromStdVector(viewer->GetDrawable()));
             }
         }
     }
@@ -428,7 +436,7 @@ void QtMainWindow::zoomIn() {
 
 void QtMainWindow::zoomOut() {
     Qt2dViewerWidget *viewerWidget;
-    irtkQtTwoDimensionalViewer *viewer;
+    irtkQtBaseViewer *viewer;
 
     for (int i = 0; i < viewers.size(); i++) {
         viewerWidget = dynamic_cast<Qt2dViewerWidget*>(viewerWidgets[i]);
@@ -437,9 +445,9 @@ void QtMainWindow::zoomOut() {
         if (viewerWidget != 0) {
             if (viewerWidget->getGlWidget()->isEnabled()) {
                 viewer->DecreaseResolution();
-                viewer->InitializeOutputImage();
+                viewer->CalculateOutputImages();
                 viewerWidget->getGlWidget()->updateDrawable(
-                            QVector<QRgb*>::fromStdVector(viewer->GetDrawable()));
+                            QVector<QRgb**>::fromStdVector(viewer->GetDrawable()));
             }
         }
     }
@@ -471,7 +479,9 @@ void QtMainWindow::deleteThisWidget() {
         layout->removeWidget(viewerWidgets[i]);
         if (senderWidget == viewerWidgets[i]) {
             delete viewerWidgets.takeAt(i);
+            cout << "deleted widget " << i << endl;
             delete viewers.takeAt(i);
+            cout << "deleted viewer " << i << endl;
         }
     }
     for (int i = 0; i < viewerWidgets.size(); i++) {
@@ -504,12 +514,13 @@ void QtMainWindow::create3dView() {
 
 void QtMainWindow::clearViews() {
     clearVectors();
+    singleViewerInScreen = false;
 }
 
 void QtMainWindow::updateOrigin(double x, double y, double z) {
-    irtkQtTwoDimensionalViewer *senderViewer, *viewer;
+    irtkQtBaseViewer *senderViewer, *viewer;
     Qt2dViewerWidget *viewerWidget;
-    senderViewer = dynamic_cast<irtkQtTwoDimensionalViewer*>(sender());
+    senderViewer = dynamic_cast<irtkQtBaseViewer*>(sender());
 
     disconnectViewerSignals();
 
@@ -526,10 +537,10 @@ void QtMainWindow::updateOrigin(double x, double y, double z) {
             if ( viewerWidget->getGlWidget()->isEnabled() &&
                  ( (isSenderLinked && viewerWidget->isLinked()) || (viewer == senderViewer) ) ) {
                 viewer->SetOrigin(x, y, z);
-                viewer->InitializeOutputImage();
-                viewerWidget->setCurrentSlice(viewer->GetCurrentSlice());
+                viewer->CalculateOutputImages();
+                viewerWidget->setCurrentSlice(viewer->GetCurrentSlice()[0]);
                 viewerWidget->getGlWidget()->updateDrawable(
-                            QVector<QRgb*>::fromStdVector(viewer->GetDrawable()));
+                            QVector<QRgb**>::fromStdVector(viewer->GetDrawable()));
             }
         }
     }
@@ -544,6 +555,8 @@ void QtMainWindow::opacityValueChanged(int value) {
         list.at(index)->SetOpacity(value);
     }
     opacityLabel->setText(QString::number(value));
+
+    viewImage();
 }
 
 void QtMainWindow::listViewClicked(QModelIndex index) {
@@ -560,6 +573,8 @@ void QtMainWindow::listViewDoubleClicked(QModelIndex index) {
     delete imageModel;
     imageModel = new irtkImageListModel(list);
     imageListView->setModel(imageModel);
+
+    viewImage();
 }
 
 void QtMainWindow::moveImageUp() {
@@ -574,6 +589,8 @@ void QtMainWindow::moveImageUp() {
 
         imageListView->setCurrentIndex(imageModel->index(index-1, 0));
     }
+
+    viewImage();
 }
 
 void QtMainWindow::moveImageDown() {
@@ -588,4 +605,6 @@ void QtMainWindow::moveImageDown() {
 
         imageListView->setCurrentIndex(imageModel->index(index+1, 0));
     }
+
+    viewImage();
 }
