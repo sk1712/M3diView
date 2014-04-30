@@ -15,7 +15,7 @@ irtkQtTwoDimensionalViewer::~irtkQtTwoDimensionalViewer() {
     delete currentSlice;
 }
 
-int* irtkQtTwoDimensionalViewer::GetCurrentSlice() {
+void irtkQtTwoDimensionalViewer::UpdateCurrentSlice() {
     double x, y, z;
 
     x = _originX;
@@ -38,8 +38,6 @@ int* irtkQtTwoDimensionalViewer::GetCurrentSlice() {
         currentSlice = 0;
         break;
     }
-
-    return currentSlice;
 }
 
 vector<QRgb**> irtkQtTwoDimensionalViewer::GetDrawable() {

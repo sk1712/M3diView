@@ -34,6 +34,9 @@ public:
 
     virtual QtGlWidget* getGlWidget() const = 0;
 
+    virtual void setCurrentSlice(int* current) = 0;
+
+
 protected:
 
     /// create tool buttons
@@ -66,5 +69,6 @@ signals:
 inline bool QtViewerWidget::isLinked() const {
     return linked;
 }
+
 
 #endif // QTVIEWERWIDGET_H

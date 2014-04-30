@@ -363,7 +363,6 @@ void InitializeViewer(irtkQtBaseViewer* &viewer) {
 
 void QtMainWindow::viewImage() {
     if ( viewers.size() == 0 ) {
-        createMessageBox("You need to add viewers first.", QMessageBox::Warning);
         return;
     }
 
@@ -372,7 +371,6 @@ void QtMainWindow::viewImage() {
 
     // load the images to be displayed and add them to the viewers
     if ( !setDisplayedImages() ) {
-        createMessageBox("You need to select an image to view.", QMessageBox::Warning);
         return;
     }
 
@@ -401,10 +399,14 @@ void QtMainWindow::viewImage() {
         if (twoDviewerWidget != 0) {
             twoDviewerWidget->getSlider()->setEnabled(true);
             twoDviewerWidget->setMaximumSlice(viewer->GetSliceNumber()[0]);
-            twoDviewerWidget->setCurrentSlice(viewer->GetCurrentSlice()[0]);
+            twoDviewerWidget->setCurrentSlice(viewer->GetCurrentSlice());
         }
         else if (threeDviewerWidget != 0) {
+            double dx, dy, dz;
+            viewer->GetResolution(dx, dy, dz);
+            threeDviewerWidget->setResolution(dx, dy, dz);
             threeDviewerWidget->setDimensions(viewer->GetSliceNumber());
+            threeDviewerWidget->setCurrentSlice(viewer->GetCurrentSlice());
         }
 
         glWidget->updateDrawable(QVector<QRgb**>::fromStdVector(
@@ -519,7 +521,7 @@ void QtMainWindow::clearViews() {
 
 void QtMainWindow::updateOrigin(double x, double y, double z) {
     irtkQtBaseViewer *senderViewer, *viewer;
-    Qt2dViewerWidget *viewerWidget;
+    QtViewerWidget *viewerWidget;
     senderViewer = dynamic_cast<irtkQtBaseViewer*>(sender());
 
     disconnectViewerSignals();
@@ -531,17 +533,15 @@ void QtMainWindow::updateOrigin(double x, double y, double z) {
 
     for (int i = 0; i < viewers.size(); i++) {
         viewer = viewers[i];
-        viewerWidget = dynamic_cast<Qt2dViewerWidget*>(viewerWidgets[i]);
+        viewerWidget = viewerWidgets[i];
 
-        if (viewerWidget != 0) {
-            if ( viewerWidget->getGlWidget()->isEnabled() &&
-                 ( (isSenderLinked && viewerWidget->isLinked()) || (viewer == senderViewer) ) ) {
-                viewer->SetOrigin(x, y, z);
-                viewer->CalculateOutputImages();
-                viewerWidget->setCurrentSlice(viewer->GetCurrentSlice()[0]);
-                viewerWidget->getGlWidget()->updateDrawable(
-                            QVector<QRgb**>::fromStdVector(viewer->GetDrawable()));
-            }
+        if ( viewerWidget->getGlWidget()->isEnabled() &&
+             ( (isSenderLinked && viewerWidget->isLinked()) || (viewer == senderViewer) ) ) {
+            viewer->SetOrigin(x, y, z);
+            viewer->CalculateOutputImages();
+            viewerWidget->setCurrentSlice(viewer->GetCurrentSlice());
+            viewerWidget->getGlWidget()->updateDrawable(
+                        QVector<QRgb**>::fromStdVector(viewer->GetDrawable()));
         }
     }
 

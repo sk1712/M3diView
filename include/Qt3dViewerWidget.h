@@ -17,7 +17,13 @@ public:
 
     QtGlWidget* getGlWidget() const;
 
+    /// set image dimensions in image coordinates
     void setDimensions(int *dim);
+
+    /// update currentSlice
+    void setCurrentSlice(int* current);
+
+    void setResolution(double dx, double dy, double dz);
 
 };
 
@@ -27,6 +33,14 @@ inline QtGlWidget* Qt3dViewerWidget::getGlWidget() const {
 
 inline void Qt3dViewerWidget::setDimensions(int *dim) {
     glWidget->setDimensions(dim);
+}
+
+inline void Qt3dViewerWidget::setCurrentSlice(int *current) {
+    glWidget->setCurrentSlice(current);
+}
+
+inline void Qt3dViewerWidget::setResolution(double dx, double dy, double dz) {
+    glWidget->setResolution(dx, dy, dz);
 }
 
 #endif // QT3DVIEWERWIDGET_H

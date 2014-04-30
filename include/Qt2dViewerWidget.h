@@ -40,7 +40,7 @@ public:
     QLabel* getLabel() const;
 
     /// update currentSlice
-    void setCurrentSlice(int current);
+    void setCurrentSlice(int* current);
 
     /// update maximumSlice
     void setMaximumSlice(int maximum);
@@ -83,8 +83,8 @@ inline QLabel* Qt2dViewerWidget::getLabel() const {
     return sliceLabel;
 }
 
-inline void Qt2dViewerWidget::setCurrentSlice(int current) {
-    sliceSlider->setValue(current);
+inline void Qt2dViewerWidget::setCurrentSlice(int* current) {
+    sliceSlider->setValue(current[0]);
 }
 
 inline void Qt2dViewerWidget::setMaximumSlice(int maximum) {

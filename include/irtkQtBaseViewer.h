@@ -12,7 +12,7 @@
 
 
 /// view modes
-enum irtkViewMode {VIEW_AXIAL, VIEW_SAGITTAL, VIEW_CORONAL, VIEW_NONE};
+enum irtkViewMode {VIEW_AXIAL = 0, VIEW_SAGITTAL, VIEW_CORONAL, VIEW_NONE};
 
 class irtkQtBaseViewer : public QObject
 {
@@ -79,11 +79,13 @@ public:
     /// get view mode (axial, sagittal, coronal)
     irtkViewMode GetViewMode();
 
+    void GetResolution(double& dx, double& dy, double& dz);
+
     /// get total number of slices
     int* GetSliceNumber();
 
     /// get current slice in image coordinates
-    virtual int* GetCurrentSlice() = 0;
+    int* GetCurrentSlice();
 
     /// get the array of RGB values to be drawn on the screen
     virtual vector<QRgb**> GetDrawable() = 0;
@@ -119,12 +121,14 @@ protected:
     /// initialize image origin and orientation
     void InitializeOriginOrientation();
 
+    ///
+    virtual void UpdateCurrentSlice() = 0;
+
     /// add new image and corresponding tools to vectors
     virtual void AddToVectors(irtkImage* newImage) = 0;
 
     /// sets image orientation
     void SetOrientation(const double * xaxis, const double * yaxis, const double * zaxis);
-
 
     /// delete all elements of a vector first and then clear
     template<class T> void DeleteVector(vector<T> & vec);
@@ -148,6 +152,8 @@ inline void irtkQtBaseViewer::SetOrigin(double x, double y, double z) {
     _originX = x;
     _originY = y;
     _originZ = z;
+
+    UpdateCurrentSlice();
 }
 
 inline void irtkQtBaseViewer::SetResolution(double dx, double dy, double dz) {
@@ -179,8 +185,18 @@ inline irtkViewMode irtkQtBaseViewer::GetViewMode() {
     return _viewMode;
 }
 
+inline void irtkQtBaseViewer::GetResolution(double& dx, double& dy, double& dz) {
+    dx = _dx;
+    dy = _dy;
+    dz = _dz;
+}
+
 inline int* irtkQtBaseViewer::GetSliceNumber() {
     return sliceNum;
+}
+
+inline int* irtkQtBaseViewer::GetCurrentSlice() {
+    return currentSlice;
 }
 
 template<class T>

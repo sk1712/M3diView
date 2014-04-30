@@ -9,7 +9,7 @@ QtTwoDimensionalGlWidget::~QtTwoDimensionalGlWidget() {
     deleteDrawable();
 }
 
-void QtTwoDimensionalGlWidget::drawImage() {
+void QtTwoDimensionalGlWidget::drawImage() const {
     QVector<QRgb**>::const_iterator rit;
 
     // draw last image in the list first and the others on top of it
@@ -25,7 +25,7 @@ void QtTwoDimensionalGlWidget::drawImage() {
     }
 }
 
-void QtTwoDimensionalGlWidget::drawCursor() {
+void QtTwoDimensionalGlWidget::drawCursor() const {
     qglColor(Qt::green);
     glBegin(GL_LINES);
     glVertex2f(_width/2-10, _height/2);

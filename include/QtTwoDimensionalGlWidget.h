@@ -21,10 +21,10 @@ public:
     ~QtTwoDimensionalGlWidget();
 
     /// draw image on screen
-    void drawImage();
+    void drawImage() const;
 
     /// draw cursor on screen
-    void drawCursor();
+    void drawCursor() const;
 
     /// draw four labels on screen
     void drawLabels();

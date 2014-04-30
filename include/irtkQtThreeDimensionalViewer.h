@@ -10,6 +10,9 @@ class irtkQtThreeDimensionalViewer : public irtkQtBaseViewer
 {
     Q_OBJECT
 
+    /// store previous slice info
+    int previousSlice[3];
+
     /// image output vector
     vector<irtkGreyImage **> _imageOutput;
 
@@ -29,9 +32,6 @@ public:
 
     /// class destructor
     ~irtkQtThreeDimensionalViewer();
-
-    /// get current slice in image coordinates
-    int* GetCurrentSlice();
 
     /// get the array of RGB values to be drawn on the screen
     vector<QRgb**> GetDrawable();
@@ -58,8 +58,15 @@ public slots:
 
 protected:
 
+    ///
+    void UpdateCurrentSlice();
+
     /// add new image and corresponding tools to vectors
     void AddToVectors(irtkImage* newImage);
+
+    void SetOrientation(int view);
+
+    void ChangeViewSlice(int view);
 
 private:
 

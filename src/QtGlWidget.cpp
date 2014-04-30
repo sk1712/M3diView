@@ -23,6 +23,10 @@ int QtGlWidget::customHeight() const {
     return height() * pixelRatio;
 }
 
+void QtGlWidget::setResolution(double dx, double dy, double dz) {
+
+}
+
 void QtGlWidget::updateDrawable(QVector<QRgb**> drawable) {
     deleteDrawable();
     _drawable = drawable;

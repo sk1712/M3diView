@@ -6,6 +6,8 @@ irtkQtThreeDimensionalViewer::irtkQtThreeDimensionalViewer() {
     _viewMode = VIEW_NONE;
     currentSlice = new int[3];
     sliceNum = new int[3];
+
+    for (int i = 0; i < 3; i++) previousSlice[i] = 0;
 }
 
 irtkQtThreeDimensionalViewer::~irtkQtThreeDimensionalViewer() {
@@ -13,7 +15,7 @@ irtkQtThreeDimensionalViewer::~irtkQtThreeDimensionalViewer() {
     delete [] currentSlice;
 }
 
-int* irtkQtThreeDimensionalViewer::GetCurrentSlice() {
+void irtkQtThreeDimensionalViewer::UpdateCurrentSlice() {
     double x, y, z;
 
     x = _originX;
@@ -22,16 +24,16 @@ int* irtkQtThreeDimensionalViewer::GetCurrentSlice() {
 
     _targetImage->WorldToImage(x, y, z);
 
-    currentSlice[0] = (int) round(z);
-    currentSlice[1] = (int) round(x);
-    currentSlice[2] = (int) round(y);
+    for (int i = 0; i < 3; i++) previousSlice[i] = currentSlice[i];
 
-    return currentSlice;
+    currentSlice[0] = (int) round(x);
+    currentSlice[1] = (int) round(y);
+    currentSlice[2] = (int) round(z);
 }
 
 vector<QRgb**> irtkQtThreeDimensionalViewer::GetDrawable() {
     vector<QRgb**> allDrawables;
-    QRgb _backgroundColor = qRgba(0, 0, 0, 0);
+    QRgb _backgroundColor = qRgba(0, 0, 0, 1);
 
     int dimensions[3][2] = {
         {sliceNum[0], sliceNum[1]},
@@ -95,6 +97,8 @@ void irtkQtThreeDimensionalViewer::ChangeOrigin(int x, int y) {
 }
 
 void irtkQtThreeDimensionalViewer::AddToVectors(irtkImage* newImage) {
+    _targetImage->Print();
+
     _image.push_back(newImage);
 
     _imageOutput.push_back(new irtkGreyImage*[3]);
@@ -124,41 +128,92 @@ void CalculateSingleTransform(irtkImageTransformation** &transform) {
 }
 
 void irtkQtThreeDimensionalViewer::CalculateOutputImages() {
-    double x[3], y[3], z[3];
     irtkImageAttributes attr[3];
+    int width[3] = {sliceNum[0], sliceNum[1], sliceNum[0]};
+    int height[3] = {sliceNum[1], sliceNum[2], sliceNum[2]};
+    int index[3] = {2, 0, 1};
+
+    double originX_backup = _originX, originY_backup = _originY, originZ_backup = _originZ;
+
+    for (int i = 0; i < 3; i++) {
+        if (previousSlice[index[i]] != currentSlice[index[i]]) {
+            _width = width[i];
+            _height = height[i];
+            SetOrientation(i);
+            ChangeViewSlice(i);
+            attr[i] = InitializeAttributes();
+
+            vector<irtkGreyImage **>::iterator image_it;
+            for (image_it = _imageOutput.begin(); image_it != _imageOutput.end(); image_it++) {
+                (*image_it)[i]->Initialize(attr[i]);
+            }
+
+            vector<irtkImageTransformation **>::iterator trans_it;
+            for (trans_it = _transformFilter.begin(); trans_it != _transformFilter.end(); trans_it++) {
+                (*trans_it)[i]->PutSourcePaddingValue(-1);
+                (*trans_it)[i]->Run();
+            }
+
+            qDebug() << "updated transformation for view " << i;
+        }
+    }
+
+    _originX = originX_backup;
+    _originY = originY_backup;
+    _originZ = originZ_backup;
+    //QtConcurrent::blockingMap(_transformFilter, &CalculateSingleTransform);
+}
+
+void irtkQtThreeDimensionalViewer::SetOrientation(int view) {
+    double x[3], y[3], z[3];
 
     _targetImage->GetOrientation(x, y, z);
 
-    // axial view
-    _width = sliceNum[0];
-    _height = sliceNum[1];
-    SetOrientation(x, y, z);
-    attr[0] = InitializeAttributes();
+    switch (view) {
+    case VIEW_AXIAL :
+        irtkQtBaseViewer::SetOrientation(x, y, z);
+        break;
+    case VIEW_SAGITTAL :
+        irtkQtBaseViewer::SetOrientation(y, z, x);
+        break;
+    case VIEW_CORONAL :
+        irtkQtBaseViewer::SetOrientation(x, z, y);
+        break;
+    default:
+        cerr << "Not a valid type of two dimensional viewer" << endl;
+        exit(1);
+        break;
+    }
+}
 
-    // sagittal view
-    _width = sliceNum[1];
-    _height = sliceNum[2];
-    SetOrientation(y, z, x);
-    attr[1] = InitializeAttributes();
+void irtkQtThreeDimensionalViewer::ChangeViewSlice(int view) {
+    double originX, originY, originZ;
 
-    // coronal view
-    _width = sliceNum[0];
-    _height = sliceNum[2];
-    SetOrientation(x, z, y);
-    attr[2] = InitializeAttributes();
+    _targetImage->GetOrigin(originX, originY, originZ);
+    _targetImage->WorldToImage(originX, originY, originZ);
 
-    vector<irtkGreyImage **>::iterator it;
-    for (it = _imageOutput.begin(); it != _imageOutput.end(); it++) {
-        for (int i = 0; i < 3; i++) {
-            (*it)[i]->Initialize(attr[i]);
-        }
+    switch (view) {
+    case VIEW_AXIAL :
+        originZ = currentSlice[2];
+        break;
+    case VIEW_SAGITTAL :
+        originX = currentSlice[0];
+        break;
+    case VIEW_CORONAL :
+        originY = currentSlice[1];
+        break;
+    default:
+        cerr << "Not a valid type of two dimensional viewer" << endl;
+        exit(1);
+        break;
     }
 
-    for (unsigned int j = 0; j < _transformFilter.size(); j++) {
-        for (int i = 0; i < 3; i++) {
-            _transformFilter[j][i]->PutSourcePaddingValue(-1);
-            _transformFilter[j][i]->Run();
-        }
-    }
-    //QtConcurrent::blockingMap(_transformFilter, &CalculateSingleTransform);
+    originX = round(originX);
+    originY = round(originY);
+    originZ = round(originZ);
+    _targetImage->ImageToWorld(originX, originY, originZ);
+
+    _originX = originX;
+    _originY = originY;
+    _originZ = originZ;
 }

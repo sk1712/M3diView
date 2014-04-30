@@ -92,13 +92,15 @@ void irtkQtBaseViewer::InitializeOriginOrientation() {
     case VIEW_NONE:
         sliceNum[0] = _targetImage->GetX();
         sliceNum[1] = _targetImage->GetY();
-        sliceNum[2] = _targetImage->GetZ();
+        sliceNum[2] = round(_targetImage->GetZ() * _dz);
         break;
     default:
         cerr << "Not a valid type of two dimensional viewer" << endl;
         exit(1);
         break;
     }
+
+    UpdateCurrentSlice();
 }
 
 void irtkQtBaseViewer::SetOrientation(const double * xaxis, const double * yaxis, const double * zaxis) {

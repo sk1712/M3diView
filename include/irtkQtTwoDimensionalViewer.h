@@ -30,9 +30,6 @@ public:
     /// class destructor
     ~irtkQtTwoDimensionalViewer();
 
-    /// get current slice in image coordinates
-    int* GetCurrentSlice();
-
     /// get the array of RGB values to be drawn on the screen
     vector<QRgb**> GetDrawable();
 
@@ -60,6 +57,9 @@ public slots:
     void ChangeOrigin(int x, int y);
 
 protected:
+
+    ///
+    void UpdateCurrentSlice();
 
     /// add new image and corresponding tools to vectors
     void AddToVectors(irtkImage* newImage);

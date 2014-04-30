@@ -38,7 +38,9 @@ public:
     int customHeight() const;
 
     /// function to be implemented by all derived classes
-    virtual void drawImage() = 0;
+    virtual void drawImage() const = 0;
+
+    virtual void setResolution(double dx, double dy, double dz);
 
 public slots:
 
