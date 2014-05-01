@@ -1,6 +1,5 @@
 #include <irtkQtThreeDimensionalViewer.h>
 
-
 irtkQtThreeDimensionalViewer::irtkQtThreeDimensionalViewer() {
     ClearDisplayedImages();
     _viewMode = VIEW_NONE;
@@ -34,6 +33,7 @@ void irtkQtThreeDimensionalViewer::UpdateCurrentSlice() {
 vector<QRgb**> irtkQtThreeDimensionalViewer::GetDrawable() {
     vector<QRgb**> allDrawables;
     QRgb _backgroundColor = qRgba(0, 0, 0, 1);
+
 
     int dimensions[3][2] = {
         {sliceNum[0], sliceNum[1]},
@@ -98,6 +98,7 @@ void irtkQtThreeDimensionalViewer::ChangeOrigin(int x, int y) {
 
 void irtkQtThreeDimensionalViewer::AddToVectors(irtkImage* newImage) {
     _targetImage->Print();
+    cout << "Voxel size x = " << _targetImage->GetXSize() << " and voxel size z = " << _targetImage->GetZSize() << endl;
 
     _image.push_back(newImage);
 
@@ -118,6 +119,8 @@ void irtkQtThreeDimensionalViewer::AddToVectors(irtkImage* newImage) {
         transformation->PutSourcePaddingValue(0);
         _transformFilter.back()[dim] = transformation;
     }
+
+    for (int i = 0; i < 3; i++) previousSlice[i] = 0;
 }
 
 void CalculateSingleTransform(irtkImageTransformation** &transform) {
@@ -153,8 +156,6 @@ void irtkQtThreeDimensionalViewer::CalculateOutputImages() {
                 (*trans_it)[i]->PutSourcePaddingValue(-1);
                 (*trans_it)[i]->Run();
             }
-
-            qDebug() << "updated transformation for view " << i;
         }
     }
 
@@ -195,12 +196,18 @@ void irtkQtThreeDimensionalViewer::ChangeViewSlice(int view) {
     switch (view) {
     case VIEW_AXIAL :
         originZ = currentSlice[2];
+        _dx = _targetImage->GetXSize();
+        _dy = _targetImage->GetYSize();
         break;
     case VIEW_SAGITTAL :
         originX = currentSlice[0];
+        _dx = _targetImage->GetYSize();
+        _dy = _targetImage->GetZSize();
         break;
     case VIEW_CORONAL :
         originY = currentSlice[1];
+        _dx = _targetImage->GetXSize();
+        _dy = _targetImage->GetZSize();
         break;
     default:
         cerr << "Not a valid type of two dimensional viewer" << endl;

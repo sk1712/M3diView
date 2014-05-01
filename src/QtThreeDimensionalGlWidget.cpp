@@ -30,34 +30,26 @@ void QtThreeDimensionalGlWidget::drawImage() const {
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
     // Begin drawing the perpendicular surfaces
 
-    float slicePosition[3];
-    float max = dimensions[0];
-
-    for (int i = 0; i < 3; i++) {
-        if (max < dimensions[i]) max = dimensions[i];
-        slicePosition[i] = currentSlice[i] - dimensions[i]/2;
-    }
     float width, height, slice;
 
-    // Top face (y = 1.0f)
+    // axial view
     // Define vertices in counter-clockwise (CCW) order with normal pointing out
     width = (float) dimensions[0]/2;
     height = (float) dimensions[1]/2;
-    slice = slicePosition[2];
-    qDebug() << "axial slice position " << slice << " width = " << width << " and height = " << height;
+    slice = currentSlice[2] - dimensions[2]/2.0;
     glBindTexture(GL_TEXTURE_2D, textures[0]);
     glBegin(GL_QUADS);
+    glColor3f(0.0f, 0.0f, 0.0f);
     glTexCoord2f(0.0, 0.0); glVertex3f(-height, slice, -width);
     glTexCoord2f(0.0, 1.0); glVertex3f( height, slice, -width);
     glTexCoord2f(1.0, 1.0); glVertex3f( height, slice,  width);
     glTexCoord2f(1.0, 0.0); glVertex3f(-height, slice,  width);
     glEnd();
 
-    // Front face  (z = 1.0f)
+    // sagittal view
     width = (float) dimensions[1]/2;
     height = (float) dimensions[2]/2;
-    slice = slicePosition[0];
-    qDebug() << "sagittal slice position " << slice << " width = " << width << " and height = " << height;
+    slice = currentSlice[0] - dimensions[0]/2.0;
     glBindTexture(GL_TEXTURE_2D, textures[1]);
     glBegin(GL_QUADS);
     glTexCoord2f(0.0, 0.0); glVertex3f(-width, -height, slice);
@@ -66,11 +58,10 @@ void QtThreeDimensionalGlWidget::drawImage() const {
     glTexCoord2f(1.0, 0.0); glVertex3f( width, -height, slice);
     glEnd();
 
-    // Right face (x = 1.0f)
+    // coronal view
     width = (float) dimensions[0]/2;
     height = (float) dimensions[2]/2;
-    slice = slicePosition[1];
-    qDebug() << "coronal slice position " << slice << " width = " << width << " and height = " << height;
+    slice = currentSlice[1] - dimensions[1]/2.0;
     glBindTexture(GL_TEXTURE_2D, textures[2]);
     glBegin(GL_QUADS);
     glTexCoord2f(0.0, 0.0); glVertex3f(slice, -height, -width);
@@ -80,7 +71,62 @@ void QtThreeDimensionalGlWidget::drawImage() const {
     glEnd();  // End of drawing color-cube
 
     glFlush();
-    glEnable(GL_TEXTURE_2D);
+    glDisable(GL_TEXTURE_2D);
+}
+
+void QtThreeDimensionalGlWidget::drawBorders() {
+    float width, height, slice;
+
+    width = (float) dimensions[0]/2;
+    height = (float) dimensions[1]/2;
+    slice = currentSlice[2] - dimensions[2]/2.0;
+    qglColor(Qt::yellow);
+    glBegin(GL_LINES);
+    glVertex3f(-height, slice, -width); glVertex3f( height, slice, -width);
+    glEnd();
+    glBegin(GL_LINES);
+    glVertex3f( height, slice, -width); glVertex3f( height, slice,  width);
+    glEnd();
+    glBegin(GL_LINES);
+    glVertex3f( height, slice,  width); glVertex3f(-height, slice,  width);
+    glEnd();
+    glBegin(GL_LINES);
+    glVertex3f(-height, slice,  width); glVertex3f(-height, slice, -width);
+    glEnd();
+
+    width = (float) dimensions[1]/2;
+    height = (float) dimensions[2]/2;
+    slice = currentSlice[0] - dimensions[0]/2.0;
+    qglColor(Qt::red);
+    glBegin(GL_LINES);
+    glVertex3f(-width, -height, slice); glVertex3f(-width,  height, slice);
+    glEnd();
+    glBegin(GL_LINES);
+    glVertex3f(-width,  height, slice); glVertex3f( width,  height, slice);
+    glEnd();
+    glBegin(GL_LINES);
+    glVertex3f( width,  height, slice); glVertex3f( width, -height, slice);
+    glEnd();
+    glBegin(GL_LINES);
+    glVertex3f( width, -height, slice); glVertex3f(-width, -height, slice);
+    glEnd();
+
+    width = (float) dimensions[0]/2;
+    height = (float) dimensions[2]/2;
+    slice = currentSlice[1] - dimensions[1]/2.0;;
+    qglColor(Qt::green);
+    glBegin(GL_LINES);
+    glVertex3f(slice, -height, -width); glVertex3f(slice,  height, -width);
+    glEnd();
+    glBegin(GL_LINES);
+    glVertex3f(slice,  height, -width); glVertex3f(slice,  height,  width);
+    glEnd();
+    glBegin(GL_LINES);
+    glVertex3f(slice,  height,  width); glVertex3f(slice, -height,  width);
+    glEnd();
+    glBegin(GL_LINES);
+    glVertex3f(slice, -height,  width); glVertex3f(slice, -height, -width);
+    glEnd();
 }
 
 void QtThreeDimensionalGlWidget::createTextures() {
@@ -125,7 +171,6 @@ void QtThreeDimensionalGlWidget::deleteDrawable() {
     for (it = _drawable.begin(); it != _drawable.end(); it++) {
         for (int i = 0; i < 3; i++)
             delete [] (*it)[i];
-        //delete [] *it;
     }
 
     _drawable.clear();
@@ -133,8 +178,9 @@ void QtThreeDimensionalGlWidget::deleteDrawable() {
 
 void QtThreeDimensionalGlWidget::updateDrawable(QVector<QRgb**> drawable) {
     QtGlWidget::updateDrawable(drawable);
-    createTextures();
-
+    if (!_drawable.empty()) {
+        createTextures();
+    }
 }
 
 void QtThreeDimensionalGlWidget::initializeGL() {
@@ -160,7 +206,7 @@ void QtThreeDimensionalGlWidget::resizeGL(int w, int h) {
     glMatrixMode(GL_PROJECTION);
     GLfloat aspect = (GLfloat) w / (GLfloat) h;
     glLoadIdentity();
-    gluPerspective(45.0f, aspect, 0.1f, 600.0f);
+    gluPerspective(45.0f, aspect, 0.1f, 1000.0f);
 }
 
 void QtThreeDimensionalGlWidget::paintGL() {
@@ -168,6 +214,7 @@ void QtThreeDimensionalGlWidget::paintGL() {
 
     if (!_drawable.empty()) {
         drawImage();
+        drawBorders();
     }
 }
 

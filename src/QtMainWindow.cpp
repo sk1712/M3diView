@@ -371,6 +371,10 @@ void QtMainWindow::viewImage() {
 
     // load the images to be displayed and add them to the viewers
     if ( !setDisplayedImages() ) {
+        for (int i = 0; i < viewers.size(); i++) {
+            viewerWidgets[i]->getGlWidget()->updateDrawable(
+                        QVector<QRgb**>::fromStdVector(viewers[i]->GetDrawable()));
+        }
         return;
     }
 
@@ -402,9 +406,6 @@ void QtMainWindow::viewImage() {
             twoDviewerWidget->setCurrentSlice(viewer->GetCurrentSlice());
         }
         else if (threeDviewerWidget != 0) {
-            double dx, dy, dz;
-            viewer->GetResolution(dx, dy, dz);
-            threeDviewerWidget->setResolution(dx, dy, dz);
             threeDviewerWidget->setDimensions(viewer->GetSliceNumber());
             threeDviewerWidget->setCurrentSlice(viewer->GetCurrentSlice());
         }

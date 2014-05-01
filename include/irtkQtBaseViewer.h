@@ -79,8 +79,6 @@ public:
     /// get view mode (axial, sagittal, coronal)
     irtkViewMode GetViewMode();
 
-    void GetResolution(double& dx, double& dy, double& dz);
-
     /// get total number of slices
     int* GetSliceNumber();
 
@@ -183,12 +181,6 @@ inline void irtkQtBaseViewer::SetDimensions(int width, int height) {
 
 inline irtkViewMode irtkQtBaseViewer::GetViewMode() {
     return _viewMode;
-}
-
-inline void irtkQtBaseViewer::GetResolution(double& dx, double& dy, double& dz) {
-    dx = _dx;
-    dy = _dy;
-    dz = _dz;
 }
 
 inline int* irtkQtBaseViewer::GetSliceNumber() {

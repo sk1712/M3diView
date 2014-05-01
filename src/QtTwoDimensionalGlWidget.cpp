@@ -1,5 +1,7 @@
 #include <QtTwoDimensionalGlWidget.h>
 
+#include <QDebug>
+
 QtTwoDimensionalGlWidget::QtTwoDimensionalGlWidget(QWidget *parent)
     :QtGlWidget(parent) {
     _drawable.clear();
@@ -23,6 +25,8 @@ void QtTwoDimensionalGlWidget::drawImage() const {
                          (*rit)[0]);
         }
     }
+    else
+        qDebug() << "drawable is empty";
 }
 
 void QtTwoDimensionalGlWidget::drawCursor() const {
