@@ -482,9 +482,7 @@ void QtMainWindow::deleteThisWidget() {
         layout->removeWidget(viewerWidgets[i]);
         if (senderWidget == viewerWidgets[i]) {
             delete viewerWidgets.takeAt(i);
-            cout << "deleted widget " << i << endl;
             delete viewers.takeAt(i);
-            cout << "deleted viewer " << i << endl;
         }
     }
     for (int i = 0; i < viewerWidgets.size(); i++) {

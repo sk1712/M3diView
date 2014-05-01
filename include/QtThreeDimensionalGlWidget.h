@@ -12,6 +12,9 @@ class QtThreeDimensionalGlWidget : public QtGlWidget
     /// rotation around y axis (horizontal) and x axis (vertical) of the model
     float horizontalRotation, verticalRotation;
 
+    /// camera field of view, window width and height
+    float cameraFOV, width, height;
+
     /// mouse position when dragging started
     QPoint lastPosition;
 
@@ -89,6 +92,9 @@ private slots:
 
     /// rotate model downwards
     void rotateDown();
+
+    /// zoom in/out on mouse wheel
+    void changeZoom(int numSteps);
 };
 
 

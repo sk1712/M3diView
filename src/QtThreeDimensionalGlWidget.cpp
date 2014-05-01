@@ -17,8 +17,11 @@ QtThreeDimensionalGlWidget::QtThreeDimensionalGlWidget(QWidget *parent)
     connect(this, SIGNAL(upKeyPressed()), this, SLOT(rotateUp()));
     connect(this, SIGNAL(downKeyPressed()), this, SLOT(rotateDown()));
 
+    connect(this, SIGNAL(wheelMoved(int)), this, SLOT(changeZoom(int)));
+
     horizontalRotation = 5.0f;
     verticalRotation = 5.0f;
+    cameraFOV = 45.0f;
 }
 
 QtThreeDimensionalGlWidget::~QtThreeDimensionalGlWidget() {
@@ -205,8 +208,9 @@ void QtThreeDimensionalGlWidget::resizeGL(int w, int h) {
     glRotatef((GLfloat) verticalRotation, 1.0f, 0.0f, 0.0f);  // Rotate about (1,0,0)-axis
     glMatrixMode(GL_PROJECTION);
     GLfloat aspect = (GLfloat) w / (GLfloat) h;
+    width = w; height = h;
     glLoadIdentity();
-    gluPerspective(45.0f, aspect, 0.1f, 1000.0f);
+    gluPerspective(cameraFOV, aspect, 0.1f, 1000.0f);
 }
 
 void QtThreeDimensionalGlWidget::paintGL() {
@@ -287,4 +291,14 @@ void QtThreeDimensionalGlWidget::rotateDown() {
     verticalRotation = 5.0;
     horizontalRotation = 0.0;
     rotate();
+}
+
+void QtThreeDimensionalGlWidget::changeZoom(int numSteps) {
+    cameraFOV += numSteps*2.5;
+    glMatrixMode(GL_PROJECTION);
+    GLfloat aspect = (GLfloat) width / (GLfloat) height;
+    glLoadIdentity();
+    gluPerspective(cameraFOV, aspect, 0.1f, 1000.0f);
+
+    update();
 }
