@@ -12,6 +12,9 @@ class irtkQtImageObject
     /// image opacity when displayed
     int _opacity;
 
+    /// minimum and maximum display values
+    int minDisplay, maxDisplay;
+
     /// image full path
     QString _path;
 
@@ -20,20 +23,40 @@ class irtkQtImageObject
 
 public:
 
+    /// image object constructor
     irtkQtImageObject(const QString &path);
 
+    /// image object destructor
     ~irtkQtImageObject();
 
+    /// set image opacity
     void SetOpacity(int opacity);
 
+    /// get image opacity
     int GetOpacity() const;
 
+    /// set image minimum displayed value
+    void SetMinDisplayValue(int value);
+
+    /// get image minimum displayed value
+    int GetMinDisplayValue() const;
+
+    /// set image maximum displayed value
+    void SetMaxDisplayValue(int value);
+
+    /// get image maximum displayed value
+    int GetMaxDisplayValue() const;
+
+    /// check if image is visible
     bool IsVisible() const;
 
+    /// set if image visible
     void SetVisible(bool visible);
 
+    /// get image filename
     QString GetFileName() const;
 
+    /// get image full path
     QString GetPath() const;
 };
 
@@ -44,6 +67,22 @@ inline void irtkQtImageObject::SetOpacity(int opacity) {
 
 inline int irtkQtImageObject::GetOpacity() const {
     return _opacity;
+}
+
+inline void irtkQtImageObject::SetMinDisplayValue(int value) {
+    minDisplay = value;
+}
+
+inline int irtkQtImageObject::GetMinDisplayValue() const {
+    return minDisplay;
+}
+
+inline void irtkQtImageObject::SetMaxDisplayValue(int value) {
+    maxDisplay = value;
+}
+
+inline int irtkQtImageObject::GetMaxDisplayValue() const {
+    return maxDisplay;
 }
 
 inline bool irtkQtImageObject::IsVisible() const {
