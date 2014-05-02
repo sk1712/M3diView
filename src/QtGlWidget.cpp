@@ -4,7 +4,6 @@
 #include <QWheelEvent>
 #include <QKeyEvent>
 
-//#include <QDebug>
 
 QtGlWidget::QtGlWidget(QWidget *parent)
     : QGLWidget(parent) {
@@ -23,14 +22,9 @@ int QtGlWidget::customHeight() const {
     return height() * pixelRatio;
 }
 
-void QtGlWidget::setResolution(double dx, double dy, double dz) {
-
-}
-
 void QtGlWidget::updateDrawable(QVector<QRgb**> drawable) {
     deleteDrawable();
     _drawable = drawable;
-    update();
 }
 
 void QtGlWidget::mousePressEvent(QMouseEvent *event) {

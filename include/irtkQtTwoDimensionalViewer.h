@@ -45,6 +45,9 @@ public:
     /// delete all vector elements and clear vectors
     void ClearDisplayedImages();
 
+    /// add image object to the vector of images to be displayed
+    void AddToDisplayedImages(irtkQtImageObject *imageObject);
+
 public slots:
 
     /// callback function when image is resized to (width, height)
@@ -58,7 +61,7 @@ public slots:
 
 protected:
 
-    ///
+    /// update the slice currently visible (in image coordinates)
     void UpdateCurrentSlice();
 
     /// add new image and corresponding tools to vectors

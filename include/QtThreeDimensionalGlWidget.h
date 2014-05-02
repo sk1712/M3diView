@@ -5,6 +5,7 @@
 
 #include <QPoint>
 
+
 class QtThreeDimensionalGlWidget : public QtGlWidget
 {
     Q_OBJECT
@@ -44,7 +45,7 @@ public:
     /// map 2D images to textures
     void createTextures();
 
-    /// set image dimensions
+    /// set image dimensions (in image coordinates)
     void setDimensions(int *dim);
 
     /// set current slices
@@ -78,6 +79,11 @@ protected:
 
     /// callback function handling mouse move
     void mouseMoveEvent(QMouseEvent *event);
+
+private:
+
+    /// register the signals of the widget
+    void connectSignals();
 
 private slots:
 

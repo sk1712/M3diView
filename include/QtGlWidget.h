@@ -5,6 +5,7 @@
 #include <QWindow>
 #include <QColor>
 
+
 class QtGlWidget : public QGLWidget
 {
     Q_OBJECT // must include this if you use Qt signals/slots
@@ -40,8 +41,6 @@ public:
     /// function to be implemented by all derived classes
     virtual void drawImage() const = 0;
 
-    virtual void setResolution(double dx, double dy, double dz);
-
 public slots:
 
     /// callback function to update drawable
@@ -49,6 +48,7 @@ public slots:
 
 protected:
 
+    /// delete the drawable
     virtual void deleteDrawable() = 0;
 
     /// function handling mouse press events

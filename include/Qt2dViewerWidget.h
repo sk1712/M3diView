@@ -29,22 +29,25 @@ protected:
 
 public:
 
+    /// class constructor
     Qt2dViewerWidget(QWidget *parent = 0);
 
+    /// class destructor
     QtGlWidget* getGlWidget() const;
 
     /// getter for slice slider
     QSlider* getSlider() const;
 
-    /// getter for slice label
-    QLabel* getLabel() const;
-
     /// update currentSlice
     void setCurrentSlice(int* current);
 
     /// update maximumSlice
-    void setMaximumSlice(int maximum);
+    void setMaximumSlice(int* maximum);
 
+    /// set whether viewer is enabled
+    void setEnabled(bool enabled);
+
+    /// set viewer labels
     void setLabels(const char t, const char b, const char l, const char r);
 
 protected:
@@ -68,6 +71,11 @@ private slots:
     /// callback function for slice slider change
     void updateSlice(int slice);
 
+signals:
+
+    /// signal emitted when slider value changes
+    void sliderValueChanged(int value);
+
 };
 
 
@@ -79,17 +87,18 @@ inline QSlider* Qt2dViewerWidget::getSlider() const {
     return sliceSlider;
 }
 
-inline QLabel* Qt2dViewerWidget::getLabel() const {
-    return sliceLabel;
-}
-
 inline void Qt2dViewerWidget::setCurrentSlice(int* current) {
     sliceSlider->setValue(current[0]);
 }
 
-inline void Qt2dViewerWidget::setMaximumSlice(int maximum) {
-    maximumSlice = maximum;
+inline void Qt2dViewerWidget::setMaximumSlice(int* maximum) {
+    maximumSlice = maximum[0];
     sliceSlider->setMaximum(maximumSlice);
+}
+
+inline void Qt2dViewerWidget::setEnabled(bool enabled) {
+    glWidget->setEnabled(enabled);
+    sliceSlider->setEnabled(enabled);
 }
 
 inline void Qt2dViewerWidget::setLabels(const char t, const char b, const char l, const char r) {

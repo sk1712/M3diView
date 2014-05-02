@@ -29,13 +29,20 @@ public:
     /// class constructor
     QtViewerWidget(QWidget *parent = 0);
 
-    /// get viewer linked
+    /// check if viewer is linked to the other viewers
     bool isLinked() const;
 
+    /// get OpenGL widget of viewer
     virtual QtGlWidget* getGlWidget() const = 0;
 
+    /// set viewer's current slice
     virtual void setCurrentSlice(int* current) = 0;
 
+    /// set viewer's maximum slice
+    virtual void setMaximumSlice(int* maxSlice) = 0;
+
+    /// set viewer enabled
+    virtual void setEnabled(bool enabled) = 0;
 
 protected:
 

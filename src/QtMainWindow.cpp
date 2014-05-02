@@ -32,7 +32,7 @@ QtMainWindow::QtMainWindow() {
 }
 
 QtMainWindow::~QtMainWindow() {
-    clearVectors();
+    clearLists();
     irtkQtViewer::Destroy();
 }
 
@@ -172,7 +172,7 @@ void QtMainWindow::disconnectViewerSignals() {
             disconnect(viewer, SIGNAL(ImageResized(QVector<QRgb**>)),
                        viewerWidget->getGlWidget(), SLOT(updateDrawable(QVector<QRgb**>)));
 
-            disconnect(viewerWidget->getSlider(), SIGNAL(valueChanged(int)),
+            disconnect(viewerWidget, SIGNAL(sliderValueChanged(int)),
                        viewer, SLOT(ChangeSlice(int)));
             disconnect(viewerWidget->getGlWidget(), SIGNAL(leftButtonPressed(int, int)),
                        viewer, SLOT(ChangeOrigin(int, int)));
@@ -199,7 +199,7 @@ void QtMainWindow::connectViewerSignals() {
                     viewerWidget->getGlWidget(), SLOT(updateDrawable(QVector<QRgb**>)));
 
             // update drawable when origin is changed
-            connect(viewerWidget->getSlider(), SIGNAL(valueChanged(int)),
+            connect(viewerWidget, SIGNAL(sliderValueChanged(int)),
                     viewer, SLOT(ChangeSlice(int)));
             connect(viewerWidget->getGlWidget(), SIGNAL(leftButtonPressed(int, int)),
                                viewer, SLOT(ChangeOrigin(int, int)));
@@ -210,7 +210,7 @@ void QtMainWindow::connectViewerSignals() {
     }
 }
 
-Qt2dViewerWidget* QtMainWindow::createTwoDimensionalView(irtkViewMode viewMode) {
+Qt2dViewerWidget* QtMainWindow::createTwoDimensionalView(irtkQtBaseViewer::irtkViewMode viewMode) {
     irtkQtTwoDimensionalViewer* viewer;
     Qt2dViewerWidget *qtViewer;
 
@@ -247,7 +247,7 @@ Qt3dViewerWidget* QtMainWindow::createThreeDimensionalView() {
     return qtViewer;
 }
 
-void QtMainWindow::clearVectors() {
+void QtMainWindow::clearLists() {
     qDeleteAll(viewers);
     viewers.clear();
 
@@ -296,13 +296,15 @@ void QtMainWindow::createMessageBox(QString message, QMessageBox::Icon icon) {
 void QtMainWindow::openImage() {
 #ifdef Q_OS_MAC
     QString selfilter = tr("IMG (*.gipl *.z *.hdr *.gz *.nii)");
+    QStringList fileNames = QFileDialog::getOpenFileNames(this, tr("Open File"), QDir::homePath(),
+                                                          tr("All files (*.*);;IMG (*.gipl *.z *.hdr *.gz *.nii)" ),
+                                                          &selfilter);
 #else
     QString selfilter = tr("IMG (*.gipl *.gipl.z *.hdr *.hdr.gz *.nii *.nii.gz)");
-#endif
-
     QStringList fileNames = QFileDialog::getOpenFileNames(this, tr("Open File"), QDir::homePath(),
                                                           tr("All files (*.*);;IMG (*.gipl *.gipl.z *.hdr *.hdr.gz *.nii *.nii.gz)" ),
                                                           &selfilter);
+#endif
 
     QStringList::const_iterator it;
     for (it = fileNames.constBegin(); it != fileNames.constEnd(); it++) {
@@ -335,7 +337,6 @@ bool QtMainWindow::setDisplayedImages() {
             for (int i = 0; i < viewerWidgets.size(); i++) {
                 viewerWidget = viewerWidgets[i];
                 viewer = viewers[i];
-
                 glWidget = viewerWidget->getGlWidget();
 
                 try {
@@ -355,6 +356,23 @@ bool QtMainWindow::setDisplayedImages() {
     return atLeastOneImageVisible;
 }
 
+void QtMainWindow::setUpViewerWidgets() {
+    // update the viewers
+    QtViewerWidget *viewerWidget;
+    irtkQtBaseViewer *viewer;
+
+    for (int i = 0; i < viewers.size(); i++) {
+        viewerWidget = viewerWidgets[i];
+        viewer = viewers[i];
+
+        viewerWidget->setEnabled(true);
+        viewerWidget->setMaximumSlice(viewer->GetSliceNumber());
+        viewerWidget->setCurrentSlice(viewer->GetCurrentSlice());
+        viewerWidget->getGlWidget()->updateDrawable(
+                    QVector<QRgb**>::fromStdVector(viewer->GetDrawable()));
+    }
+}
+
 /// free function to parallelize initializing viewers
 void InitializeViewer(irtkQtBaseViewer* &viewer) {
     viewer->InitializeTransformation();
@@ -362,9 +380,8 @@ void InitializeViewer(irtkQtBaseViewer* &viewer) {
 }
 
 void QtMainWindow::viewImage() {
-    if ( viewers.size() == 0 ) {
-        return;
-    }
+    // if there are no viewers do nothing
+    if ( viewers.size() == 0 ) return;
 
     // disconnect the viewers' signals
     disconnectViewerSignals();
@@ -372,6 +389,7 @@ void QtMainWindow::viewImage() {
     // load the images to be displayed and add them to the viewers
     if ( !setDisplayedImages() ) {
         for (int i = 0; i < viewers.size(); i++) {
+            viewerWidgets[i]->setEnabled(false);
             viewerWidgets[i]->getGlWidget()->updateDrawable(
                         QVector<QRgb**>::fromStdVector(viewers[i]->GetDrawable()));
         }
@@ -385,34 +403,8 @@ void QtMainWindow::viewImage() {
     // initialize the transformations and calculate output images in parallel
     QtConcurrent::blockingMap(viewers, &InitializeViewer);
 
-    // update the viewers
-    Qt2dViewerWidget *twoDviewerWidget;
-    Qt3dViewerWidget *threeDviewerWidget;
-    irtkQtBaseViewer *viewer;
-    QtGlWidget *glWidget;
-
-    for (int i = 0; i < viewers.size(); i++) {
-        twoDviewerWidget = dynamic_cast<Qt2dViewerWidget*>(viewerWidgets[i]);
-        threeDviewerWidget = dynamic_cast<Qt3dViewerWidget*>(viewerWidgets[i]);
-
-        viewer = viewers[i];
-
-        glWidget = viewerWidgets[i]->getGlWidget();
-        glWidget->setEnabled(true);
-
-        if (twoDviewerWidget != 0) {
-            twoDviewerWidget->getSlider()->setEnabled(true);
-            twoDviewerWidget->setMaximumSlice(viewer->GetSliceNumber()[0]);
-            twoDviewerWidget->setCurrentSlice(viewer->GetCurrentSlice());
-        }
-        else if (threeDviewerWidget != 0) {
-            threeDviewerWidget->setDimensions(viewer->GetSliceNumber());
-            threeDviewerWidget->setCurrentSlice(viewer->GetCurrentSlice());
-        }
-
-        glWidget->updateDrawable(QVector<QRgb**>::fromStdVector(
-                                     viewer->GetDrawable()));
-    }
+    // set up the viewer widgets
+    setUpViewerWidgets();
 
     // re-register the viewers' signals
     connectViewerSignals();
@@ -457,7 +449,6 @@ void QtMainWindow::zoomOut() {
 }
 
 void QtMainWindow::showOnlyThisWidget() {
-
     if (singleViewerInScreen) {
         for (int i = 0; i < viewerWidgets.size(); i++) {
             viewerWidgets[i]->show();
@@ -492,21 +483,21 @@ void QtMainWindow::deleteThisWidget() {
 }
 
 void QtMainWindow::createAxialView() {
-    addToViewWidget(createTwoDimensionalView(VIEW_AXIAL));
+    addToViewWidget(createTwoDimensionalView(irtkQtBaseViewer::VIEW_AXIAL));
 }
 
 void QtMainWindow::createCoronalView() {
-    addToViewWidget(createTwoDimensionalView(VIEW_CORONAL));
+    addToViewWidget(createTwoDimensionalView(irtkQtBaseViewer::VIEW_CORONAL));
 }
 
 void QtMainWindow::createSagittalView() {
-    addToViewWidget(createTwoDimensionalView(VIEW_SAGITTAL));
+    addToViewWidget(createTwoDimensionalView(irtkQtBaseViewer::VIEW_SAGITTAL));
 }
 
 void QtMainWindow::createOrthogonalView() {
-    addToViewWidget(createTwoDimensionalView(VIEW_AXIAL));
-    addToViewWidget(createTwoDimensionalView(VIEW_CORONAL));
-    addToViewWidget(createTwoDimensionalView(VIEW_SAGITTAL));
+    addToViewWidget(createTwoDimensionalView(irtkQtBaseViewer::VIEW_AXIAL));
+    addToViewWidget(createTwoDimensionalView(irtkQtBaseViewer::VIEW_CORONAL));
+    addToViewWidget(createTwoDimensionalView(irtkQtBaseViewer::VIEW_SAGITTAL));
 }
 
 void QtMainWindow::create3dView() {
@@ -514,7 +505,7 @@ void QtMainWindow::create3dView() {
 }
 
 void QtMainWindow::clearViews() {
-    clearVectors();
+    clearLists();
     singleViewerInScreen = false;
 }
 
@@ -555,6 +546,7 @@ void QtMainWindow::opacityValueChanged(int value) {
     }
     opacityLabel->setText(QString::number(value));
 
+    // TO DO : change only the lookupTable for this image
     viewImage();
 }
 
@@ -573,6 +565,7 @@ void QtMainWindow::listViewDoubleClicked(QModelIndex index) {
     imageModel = new irtkImageListModel(list);
     imageListView->setModel(imageModel);
 
+    // TO DO : insert/delete only the current image
     viewImage();
 }
 
@@ -589,6 +582,7 @@ void QtMainWindow::moveImageUp() {
         imageListView->setCurrentIndex(imageModel->index(index-1, 0));
     }
 
+    // TO DO : move only the current image
     viewImage();
 }
 
@@ -605,5 +599,6 @@ void QtMainWindow::moveImageDown() {
         imageListView->setCurrentIndex(imageModel->index(index+1, 0));
     }
 
+    // TO DO : move only the current image
     viewImage();
 }

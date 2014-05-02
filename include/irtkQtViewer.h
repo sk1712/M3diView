@@ -37,7 +37,7 @@ public:
 
     /// create an 2D viewer of certain view (axial, sagittal, coronal)
     /// defined by viewMode
-    irtkQtTwoDimensionalViewer* CreateTwoDimensionalViewer(irtkViewMode viewMode);
+    irtkQtTwoDimensionalViewer* CreateTwoDimensionalViewer(irtkQtBaseViewer::irtkViewMode viewMode);
 
     /// create a 3D viewer
     irtkQtThreeDimensionalViewer* CreateThreeDimensionalViewer();

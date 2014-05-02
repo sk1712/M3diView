@@ -32,9 +32,10 @@ public:
     /// set viewer labels
     void setLabels(const char t, const char b, const char l, const char r);
 
-protected:
+    /// update the images to be drawn
+    void updateDrawable(QVector<QRgb**> drawable);
 
-    void deleteDrawable();
+protected:
 
     /// function to initialize OpenGL inherited from QGLWidget
     void initializeGL();
@@ -44,6 +45,9 @@ protected:
 
     /// function called whenever scene is painted inherited from QGLWidget
     void paintGL();
+
+    /// delete the drawable
+    void deleteDrawable();
 
 signals:
 

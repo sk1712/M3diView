@@ -52,7 +52,7 @@ vector<QRgb**> irtkQtTwoDimensionalViewer::GetDrawable() {
 
         int i, j;
 
-        // Only display the target image
+        // Create a drawable for all images
         for (j = 0; j < _height; j++) {
             for (i = 0; i < _width; i++) {
                 if (*original >= 0) {
@@ -105,6 +105,14 @@ void irtkQtTwoDimensionalViewer::InitializeTransformation() {
         _transformFilter[i]->SetInput(_image[i]);
         _transformFilter[i]->PutScaleFactorAndOffset(255.0 / (_targetMax
             - _targetMin), -_targetMin * 255.0 / (_targetMax - _targetMin));
+    }
+}
+
+void irtkQtTwoDimensionalViewer::AddToDisplayedImages(irtkQtImageObject *imageObject) {
+    irtkQtBaseViewer::AddToDisplayedImages(imageObject);
+    // set pixel size to 1x1mm
+    if (_image.size() == 1) {
+        SetResolution(1, 1, _targetImage->GetZSize());
     }
 }
 

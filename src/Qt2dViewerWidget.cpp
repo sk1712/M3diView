@@ -51,4 +51,6 @@ void Qt2dViewerWidget::changeSlider(int steps) {
 void Qt2dViewerWidget::updateSlice(int slice) {
     currentSlice = slice;
     updateLabel();
+
+    emit sliderValueChanged(slice);
 }

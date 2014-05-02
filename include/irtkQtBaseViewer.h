@@ -11,12 +11,14 @@
 #include <QVector>
 
 
-/// view modes
-enum irtkViewMode {VIEW_AXIAL = 0, VIEW_SAGITTAL, VIEW_CORONAL, VIEW_NONE};
-
 class irtkQtBaseViewer : public QObject
 {
     Q_OBJECT
+
+public:
+
+    /// view modes
+    enum irtkViewMode {VIEW_AXIAL = 0, VIEW_SAGITTAL, VIEW_CORONAL, VIEW_NONE};
 
 protected:
 
@@ -98,7 +100,7 @@ public:
     virtual void ClearDisplayedImages() = 0;
 
     /// add image object to the vector of images to be displayed
-    void AddToDisplayedImages(irtkQtImageObject *imageObject);
+    virtual void AddToDisplayedImages(irtkQtImageObject *imageObject);
 
 public slots:
 
@@ -119,13 +121,13 @@ protected:
     /// initialize image origin and orientation
     void InitializeOriginOrientation();
 
-    ///
+    /// update the current slice (in image coordinates) corresponding to the world coordinates
     virtual void UpdateCurrentSlice() = 0;
 
     /// add new image and corresponding tools to vectors
     virtual void AddToVectors(irtkImage* newImage) = 0;
 
-    /// sets image orientation
+    /// set image orientation
     void SetOrientation(const double * xaxis, const double * yaxis, const double * zaxis);
 
     /// delete all elements of a vector first and then clear
@@ -179,7 +181,7 @@ inline void irtkQtBaseViewer::SetDimensions(int width, int height) {
     _height = height;
 }
 
-inline irtkViewMode irtkQtBaseViewer::GetViewMode() {
+inline irtkQtBaseViewer::irtkViewMode irtkQtBaseViewer::GetViewMode() {
     return _viewMode;
 }
 

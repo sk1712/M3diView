@@ -14,16 +14,14 @@ QtTwoDimensionalGlWidget::~QtTwoDimensionalGlWidget() {
 void QtTwoDimensionalGlWidget::drawImage() const {
     QVector<QRgb**>::const_iterator rit;
 
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     // draw last image in the list first and the others on top of it
-    if (!_drawable.empty()) {
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        for (rit = _drawable.constEnd()-1; rit >= _drawable.constBegin(); rit--) {
-            // Set raster position
-            glRasterPos2f(0, 0);
-            // Draw pixelmap
-            glDrawPixels(_width, _height, GL_RGBA, GL_UNSIGNED_BYTE,
-                         (*rit)[0]);
-        }
+    for (rit = _drawable.constEnd()-1; rit >= _drawable.constBegin(); rit--) {
+        // Set raster position
+        glRasterPos2f(0, 0);
+        // Draw pixelmap
+        glDrawPixels(_width, _height, GL_RGBA, GL_UNSIGNED_BYTE,
+                     (*rit)[0]);
     }
 }
 
@@ -50,19 +48,16 @@ void QtTwoDimensionalGlWidget::drawLabels() {
     renderText(width()-15, height()/2+5, right, arialFont);
 }
 
-void QtTwoDimensionalGlWidget::deleteDrawable() {
-    QVector<QRgb**>::iterator it;
-
-    for (it = _drawable.begin(); it != _drawable.end(); it++)
-        delete [] (it[0]);
-
-    _drawable.clear();
+void QtTwoDimensionalGlWidget::updateDrawable(QVector<QRgb**> drawable) {
+    QtGlWidget::updateDrawable(drawable);
+    update();
 }
 
 void QtTwoDimensionalGlWidget::initializeGL() {
-    //glDisable(GL_TEXTURE_2D);
+    glDisable(GL_TEXTURE_2D);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_COLOR_MATERIAL);
+    // enable alpha blending
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
     qglClearColor(Qt::black);
@@ -86,9 +81,20 @@ void QtTwoDimensionalGlWidget::paintGL() {
     _width = customWidth();
     _height = customHeight();
 
-    drawImage();
+    if (!_drawable.empty()) {
+        drawImage();
+    }
     drawCursor();
     drawLabels();
+}
+
+void QtTwoDimensionalGlWidget::deleteDrawable() {
+    QVector<QRgb**>::iterator it;
+
+    for (it = _drawable.begin(); it != _drawable.end(); it++)
+        delete [] (it[0]);
+
+    _drawable.clear();
 }
 
 

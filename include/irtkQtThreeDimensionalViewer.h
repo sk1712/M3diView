@@ -58,18 +58,21 @@ public slots:
 
 protected:
 
-    ///
+    /// update the current slice (in image coordinates)
     void UpdateCurrentSlice();
 
     /// add new image and corresponding tools to vectors
     void AddToVectors(irtkImage* newImage);
 
+    /// set the orientation according to the view value
     void SetOrientation(int view);
 
+    /// change the slice corresponding to the view value
     void ChangeViewSlice(int view);
 
 private:
 
+    /// delete array elements of a vector
     template<class T> void DeleteArrayVector(vector<T> & vec);
 };
 

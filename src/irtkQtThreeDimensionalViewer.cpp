@@ -5,7 +5,7 @@ irtkQtThreeDimensionalViewer::irtkQtThreeDimensionalViewer() {
     _viewMode = VIEW_NONE;
     currentSlice = new int[3];
     sliceNum = new int[3];
-
+    // set all previous slices to 0 initially
     for (int i = 0; i < 3; i++) previousSlice[i] = 0;
 }
 
@@ -33,7 +33,6 @@ void irtkQtThreeDimensionalViewer::UpdateCurrentSlice() {
 vector<QRgb**> irtkQtThreeDimensionalViewer::GetDrawable() {
     vector<QRgb**> allDrawables;
     QRgb _backgroundColor = qRgba(0, 0, 0, 1);
-
 
     int dimensions[3][2] = {
         {sliceNum[0], sliceNum[1]},
@@ -97,9 +96,6 @@ void irtkQtThreeDimensionalViewer::ChangeOrigin(int x, int y) {
 }
 
 void irtkQtThreeDimensionalViewer::AddToVectors(irtkImage* newImage) {
-    _targetImage->Print();
-    cout << "Voxel size x = " << _targetImage->GetXSize() << " and voxel size z = " << _targetImage->GetZSize() << endl;
-
     _image.push_back(newImage);
 
     _imageOutput.push_back(new irtkGreyImage*[3]);
@@ -132,16 +128,19 @@ void CalculateSingleTransform(irtkImageTransformation** &transform) {
 
 void irtkQtThreeDimensionalViewer::CalculateOutputImages() {
     irtkImageAttributes attr[3];
+    // width of output image
     int width[3] = {sliceNum[0], sliceNum[1], sliceNum[0]};
+    // height of output image
     int height[3] = {sliceNum[1], sliceNum[2], sliceNum[2]};
+    // index of corresponding slice for each view
     int index[3] = {2, 0, 1};
 
+    // store a backup of current origin
     double originX_backup = _originX, originY_backup = _originY, originZ_backup = _originZ;
 
     for (int i = 0; i < 3; i++) {
         if (previousSlice[index[i]] != currentSlice[index[i]]) {
-            _width = width[i];
-            _height = height[i];
+            _width = width[i]; _height = height[i];
             SetOrientation(i);
             ChangeViewSlice(i);
             attr[i] = InitializeAttributes();

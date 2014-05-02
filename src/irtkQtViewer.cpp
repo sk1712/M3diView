@@ -32,12 +32,10 @@ void irtkQtViewer::DestroyImages() {
         delete _imageObjects.takeFirst();
 }
 
-irtkQtTwoDimensionalViewer* irtkQtViewer::CreateTwoDimensionalViewer(irtkViewMode viewMode) {
-    irtkQtTwoDimensionalViewer* twoDViewer = new irtkQtTwoDimensionalViewer(viewMode);
-    return twoDViewer;
+irtkQtTwoDimensionalViewer* irtkQtViewer::CreateTwoDimensionalViewer(irtkQtBaseViewer::irtkViewMode viewMode) {
+    return new irtkQtTwoDimensionalViewer(viewMode);
 }
 
 irtkQtThreeDimensionalViewer* irtkQtViewer::CreateThreeDimensionalViewer() {
-    irtkQtThreeDimensionalViewer* threeDViewer = new irtkQtThreeDimensionalViewer();
-    return threeDViewer;
+    return new irtkQtThreeDimensionalViewer();
 }

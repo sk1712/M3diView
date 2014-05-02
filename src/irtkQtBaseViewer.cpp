@@ -11,18 +11,22 @@ irtkQtBaseViewer::~irtkQtBaseViewer() {
 irtkImageAttributes irtkQtBaseViewer::InitializeAttributes() {
     irtkImageAttributes attr;
 
+    // image size
     attr._x = _width;
     attr._y = _height;
     attr._z = 1;
 
+    // image origin in world coordinates
     attr._xorigin = _originX;
     attr._yorigin = _originY;
     attr._zorigin = _originZ;
 
+    // voxel size
     attr._dx = _dx;
     attr._dy = _dy;
     attr._dz = _dz;
 
+    // x, y, z axes
     attr._xaxis[0] = _axisX[0];
     attr._xaxis[1] = _axisX[1];
     attr._xaxis[2] = _axisX[2];
@@ -33,7 +37,6 @@ irtkImageAttributes irtkQtBaseViewer::InitializeAttributes() {
     attr._zaxis[1] = _axisZ[1];
     attr._zaxis[2] = _axisZ[2];
 
-    // calculate the actual output images
     return attr;
 }
 
@@ -52,12 +55,10 @@ void irtkQtBaseViewer::AddToDisplayedImages(irtkQtImageObject *imageObject) {
     // if first image to be displayed make it target
     if (_image.size() == 0) {
         _targetImage = newImage;
-        // TO DO : write seperate functions in derived classes
-        SetResolution(1, 1, _targetImage->GetZSize());
         InitializeOriginOrientation();
     }
     else {
-        /// check image dimensions agree instead
+        /// check whether image dimensions agree instead
 //        if (!(_targetImage->GetImageAttributes() == newImage->GetImageAttributes())) {
 //            delete newImage;
 //            return;
@@ -73,6 +74,7 @@ void irtkQtBaseViewer::AddToDisplayedImages(irtkQtImageObject *imageObject) {
 void irtkQtBaseViewer::InitializeOriginOrientation() {
     double x[3], y[3], z[3];
 
+    // get original image orientation and origin
     _targetImage->GetOrientation(x, y, z);
     _targetImage->GetOrigin(_originX, _originY, _originZ);
 
@@ -95,7 +97,7 @@ void irtkQtBaseViewer::InitializeOriginOrientation() {
         sliceNum[2] = _targetImage->GetZ();
         break;
     default:
-        cerr << "Not a valid type of two dimensional viewer" << endl;
+        cerr << "Not a valid type of viewer" << endl;
         exit(1);
         break;
     }

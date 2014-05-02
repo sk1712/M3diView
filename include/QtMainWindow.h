@@ -54,7 +54,7 @@ class QtMainWindow : public QMainWindow
     /// list of viewer widgets
     QList<QtViewerWidget*> viewerWidgets;
 
-    /// list of irtk 2D viewers
+    /// list of irtk viewers
     QList<irtkQtBaseViewer*> viewers;
 
     /// model for list view
@@ -95,19 +95,20 @@ private:
     void connectViewerSignals();
 
     /// create new 2D viewer
-    Qt2dViewerWidget* createTwoDimensionalView(irtkViewMode viewMode);
+    Qt2dViewerWidget* createTwoDimensionalView(irtkQtBaseViewer::irtkViewMode viewMode);
 
     /// create new 3D viewer
     Qt3dViewerWidget* createThreeDimensionalView();
 
     /// clear viewers and viewerWidgets
-    void clearVectors();
+    void clearLists();
 
     /// check if image is already loaded
     bool imageInList(const QString fileName);
 
     /// add widget to mainViewWidget
     void addToViewWidget(QWidget *widget);
+
     void addToViewWidget(QWidget *widget, int index);
 
     /// show message box with message and icon
@@ -116,6 +117,9 @@ private:
 
     /// set up viewers with images to be displayed
     bool setDisplayedImages();
+
+    /// set up viewer widgets
+    void setUpViewerWidgets();
 
 private slots:
 
