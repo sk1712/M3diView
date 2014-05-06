@@ -9,6 +9,7 @@
 
 #include <QMainWindow>
 #include <QListView>
+#include <QTabWidget>
 #include <QSplitter>
 #include <QMessageBox>
 #include <QWidgetAction>
@@ -19,8 +20,10 @@ class QtMainWindow : public QMainWindow
     Q_OBJECT
 
     /// main window widgets
-    QSplitter *splitter;
+    QSplitter *horizontalSplitter;
+    QSplitter *verticalSplitter;
     QListView *imageListView;
+    QTabWidget *toolsTabWidget;
     QWidget *mainViewWidget;
     QSlider *opacitySlider;
     QLabel *opacityLabel;

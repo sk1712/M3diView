@@ -7,6 +7,8 @@
 #include <irtkQtLookupTable.h>
 #include <irtkQtImageObject.h>
 
+#include <map>
+
 #include <QObject>
 #include <QVector>
 
@@ -46,11 +48,11 @@ protected:
     /// image against which all other images are transformed
     irtkImage* _targetImage;
 
-    /// original image vector
-    vector<irtkImage*> _image;
+    /// original image map
+    map<int, irtkImage*> _image;
 
-    /// image lookup table vector
-    vector<irtkQtLookupTable *> _lookupTable;
+    /// image lookup table map
+    map<int, irtkQtLookupTable *> _lookupTable;
 
 public:
 
@@ -96,11 +98,11 @@ public:
     /// initialize the transformation from the input to the output image
     virtual void InitializeTransformation() = 0;
 
-    /// delete all vector elements and clear vectors
+    /// delete all map elements and clear maps
     virtual void ClearDisplayedImages() = 0;
 
-    /// add image object to the vector of images to be displayed
-    virtual void AddToDisplayedImages(irtkQtImageObject *imageObject);
+    /// add image object to the maps of images to be displayed
+    virtual void AddToDisplayedImages(irtkQtImageObject *imageObject, int index);
 
 public slots:
 
@@ -124,14 +126,14 @@ protected:
     /// update the current slice (in image coordinates) corresponding to the world coordinates
     virtual void UpdateCurrentSlice() = 0;
 
-    /// add new image and corresponding tools to vectors
-    virtual void AddToVectors(irtkImage* newImage) = 0;
+    /// add new image and corresponding tools to maps
+    virtual void AddToMaps(irtkImage* newImage, int index) = 0;
 
     /// set image orientation
     void SetOrientation(const double * xaxis, const double * yaxis, const double * zaxis);
 
-    /// delete all elements of a vector first and then clear
-    template<class T> void DeleteVector(vector<T> & vec);
+    /// delete all elements of a map first and then clear
+    template<class T> void DeleteMap(map<int, T> & mymap);
 
 signals:
 
@@ -194,9 +196,13 @@ inline int* irtkQtBaseViewer::GetCurrentSlice() {
 }
 
 template<class T>
-inline void irtkQtBaseViewer::DeleteVector(vector<T> & vec) {
-    qDeleteAll(vec);
-    vec.clear();
+inline void irtkQtBaseViewer::DeleteMap(map<int, T> & mymap) {
+    typename map<int, T>::iterator it;
+
+    for( it = mymap.begin(); it != mymap.end(); it++){
+            delete ((*it).second);
+    }
+    mymap.clear();
 }
 
 #endif // IRTKQTBASEVIEWER_H

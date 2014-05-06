@@ -1,8 +1,11 @@
 #include <irtkQtLookupTable.h>
 
 irtkQtLookupTable::irtkQtLookupTable(int min, int max) {
-    alpha = 255;
+    _alpha = 255;
+    minDisplay = 0;
+    maxDisplay = 0;
     lookupTable = new QRgb[max-min+1];
+    Initialize();
 }
 
 irtkQtLookupTable::~irtkQtLookupTable() {
@@ -10,12 +13,12 @@ irtkQtLookupTable::~irtkQtLookupTable() {
 }
 
 void irtkQtLookupTable::SetAlpha(int a) {
-    alpha = a;
+    _alpha = a;
     Initialize();
 }
 
 void irtkQtLookupTable::Initialize() {
     for (int i = 0; i <= 255; i ++) {
-        lookupTable[i] = qRgba(i, i, i, alpha);
+        lookupTable[i] = qRgba(i, i, i, _alpha);
     }
 }

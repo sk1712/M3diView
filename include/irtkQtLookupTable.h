@@ -6,7 +6,10 @@
 class irtkQtLookupTable
 {
     /// alpha coefficient
-    int alpha;
+    int _alpha;
+
+    /// minimum and maximum display values
+    int minDisplay, maxDisplay;
 
 public:
 
@@ -18,12 +21,56 @@ public:
     /// class destructor
     ~irtkQtLookupTable();
 
-    /// set alpha value for the look up table
-    void SetAlpha(int a);
-
     /// initialize look up table
     void Initialize();
+
+    /// set image alpha value
+    void SetAlpha(int a);
+
+    /// get image alpha value
+    int GetAlpha() const;
+
+    /// set image minimum displayed value
+    void SetMinDisplayValue(int value);
+
+    /// get image minimum displayed value
+    int GetMinDisplayValue() const;
+
+    /// set image maximum displayed value
+    void SetMaxDisplayValue(int value);
+
+    /// get image maximum displayed value
+    int GetMaxDisplayValue() const;
+
+    /// set minimum and maximum values
+    void SetMinMaxDisplayValues(int min, int max);
 };
+
+
+inline int irtkQtLookupTable::GetAlpha() const {
+    return _alpha;
+}
+
+inline void irtkQtLookupTable::SetMinDisplayValue(int value) {
+    minDisplay = value;
+}
+
+inline int irtkQtLookupTable::GetMinDisplayValue() const {
+    return minDisplay;
+}
+
+inline void irtkQtLookupTable::SetMaxDisplayValue(int value) {
+    maxDisplay = value;
+}
+
+inline int irtkQtLookupTable::GetMaxDisplayValue() const {
+    return maxDisplay;
+}
+
+inline void irtkQtLookupTable::SetMinMaxDisplayValues(int min, int max) {
+    minDisplay = min;
+    maxDisplay = max;
+}
 
 
 #endif // IRTKQTLOOKUPTABLE_H

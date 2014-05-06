@@ -40,7 +40,7 @@ irtkImageAttributes irtkQtBaseViewer::InitializeAttributes() {
     return attr;
 }
 
-void irtkQtBaseViewer::AddToDisplayedImages(irtkQtImageObject *imageObject) {
+void irtkQtBaseViewer::AddToDisplayedImages(irtkQtImageObject *imageObject, int index) {
     irtkImage *newImage = NULL;
 
     // check if image object can be constructed from the file
@@ -66,9 +66,8 @@ void irtkQtBaseViewer::AddToDisplayedImages(irtkQtImageObject *imageObject) {
     }
 
     // if everything is fine add to vectors
-    AddToVectors(newImage);
-    _lookupTable.push_back(new irtkQtLookupTable());
-    _lookupTable.back()->SetAlpha(imageObject->GetOpacity());
+    AddToMaps(newImage, index);
+    _lookupTable.insert(pair<int, irtkQtLookupTable*> ( index, new irtkQtLookupTable() ));
 }
 
 void irtkQtBaseViewer::InitializeOriginOrientation() {

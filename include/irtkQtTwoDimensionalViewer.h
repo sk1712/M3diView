@@ -10,17 +10,17 @@ class irtkQtTwoDimensionalViewer : public irtkQtBaseViewer
 {
     Q_OBJECT
 
-    /// image output vector
-    vector<irtkGreyImage *> _imageOutput;
+    /// image output map
+    map<int, irtkGreyImage *> _imageOutput;
 
-    /// image transform vector
-    vector<irtkTransformation *> _transform;
+    /// image transform map
+    map<int, irtkTransformation *> _transform;
 
-    /// image interpolator vector
-    vector<irtkImageFunction *> _interpolator;
+    /// image interpolator map
+    map<int, irtkImageFunction *> _interpolator;
 
-    /// image transformaton filter vector
-    vector<irtkImageTransformation *> _transformFilter;
+    /// image transformaton filter map
+    map<int, irtkImageTransformation *> _transformFilter;
 
 public:
 
@@ -49,7 +49,7 @@ public:
     void ClearDisplayedImages();
 
     /// add image object to the vector of images to be displayed
-    void AddToDisplayedImages(irtkQtImageObject *imageObject);
+    void AddToDisplayedImages(irtkQtImageObject *imageObject, int index);
 
 public slots:
 
@@ -68,17 +68,17 @@ protected:
     void UpdateCurrentSlice();
 
     /// add new image and corresponding tools to vectors
-    void AddToVectors(irtkImage* newImage);
+    void AddToMaps(irtkImage* newImage, int index);
 };
 
 
 inline void irtkQtTwoDimensionalViewer::ClearDisplayedImages() {
-    DeleteVector(_image);
-    DeleteVector(_imageOutput);
-    DeleteVector(_lookupTable);
-    DeleteVector(_transform);
-    DeleteVector(_interpolator);
-    DeleteVector(_transformFilter);
+    DeleteMap(_image);
+    DeleteMap(_imageOutput);
+    DeleteMap(_lookupTable);
+    DeleteMap(_transform);
+    DeleteMap(_interpolator);
+    DeleteMap(_transformFilter);
 }
 
 #endif // IRTKQTTWODIMENSIONALVIEWER_H

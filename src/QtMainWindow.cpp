@@ -1,5 +1,6 @@
 #include <QtMainWindow.h>
 
+#include <QDesktopWidget>
 #include <QMenuBar>
 #include <QToolBar>
 #include <QFileDialog>
@@ -9,12 +10,20 @@
 #include <QVBoxLayout>
 
 QtMainWindow::QtMainWindow() {
-    splitter = new QSplitter(this);
+    // set the sizes for the splitter elements according to the desktop size
+    QDesktopWidget desktop;
+    QRect screenSize = desktop.availableGeometry(this);
+    QList<int> horizontalSize, verticalSize;
+    horizontalSize << screenSize.width() * 0.15f << screenSize.width() * 0.85f;
+    verticalSize << screenSize.height() *0.4f << screenSize.height() * 0.6f;
 
-    imageListView = new QListView(splitter);
-    imageListView->setMaximumWidth(0.5*width());
+    horizontalSplitter = new QSplitter(this);
+    verticalSplitter = new QSplitter(Qt::Vertical, horizontalSplitter);
+    verticalSplitter->setSizes(horizontalSize);
+    imageListView = new QListView(verticalSplitter);
+    toolsTabWidget = new QTabWidget(verticalSplitter);
 
-    mainViewWidget = new QWidget(splitter);
+    mainViewWidget = new QWidget(horizontalSplitter);
     QGridLayout *layout = new QGridLayout();
     mainViewWidget->setLayout(layout);
 
@@ -26,7 +35,10 @@ QtMainWindow::QtMainWindow() {
 
     opacitySlider->setValue(255);
 
-    setCentralWidget(splitter);
+    verticalSplitter->setSizes(verticalSize);
+    horizontalSplitter->setSizes(horizontalSize);
+
+    setCentralWidget(horizontalSplitter);
     singleViewerInScreen = false;
     imageModel = NULL;
 }
@@ -341,7 +353,7 @@ bool QtMainWindow::setDisplayedImages() {
                 glWidget = viewerWidget->getGlWidget();
 
                 try {
-                    viewer->AddToDisplayedImages(*it);
+                    viewer->AddToDisplayedImages(*it, imageList.indexOf(*it));
                     atLeastOneImageVisible = true;
                 }
                 catch (irtkException) {
@@ -543,7 +555,7 @@ void QtMainWindow::opacityValueChanged(int value) {
     QList<irtkQtImageObject*> list = irtkQtViewer::Instance()->GetImageList();
     int index = imageListView->currentIndex().row();
     if (!list.empty() && index >= 0) {
-        list.at(index)->SetOpacity(value);
+        //list.at(index)->SetOpacity(value);
     }
     opacityLabel->setText(QString::number(value));
 
@@ -553,7 +565,7 @@ void QtMainWindow::opacityValueChanged(int value) {
 
 void QtMainWindow::listViewClicked(QModelIndex index) {
     QList<irtkQtImageObject*> list = irtkQtViewer::Instance()->GetImageList();
-    opacitySlider->setValue(list.at(index.row())->GetOpacity());
+    //opacitySlider->setValue(list.at(index.row())->GetOpacity());
 }
 
 void QtMainWindow::listViewDoubleClicked(QModelIndex index) {

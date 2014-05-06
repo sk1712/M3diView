@@ -13,17 +13,17 @@ class irtkQtThreeDimensionalViewer : public irtkQtBaseViewer
     /// store previous slice info
     int previousSlice[3];
 
-    /// image output vector
-    vector<irtkGreyImage **> _imageOutput;
+    /// image output map
+    map<int, irtkGreyImage **> _imageOutput;
 
-    /// image transform vector
-    vector<irtkTransformation **> _transform;
+    /// image transform map
+    map<int, irtkTransformation **> _transform;
 
-    /// image interpolator vector
-    vector<irtkImageFunction **> _interpolator;
+    /// image interpolator map
+    map<int, irtkImageFunction **> _interpolator;
 
-    /// image transformaton filter vector
-    vector<irtkImageTransformation **> _transformFilter;
+    /// image transformaton filter map
+    map<int, irtkImageTransformation **> _transformFilter;
 
 public:
 
@@ -62,7 +62,7 @@ protected:
     void UpdateCurrentSlice();
 
     /// add new image and corresponding tools to vectors
-    void AddToVectors(irtkImage* newImage);
+    void AddToMaps(irtkImage* newImage, int index);
 
     /// set the orientation according to the view value
     void SetOrientation(int view);
@@ -73,28 +73,28 @@ protected:
 private:
 
     /// delete array elements of a vector
-    template<class T> void DeleteArrayVector(vector<T> & vec);
+    template<class T> void DeleteArrayMap(map<int, T> & mymap);
 };
 
 
 inline void irtkQtThreeDimensionalViewer::ClearDisplayedImages() {
-    DeleteVector(_image);
-    DeleteArrayVector(_imageOutput);
-    DeleteVector(_lookupTable);
-    DeleteArrayVector(_transform);
-    DeleteArrayVector(_interpolator);
-    DeleteArrayVector(_transformFilter);
+    DeleteMap(_image);
+    DeleteArrayMap(_imageOutput);
+    DeleteMap(_lookupTable);
+    DeleteArrayMap(_transform);
+    DeleteArrayMap(_interpolator);
+    DeleteArrayMap(_transformFilter);
 }
 
 template<class T>
-inline void irtkQtThreeDimensionalViewer::DeleteArrayVector(vector<T> & vec) {
-    typename vector<T>::iterator it;
+inline void irtkQtThreeDimensionalViewer::DeleteArrayMap(map<int, T> & mymap) {
+    typename map<int, T>::iterator it;
 
-    for (it = vec.begin(); it != vec.end(); it++) {
-        delete [] (*it);
+    for( it = mymap.begin(); it != mymap.end(); it++){
+        delete [] ((*it).second);
     }
 
-    vec.clear();
+    mymap.clear();
 }
 
 #endif // IRTKQTTHREEDIMENSIONALVIEWER_H

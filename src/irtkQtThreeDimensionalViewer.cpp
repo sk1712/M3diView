@@ -40,12 +40,13 @@ vector<QRgb**> irtkQtThreeDimensionalViewer::GetDrawable() {
         {sliceNum[0], sliceNum[2]}
     };
 
-    for (unsigned int index = 0; index < _image.size(); index++) {
+    map<int, irtkGreyImage **>::iterator it;
+    for (it = _imageOutput.begin(); it != _imageOutput.end(); ++it) {
         QRgb** drawable = new QRgb*[3];
 
         for (int dim = 0; dim < 3; dim++) {
-            drawable[dim] = new QRgb[_imageOutput[index][dim]->GetNumberOfVoxels()];
-            irtkGreyPixel *original = _imageOutput[index][dim]->GetPointerToVoxels();
+            drawable[dim] = new QRgb[it->second[dim]->GetNumberOfVoxels()];
+            irtkGreyPixel *original = it->second[dim]->GetPointerToVoxels();
             QRgb *drawn = drawable[dim];
 
             int i, j;
@@ -53,7 +54,7 @@ vector<QRgb**> irtkQtThreeDimensionalViewer::GetDrawable() {
             for (j = 0; j < dimensions[dim][0]; j++) {
                 for (i = 0; i < dimensions[dim][1]; i++) {
                     if (*original >= 0) {
-                        *drawn = _lookupTable[index]->lookupTable[*original];
+                        *drawn = _lookupTable[it->first]->lookupTable[*original];
                     } else {
                         *drawn = _backgroundColor;
                     }
@@ -72,12 +73,13 @@ vector<QRgb**> irtkQtThreeDimensionalViewer::GetDrawable() {
 void irtkQtThreeDimensionalViewer::InitializeTransformation() {
     double _targetMin, _targetMax;
 
-    for (unsigned int i = 0; i < _image.size(); i++) {
-        _image[i]->GetMinMaxAsDouble(&_targetMin, &_targetMax);
+    map<int, irtkImage*>::iterator it;
+    for (it = _image.begin(); it != _image.end(); it++) {
+        it->second->GetMinMaxAsDouble(&_targetMin, &_targetMax);
 
         for (int dim = 0; dim < 3; dim++) {
-            _transformFilter[i][dim]->SetInput(_image[i]);
-            _transformFilter[i][dim]->PutScaleFactorAndOffset(255.0 / (_targetMax
+            _transformFilter[it->first][dim]->SetInput(it->second);
+            _transformFilter[it->first][dim]->PutScaleFactorAndOffset(255.0 / (_targetMax
                 - _targetMin), -_targetMin * 255.0 / (_targetMax - _targetMin));
         }
     }
@@ -103,25 +105,25 @@ void irtkQtThreeDimensionalViewer::ChangeOrigin(int x, int y) {
 
 }
 
-void irtkQtThreeDimensionalViewer::AddToVectors(irtkImage* newImage) {
-    _image.push_back(newImage);
+void irtkQtThreeDimensionalViewer::AddToMaps(irtkImage* newImage, int index) {
+    _image.insert(pair<int, irtkImage *> (index, newImage));
 
-    _imageOutput.push_back(new irtkGreyImage*[3]);
-    _transform.push_back(new irtkTransformation*[3]);
-    _interpolator.push_back(new irtkImageFunction*[3]);
-    _transformFilter.push_back(new irtkImageTransformation*[3]);
+    _imageOutput.insert(pair<int, irtkGreyImage **> (index, new irtkGreyImage*[3]));
+    _transform.insert(pair<int, irtkTransformation **> (index, new irtkTransformation*[3]));
+    _interpolator.insert(pair<int, irtkImageFunction **> (index, new irtkImageFunction*[3]));
+    _transformFilter.insert(pair<int, irtkImageTransformation **> (index, new irtkImageTransformation*[3]));
 
     for (int dim = 0; dim < 3; dim++) {
-        _imageOutput.back()[dim] = new irtkGreyImage;
-        _transform.back()[dim] = new irtkAffineTransformation;
-        _interpolator.back()[dim] = new irtkNearestNeighborInterpolateImageFunction;
+        _imageOutput[index][dim] = new irtkGreyImage;
+        _transform[index][dim] = new irtkAffineTransformation;
+        _interpolator[index][dim] = new irtkNearestNeighborInterpolateImageFunction;
 
         irtkImageTransformation *transformation = new irtkImageTransformation;
-        transformation->SetOutput(_imageOutput.back()[dim]);
-        transformation->SetTransformation(_transform.back()[dim]);
-        transformation->PutInterpolator(_interpolator.back()[dim]);
+        transformation->SetOutput(_imageOutput[index][dim]);
+        transformation->SetTransformation(_transform[index][dim]);
+        transformation->PutInterpolator(_interpolator[index][dim]);
         transformation->PutSourcePaddingValue(0);
-        _transformFilter.back()[dim] = transformation;
+        _transformFilter[index][dim] = transformation;
     }
 
     for (int i = 0; i < 3; i++) previousSlice[i] = 0;
@@ -153,15 +155,15 @@ void irtkQtThreeDimensionalViewer::CalculateOutputImages() {
             ChangeViewSlice(i);
             attr[i] = InitializeAttributes();
 
-            vector<irtkGreyImage **>::iterator image_it;
+            map<int, irtkGreyImage **>::iterator image_it;
             for (image_it = _imageOutput.begin(); image_it != _imageOutput.end(); image_it++) {
-                (*image_it)[i]->Initialize(attr[i]);
+                image_it->second[i]->Initialize(attr[i]);
             }
 
-            vector<irtkImageTransformation **>::iterator trans_it;
+            map<int, irtkImageTransformation **>::iterator trans_it;
             for (trans_it = _transformFilter.begin(); trans_it != _transformFilter.end(); trans_it++) {
-                (*trans_it)[i]->PutSourcePaddingValue(-1);
-                (*trans_it)[i]->Run();
+                trans_it->second[i]->PutSourcePaddingValue(-1);
+                trans_it->second[i]->Run();
             }
         }
     }
