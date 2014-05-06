@@ -47,6 +47,9 @@ public:
     /// get image maximum displayed value
     int GetMaxDisplayValue() const;
 
+    /// set minimum and maximum values
+    void SetMinMaxDisplayValues(int min, int max);
+
     /// check if image is visible
     bool IsVisible() const;
 
@@ -83,6 +86,11 @@ inline void irtkQtImageObject::SetMaxDisplayValue(int value) {
 
 inline int irtkQtImageObject::GetMaxDisplayValue() const {
     return maxDisplay;
+}
+
+inline void irtkQtImageObject::SetMinMaxDisplayValues(int min, int max) {
+    minDisplay = min;
+    maxDisplay = max;
 }
 
 inline bool irtkQtImageObject::IsVisible() const {

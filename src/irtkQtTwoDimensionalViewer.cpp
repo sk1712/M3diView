@@ -96,6 +96,26 @@ void irtkQtTwoDimensionalViewer::GetLabels(char &top, char &bottom, char &left, 
     }
 }
 
+string irtkQtTwoDimensionalViewer::GetObjectName() {
+    string objectName = "";
+
+    switch (_viewMode) {
+    case VIEW_AXIAL :
+        objectName = "axial";
+        break;
+    case VIEW_SAGITTAL :
+        objectName = "sagittal";
+        break;
+    case VIEW_CORONAL :
+        objectName = "coronal";
+        break;
+    default :
+        break;
+    }
+
+    return objectName;
+}
+
 void irtkQtTwoDimensionalViewer::InitializeTransformation() {
     double _targetMin, _targetMax;
 
@@ -123,14 +143,14 @@ void irtkQtTwoDimensionalViewer::ResizeImage(int width, int height) {
     emit ImageResized(QVector<QRgb**>::fromStdVector(GetDrawable()));
 }
 
-void irtkQtTwoDimensionalViewer::ChangeSlice(int slice) {
+void irtkQtTwoDimensionalViewer::ChangeSlice(int* slice) {
     double originX, originY, originZ;
 
     irtkGreyImage *_targetImageOutput = _imageOutput[0];
 
     _targetImageOutput->GetOrigin(originX, originY, originZ);
     _targetImageOutput->WorldToImage(originX, originY, originZ);
-    originZ += slice - *GetCurrentSlice();
+    originZ += slice[0] - *GetCurrentSlice();
     _targetImageOutput->ImageToWorld(originX, originY, originZ);
 
     _targetImage->WorldToImage(originX, originY, originZ);

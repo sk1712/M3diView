@@ -163,6 +163,11 @@ void QtMainWindow::disconnectViewerSignals() {
     irtkQtBaseViewer *viewer;
 
     for (int i = 0; i < viewers.size(); i++) {
+        disconnect(viewerWidgets[i], SIGNAL(sliderValueChanged(int*)),
+                   viewers[i], SLOT(ChangeSlice(int*)));
+        disconnect(viewers[i], SIGNAL(OriginChanged(double, double, double)),
+                   this, SLOT(updateOrigin(double, double, double)));
+
         viewerWidget = dynamic_cast<Qt2dViewerWidget*>(viewerWidgets[i]);
         viewer = viewers[i];
 
@@ -172,13 +177,8 @@ void QtMainWindow::disconnectViewerSignals() {
             disconnect(viewer, SIGNAL(ImageResized(QVector<QRgb**>)),
                        viewerWidget->getGlWidget(), SLOT(updateDrawable(QVector<QRgb**>)));
 
-            disconnect(viewerWidget, SIGNAL(sliderValueChanged(int)),
-                       viewer, SLOT(ChangeSlice(int)));
             disconnect(viewerWidget->getGlWidget(), SIGNAL(leftButtonPressed(int, int)),
                        viewer, SLOT(ChangeOrigin(int, int)));
-
-            disconnect(viewers.at(i), SIGNAL(OriginChanged(double, double, double)),
-                       this, SLOT(updateOrigin(double, double, double)));
         }
     }
 }
@@ -188,6 +188,12 @@ void QtMainWindow::connectViewerSignals() {
     irtkQtBaseViewer *viewer;
 
     for (int i = 0; i < viewers.size(); i++) {
+        // update drawable when origin is changed
+        connect(viewerWidgets[i], SIGNAL(sliderValueChanged(int*)),
+                   viewers[i], SLOT(ChangeSlice(int*)));
+        connect(viewers[i], SIGNAL(OriginChanged(double, double, double)),
+                   this, SLOT(updateOrigin(double, double, double)));
+
         viewerWidget = dynamic_cast<Qt2dViewerWidget*>(viewerWidgets[i]);
         viewer = viewers[i];
 
@@ -198,14 +204,8 @@ void QtMainWindow::connectViewerSignals() {
             connect(viewer, SIGNAL(ImageResized(QVector<QRgb**>)),
                     viewerWidget->getGlWidget(), SLOT(updateDrawable(QVector<QRgb**>)));
 
-            // update drawable when origin is changed
-            connect(viewerWidget, SIGNAL(sliderValueChanged(int)),
-                    viewer, SLOT(ChangeSlice(int)));
             connect(viewerWidget->getGlWidget(), SIGNAL(leftButtonPressed(int, int)),
                                viewer, SLOT(ChangeOrigin(int, int)));
-
-            connect(viewer, SIGNAL(OriginChanged(double, double, double)),
-                    this, SLOT(updateOrigin(double, double, double)));
         }
     }
 }
@@ -223,6 +223,7 @@ Qt2dViewerWidget* QtMainWindow::createTwoDimensionalView(irtkQtBaseViewer::irtkV
     char top, bottom, left, right;
     viewer->GetLabels(top, bottom, left, right);
     qtViewer->setLabels(top, bottom, left, right);
+    qtViewer->setObjectName(QString::fromStdString(viewer->GetObjectName()));
 
     // register signals to expand or delete the viewer
     connect(qtViewer, SIGNAL(windowExpanded()), this, SLOT(showOnlyThisWidget()));

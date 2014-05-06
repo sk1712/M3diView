@@ -19,8 +19,6 @@ class Qt2dViewerWidget : public QtViewerWidget
     /// label showing number of slice
     QLabel *sliceLabel;
 
-protected:
-
     /// slice currently shown
     int currentSlice;
 
@@ -35,9 +33,6 @@ public:
     /// class destructor
     QtGlWidget* getGlWidget() const;
 
-    /// getter for slice slider
-    QSlider* getSlider() const;
-
     /// update currentSlice
     void setCurrentSlice(int* current);
 
@@ -49,6 +44,9 @@ public:
 
     /// set viewer labels
     void setLabels(const char t, const char b, const char l, const char r);
+
+    /// set object name (used for styling the widgets
+    void setObjectName(QString objectName);
 
 protected:
 
@@ -74,17 +72,13 @@ private slots:
 signals:
 
     /// signal emitted when slider value changes
-    void sliderValueChanged(int value);
+    void sliderValueChanged(int* value);
 
 };
 
 
 inline QtGlWidget* Qt2dViewerWidget::getGlWidget() const {
     return glWidget;
-}
-
-inline QSlider* Qt2dViewerWidget::getSlider() const {
-    return sliceSlider;
 }
 
 inline void Qt2dViewerWidget::setCurrentSlice(int* current) {
@@ -103,6 +97,10 @@ inline void Qt2dViewerWidget::setEnabled(bool enabled) {
 
 inline void Qt2dViewerWidget::setLabels(const char t, const char b, const char l, const char r) {
     glWidget->setLabels(t, b, l, r);
+}
+
+inline void Qt2dViewerWidget::setObjectName(QString objectName) {
+    sliceSlider->setObjectName(objectName);
 }
 
 #endif // QT2DVIEWERWIDGET_H

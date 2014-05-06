@@ -11,6 +11,12 @@ class Qt3dViewerWidget : public QtViewerWidget
     /// OpenGL widget
     QtThreeDimensionalGlWidget *glWidget;
 
+    /// slice sliders
+    QSlider *axialSlider, *sagittalSlider, *coronalSlider;
+
+    /// slices currently shown
+    int currentSlice[3];
+
 public:
 
     /// class constructor
@@ -27,6 +33,23 @@ public:
 
     /// set viewer enabled
     void setEnabled(bool enabled);
+
+protected:
+
+    /// connect signals to slots
+    void connectSignals();
+
+private slots:
+
+    void axialSliceChanged(int value);
+
+    void sagittalSliceChanged(int value);
+
+    void coronalSliceChanged(int value);
+
+signals:
+
+    void sliderValueChanged(int* value);
 };
 
 inline QtGlWidget* Qt3dViewerWidget::getGlWidget() const {
@@ -35,14 +58,25 @@ inline QtGlWidget* Qt3dViewerWidget::getGlWidget() const {
 
 inline void Qt3dViewerWidget::setCurrentSlice(int *current) {
     glWidget->setCurrentSlice(current);
+
+    axialSlider->setValue(current[2]);
+    sagittalSlider->setValue(current[0]);
+    coronalSlider->setValue(current[1]);
 }
 
 inline void Qt3dViewerWidget::setMaximumSlice(int *dim) {
     glWidget->setDimensions(dim);
+
+    axialSlider->setMaximum(dim[2]);
+    sagittalSlider->setMaximum(dim[0]);
+    coronalSlider->setMaximum(dim[1]);
 }
 
 inline void Qt3dViewerWidget::setEnabled(bool enabled) {
     glWidget->setEnabled(enabled);
+    axialSlider->setEnabled(enabled);
+    sagittalSlider->setEnabled(enabled);
+    coronalSlider->setEnabled(enabled);
 }
 
 #endif // QT3DVIEWERWIDGET_H

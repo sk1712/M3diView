@@ -49,7 +49,7 @@ protected:
     /// create tool buttons
     virtual void createToolButtons();
 
-    /// connect signals
+    /// connect signals to slots
     virtual void connectSignals();
 
 protected slots:

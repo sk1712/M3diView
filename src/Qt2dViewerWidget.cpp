@@ -8,18 +8,18 @@ Qt2dViewerWidget::Qt2dViewerWidget(QWidget *parent)
     QGridLayout *layout = dynamic_cast<QGridLayout*>(this->layout());
 
     glWidget = new QtTwoDimensionalGlWidget(this);
-    glWidget->setEnabled(false);
     layout->addWidget(glWidget, 0, 0);
+    layout->setColumnStretch(0, 1);
 
     sliceSlider = new QSlider(Qt::Vertical);
     sliceSlider->setMinimum(1);
-    sliceSlider->setEnabled(false);
     layout->addWidget(sliceSlider, 0, 1);
 
     sliceLabel = new QLabel();
     layout->addWidget(sliceLabel, 1, 0, Qt::AlignRight);
 
     connectSignals();
+    setEnabled(false);
 }
 
 void Qt2dViewerWidget::updateLabel() {
@@ -52,5 +52,5 @@ void Qt2dViewerWidget::updateSlice(int slice) {
     currentSlice = slice;
     updateLabel();
 
-    emit sliderValueChanged(slice);
+    emit sliderValueChanged(&currentSlice);
 }

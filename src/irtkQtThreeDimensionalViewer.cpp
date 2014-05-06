@@ -87,8 +87,16 @@ void irtkQtThreeDimensionalViewer::ResizeImage(int width, int height) {
 
 }
 
-void irtkQtThreeDimensionalViewer::ChangeSlice(int slice) {
+void irtkQtThreeDimensionalViewer::ChangeSlice(int* slice) {
+    double originX, originY, originZ;
 
+    originX = slice[0];
+    originY = slice[1];
+    originZ = slice[2];
+
+    _targetImage->ImageToWorld(originX, originY, originZ);
+
+    emit OriginChanged(originX, originY, originZ);
 }
 
 void irtkQtThreeDimensionalViewer::ChangeOrigin(int x, int y) {

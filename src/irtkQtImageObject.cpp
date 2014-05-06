@@ -10,6 +10,8 @@ irtkQtImageObject::irtkQtImageObject(const QString &path)
 
     _visible = false;
     _opacity = 255;
+    minDisplay = 0;
+    maxDisplay = 0;
 }
 
 irtkQtImageObject::~irtkQtImageObject() {

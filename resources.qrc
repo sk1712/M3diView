@@ -10,5 +10,6 @@
         <file>icons/eye.png</file>
         <file>icons/arrow_down.png</file>
         <file>icons/arrow_up.png</file>
+        <file>stylesheets/stylesheet.qss</file>
     </qresource>
 </RCC>

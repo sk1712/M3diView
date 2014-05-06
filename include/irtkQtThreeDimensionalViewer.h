@@ -51,7 +51,7 @@ public slots:
     void ResizeImage(int width, int height);
 
     /// callback function when slice is changed
-    void ChangeSlice(int slice);
+    void ChangeSlice(int* slice);
 
     /// callback function when origin is changed
     void ChangeOrigin(int x, int y);

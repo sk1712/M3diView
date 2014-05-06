@@ -42,6 +42,9 @@ public:
     /// get the labels displayed on the screen
     void GetLabels(char &top, char &bottom, char &left, char &right);
 
+    /// get the object name for the corresponding view (useful for the styling)
+    string GetObjectName();
+
     /// delete all vector elements and clear vectors
     void ClearDisplayedImages();
 
@@ -54,7 +57,7 @@ public slots:
     void ResizeImage(int width, int height);
 
     /// callback function when slice is changed
-    void ChangeSlice(int slice);
+    void ChangeSlice(int* slice);
 
     /// callback function when origin is changed
     void ChangeOrigin(int x, int y);

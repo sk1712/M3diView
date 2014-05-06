@@ -108,7 +108,7 @@ public slots:
     virtual void ResizeImage(int width, int height) = 0;
 
     /// callback function when slice is changed
-    virtual void ChangeSlice(int slice) = 0;
+    virtual void ChangeSlice(int* slice) = 0;
 
     /// callback function when origin is changed
     virtual void ChangeOrigin(int x, int y) = 0;
