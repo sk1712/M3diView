@@ -28,6 +28,8 @@ void irtkQtThreeDimensionalViewer::UpdateCurrentSlice() {
     currentSlice[0] = (int) round(x);
     currentSlice[1] = (int) round(y);
     currentSlice[2] = (int) round(z);
+
+    cout << "number of images " << _image.size() << endl;
 }
 
 vector<QRgb**> irtkQtThreeDimensionalViewer::GetDrawable() {
@@ -71,17 +73,22 @@ vector<QRgb**> irtkQtThreeDimensionalViewer::GetDrawable() {
 }
 
 void irtkQtThreeDimensionalViewer::InitializeTransformation() {
-    double _targetMin, _targetMax;
-
     map<int, irtkImage*>::iterator it;
     for (it = _image.begin(); it != _image.end(); it++) {
-        it->second->GetMinMaxAsDouble(&_targetMin, &_targetMax);
+        currentIndex = it->first;
+        InitializeCurrentTransformation();
+    }
+}
 
-        for (int dim = 0; dim < 3; dim++) {
-            _transformFilter[it->first][dim]->SetInput(it->second);
-            _transformFilter[it->first][dim]->PutScaleFactorAndOffset(255.0 / (_targetMax
-                - _targetMin), -_targetMin * 255.0 / (_targetMax - _targetMin));
-        }
+void irtkQtThreeDimensionalViewer::InitializeCurrentTransformation() {
+    double _targetMin, _targetMax;
+
+    _image[currentIndex]->GetMinMaxAsDouble(&_targetMin, &_targetMax);
+
+    for (int dim = 0; dim < 3; dim++) {
+        _transformFilter[currentIndex][dim]->SetInput(_image[currentIndex]);
+        _transformFilter[currentIndex][dim]->PutScaleFactorAndOffset(255.0 / (_targetMax
+            - _targetMin), -_targetMin * 255.0 / (_targetMax - _targetMin));
     }
 }
 
@@ -172,6 +179,75 @@ void irtkQtThreeDimensionalViewer::CalculateOutputImages() {
     _originY = originY_backup;
     _originZ = originZ_backup;
     //QtConcurrent::blockingMap(_transformFilter, &CalculateSingleTransform);
+}
+
+void irtkQtThreeDimensionalViewer::CalculateCurrentOutput() {
+    irtkImageAttributes attr[3];
+    // width of output image
+    int width[3] = {sliceNum[0], sliceNum[1], sliceNum[0]};
+    // height of output image
+    int height[3] = {sliceNum[1], sliceNum[2], sliceNum[2]};
+
+    // store a backup of current origin
+    double originX_backup = _originX, originY_backup = _originY, originZ_backup = _originZ;
+
+    for (int i = 0; i < 3; i++) {
+        _width = width[i]; _height = height[i];
+        SetOrientation(i);
+        ChangeViewSlice(i);
+        attr[i] = InitializeAttributes();
+
+        _imageOutput[currentIndex][i]->Initialize(attr[i]);
+        _transformFilter[currentIndex][i]->PutSourcePaddingValue(-1);
+        _transformFilter[currentIndex][i]->Run();
+    }
+
+    _originX = originX_backup;
+    _originY = originY_backup;
+    _originZ = originZ_backup;
+}
+
+void irtkQtThreeDimensionalViewer::DeleteSingleImage(int index) {
+    delete _image[index];
+    _image.erase(index);
+
+    delete [] _imageOutput[index];
+    _imageOutput.erase(index);
+
+    delete _lookupTable[index];
+    _lookupTable.erase(index);
+
+    delete [] _transform[index];
+    _transform.erase(index);
+
+    delete [] _interpolator[index];
+    _interpolator.erase(index);
+
+    delete [] _transformFilter[index];
+    _transformFilter.erase(index);
+
+    irtkQtBaseViewer::DeleteSingleImage(index);
+}
+
+void irtkQtThreeDimensionalViewer::MoveImage(int previousKey, int newKey) {
+    if (newKey < previousKey) {
+        MoveImageUp(_image, previousKey, newKey);
+        MoveImageUp(_imageOutput, previousKey, newKey);
+        MoveImageUp(_lookupTable, previousKey, newKey);
+        MoveImageUp(_transform, previousKey, newKey);
+        MoveImageUp(_interpolator, previousKey, newKey);
+        MoveImageUp(_transformFilter, previousKey, newKey);
+    }
+    else if (newKey > previousKey){
+        MoveImageDown(_image, previousKey, newKey);
+        MoveImageDown(_imageOutput, previousKey, newKey);
+        MoveImageDown(_lookupTable, previousKey, newKey);
+        MoveImageDown(_transform, previousKey, newKey);
+        MoveImageDown(_interpolator, previousKey, newKey);
+        MoveImageDown(_transformFilter, previousKey, newKey);
+    }
+
+    cout << "first image key is " << _image.begin()->first << endl;
 }
 
 void irtkQtThreeDimensionalViewer::SetOrientation(int view) {

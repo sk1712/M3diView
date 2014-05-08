@@ -52,6 +52,7 @@ void irtkQtBaseViewer::AddToDisplayedImages(irtkQtImageObject *imageObject, int 
         return;
     }
 
+    currentIndex = index;
     // if first image to be displayed make it target
     if (_image.size() == 0) {
         _targetImage = newImage;
@@ -68,6 +69,16 @@ void irtkQtBaseViewer::AddToDisplayedImages(irtkQtImageObject *imageObject, int 
     // if everything is fine add to vectors
     AddToMaps(newImage, index);
     _lookupTable.insert(pair<int, irtkQtLookupTable*> ( index, new irtkQtLookupTable() ));
+}
+
+void irtkQtBaseViewer::DeleteSingleImage(int index) {
+    if (index < _image.begin()->first) {
+        _targetImage = _image.begin()->second;
+    }
+}
+
+void irtkQtBaseViewer::SetOpacity(int value, int index) {
+    _lookupTable[index]->SetAlpha(value);
 }
 
 void irtkQtBaseViewer::InitializeOriginOrientation() {

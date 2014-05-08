@@ -45,6 +45,9 @@ protected:
     /// slices currently visible
     int* currentSlice;
 
+    /// current index added to the images displayed
+    int currentIndex;
+
     /// image against which all other images are transformed
     irtkImage* _targetImage;
 
@@ -95,14 +98,29 @@ public:
     /// calculate the output image from the transformation
     virtual void CalculateOutputImages() = 0;
 
+    /// calculate single output image from the transformation
+    virtual void CalculateCurrentOutput() = 0;
+
     /// initialize the transformation from the input to the output image
     virtual void InitializeTransformation() = 0;
+
+    /// initialize single transformation from the input to the output image
+    virtual void InitializeCurrentTransformation() = 0;
 
     /// delete all map elements and clear maps
     virtual void ClearDisplayedImages() = 0;
 
     /// add image object to the maps of images to be displayed
     virtual void AddToDisplayedImages(irtkQtImageObject *imageObject, int index);
+
+    /// delete single image
+    virtual void DeleteSingleImage(int index);
+
+    /// move image with key previousKey to newKey
+    virtual void MoveImage(int previousKey, int newKey) = 0;
+
+    /// set opacity for the corresponding image
+    void SetOpacity(int value, int index);
 
 public slots:
 
@@ -133,7 +151,14 @@ protected:
     void SetOrientation(const double * xaxis, const double * yaxis, const double * zaxis);
 
     /// delete all elements of a map first and then clear
-    template<class T> void DeleteMap(map<int, T> & mymap);
+    template<class T>
+    void DeleteMap(map<int, T> & mymap);
+
+    template<class T>
+    void MoveImageUp(map<int, T> & mymap, int previousKey, int newKey);
+
+    template<class T>
+    void MoveImageDown(map<int, T> & mymap, int previousKey, int newKey);
 
 signals:
 
@@ -203,6 +228,54 @@ inline void irtkQtBaseViewer::DeleteMap(map<int, T> & mymap) {
             delete ((*it).second);
     }
     mymap.clear();
+}
+
+template<class T>
+void irtkQtBaseViewer::MoveImageUp(map<int, T> & mymap, int previousKey, int newKey) {
+    map<int, T> newmap;
+    typename map<int, T>::iterator it;
+
+    for (it = mymap.begin(); it != mymap.end(); it++) {
+        if ((it->first < newKey || it->first > previousKey)) {
+            newmap.insert(pair<int, T> (it->first, it->second));
+            continue;
+        }
+        else if (it->first == previousKey) {
+            newmap.insert(pair<int, T> (newKey, it->second));
+            continue;
+        }
+        else {
+            newmap.insert(pair<int, T> (it->first + 1, it->second));
+        }
+    }
+
+    mymap.clear();
+
+    mymap = newmap;
+}
+
+template<class T>
+void irtkQtBaseViewer::MoveImageDown(map<int, T> & mymap, int previousKey, int newKey) {
+    map<int, T> newmap;
+    typename map<int, T>::iterator it;
+
+    for (it = mymap.begin(); it != mymap.end(); it++) {
+        if ((it->first > newKey) || (it->first < previousKey)) {
+            newmap.insert(pair<int, T> (it->first, it->second));
+            continue;
+        }
+        else if (it->first == previousKey) {
+            newmap.insert(pair<int, T> (newKey, it->second));
+            continue;
+        }
+        else {
+            newmap.insert(pair<int, T> (it->first - 1, it->second));
+        }
+    }
+
+    mymap.clear();
+
+    mymap = newmap;
 }
 
 #endif // IRTKQTBASEVIEWER_H

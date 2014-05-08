@@ -33,11 +33,20 @@ public:
     /// get the array of RGB values to be drawn on the screen
     vector<QRgb**> GetDrawable();
 
+    /// calculate the output image from the transformation
+    void CalculateOutputImages();
+
+    /// calculate single output image from the transformation
+    void CalculateCurrentOutput();
+
     /// initialize the transformation from the input to the output image
     void InitializeTransformation();
 
-    /// calculate the output image from the transformation
-    void CalculateOutputImages();
+    /// initialize single transformation from the input to the output image
+    void InitializeCurrentTransformation();
+
+    /// move image with key previousKey to newKey
+    void MoveImage(int previousKey, int newKey);
 
     /// get the labels displayed on the screen
     void GetLabels(char &top, char &bottom, char &left, char &right);
@@ -50,6 +59,9 @@ public:
 
     /// add image object to the vector of images to be displayed
     void AddToDisplayedImages(irtkQtImageObject *imageObject, int index);
+
+    /// delete single image
+    void DeleteSingleImage(int index);
 
 public slots:
 

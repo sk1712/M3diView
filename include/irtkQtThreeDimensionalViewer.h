@@ -39,11 +39,23 @@ public:
     /// initialize the transformation from the input to the output image
     void InitializeTransformation();
 
+    /// initialize single transformation from the input to the output image
+    void InitializeCurrentTransformation();
+
     /// calculate the output image from the transformation
     void CalculateOutputImages();
 
+    /// calculate single output image from the transformation
+    void CalculateCurrentOutput();
+
     /// delete all vector elements and clear vectors
     void ClearDisplayedImages();
+
+    /// delete single image
+    void DeleteSingleImage(int index);
+
+    /// move image with key previousKey to newKey
+    void MoveImage(int previousKey, int newKey);
 
 public slots:
 

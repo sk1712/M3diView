@@ -15,31 +15,6 @@ irtkQtTwoDimensionalViewer::~irtkQtTwoDimensionalViewer() {
     delete currentSlice;
 }
 
-void irtkQtTwoDimensionalViewer::UpdateCurrentSlice() {
-    double x, y, z;
-
-    x = _originX;
-    y = _originY;
-    z = _originZ;
-
-    _targetImage->WorldToImage(x, y, z);
-
-    switch (_viewMode) {
-    case VIEW_AXIAL :
-        *currentSlice = (int) round(z);
-        break;
-    case VIEW_SAGITTAL :
-        *currentSlice = (int) round(x);
-        break;
-    case VIEW_CORONAL :
-        *currentSlice = (int) round(y);
-        break;
-    default:
-        currentSlice = 0;
-        break;
-    }
-}
-
 vector<QRgb**> irtkQtTwoDimensionalViewer::GetDrawable() {
     vector<QRgb**> allDrawables;
     QRgb _backgroundColor = qRgba(0, 0, 0, 0);
@@ -70,6 +45,74 @@ vector<QRgb**> irtkQtTwoDimensionalViewer::GetDrawable() {
     }
 
     return allDrawables;
+}
+
+void irtkQtTwoDimensionalViewer::CalculateOutputImages() {
+//    clock_t t, t2;
+
+//    t = clock();
+    irtkImageAttributes attr = InitializeAttributes();
+
+    map<int, irtkGreyImage *>::iterator it;
+    for (it = _imageOutput.begin(); it != _imageOutput.end(); it++) {
+        it->second->Initialize(attr);
+    }
+
+    map<int, irtkImageTransformation *>::iterator trit;
+    for (trit = _transformFilter.begin(); trit != _transformFilter.end(); trit++) {
+        trit->second->PutSourcePaddingValue(-1);
+        trit->second->Run();
+    }
+
+//    t2 = clock() - t;
+//    qDebug() << "Now running thread: " << QThread::currentThreadId()
+//             << " and it took me " << ((float)t2)/CLOCKS_PER_SEC
+//             << " seconds to calculate output images.\n";
+}
+
+void irtkQtTwoDimensionalViewer::CalculateCurrentOutput() {
+    irtkImageAttributes attr = InitializeAttributes();
+    _imageOutput[currentIndex]->Initialize(attr);
+
+    _transformFilter[currentIndex]->PutSourcePaddingValue(-1);
+    _transformFilter[currentIndex]->Run();
+}
+
+void irtkQtTwoDimensionalViewer::InitializeTransformation() {
+    map<int, irtkImage*>::iterator it;
+    for (it = _image.begin(); it != _image.end(); it++) {
+        currentIndex = it->first;
+        InitializeCurrentTransformation();
+    }
+}
+
+void irtkQtTwoDimensionalViewer::InitializeCurrentTransformation() {
+    double _targetMin, _targetMax;
+
+    _image[currentIndex]->GetMinMaxAsDouble(&_targetMin, &_targetMax);
+
+    _transformFilter[currentIndex]->SetInput(_image[currentIndex]);
+    _transformFilter[currentIndex]->PutScaleFactorAndOffset(255.0 / (_targetMax
+        - _targetMin), -_targetMin * 255.0 / (_targetMax - _targetMin));
+}
+
+void irtkQtTwoDimensionalViewer::MoveImage(int previousKey, int newKey) {
+    if (newKey < previousKey) {
+        MoveImageUp(_image, previousKey, newKey);
+        MoveImageUp(_imageOutput, previousKey, newKey);
+        MoveImageUp(_lookupTable, previousKey, newKey);
+        MoveImageUp(_transform, previousKey, newKey);
+        MoveImageUp(_interpolator, previousKey, newKey);
+        MoveImageUp(_transformFilter, previousKey, newKey);
+    }
+    else if (newKey > previousKey){
+        MoveImageDown(_image, previousKey, newKey);
+        MoveImageDown(_imageOutput, previousKey, newKey);
+        MoveImageDown(_lookupTable, previousKey, newKey);
+        MoveImageDown(_transform, previousKey, newKey);
+        MoveImageDown(_interpolator, previousKey, newKey);
+        MoveImageDown(_transformFilter, previousKey, newKey);
+    }
 }
 
 void irtkQtTwoDimensionalViewer::GetLabels(char &top, char &bottom, char &left, char &right) {
@@ -117,25 +160,34 @@ string irtkQtTwoDimensionalViewer::GetObjectName() {
     return objectName;
 }
 
-void irtkQtTwoDimensionalViewer::InitializeTransformation() {
-    double _targetMin, _targetMax;
-
-    map<int, irtkImage*>::iterator it;
-    for (it = _image.begin(); it != _image.end(); it++) {
-        it->second->GetMinMaxAsDouble(&_targetMin, &_targetMax);
-
-        _transformFilter[it->first]->SetInput(it->second);
-        _transformFilter[it->first]->PutScaleFactorAndOffset(255.0 / (_targetMax
-            - _targetMin), -_targetMin * 255.0 / (_targetMax - _targetMin));
-    }
-}
-
 void irtkQtTwoDimensionalViewer::AddToDisplayedImages(irtkQtImageObject *imageObject, int index) {
     irtkQtBaseViewer::AddToDisplayedImages(imageObject, index);
     // set pixel size to 1x1mm
     if (_image.size() == 1) {
         SetResolution(1, 1, _targetImage->GetZSize());
     }
+}
+
+void irtkQtTwoDimensionalViewer::DeleteSingleImage(int index) {
+    delete _image[index];
+    _image.erase(index);
+
+    delete _imageOutput[index];
+    _imageOutput.erase(index);
+
+    delete _lookupTable[index];
+    _lookupTable.erase(index);
+
+    delete _transform[index];
+    _transform.erase(index);
+
+    delete _interpolator[index];
+    _interpolator.erase(index);
+
+    delete _transformFilter[index];
+    _transformFilter.erase(index);
+
+    irtkQtBaseViewer::DeleteSingleImage(index);
 }
 
 void irtkQtTwoDimensionalViewer::ResizeImage(int width, int height) {
@@ -184,6 +236,31 @@ void irtkQtTwoDimensionalViewer::ChangeOrigin(int x, int y) {
     emit OriginChanged(originX, originY, originZ);
 }
 
+void irtkQtTwoDimensionalViewer::UpdateCurrentSlice() {
+    double x, y, z;
+
+    x = _originX;
+    y = _originY;
+    z = _originZ;
+
+    _targetImage->WorldToImage(x, y, z);
+
+    switch (_viewMode) {
+    case VIEW_AXIAL :
+        *currentSlice = (int) round(z);
+        break;
+    case VIEW_SAGITTAL :
+        *currentSlice = (int) round(x);
+        break;
+    case VIEW_CORONAL :
+        *currentSlice = (int) round(y);
+        break;
+    default:
+        currentSlice = 0;
+        break;
+    }
+}
+
 void irtkQtTwoDimensionalViewer::AddToMaps(irtkImage* newImage, int index) {
     _image.insert(pair<int, irtkImage *> (index, newImage));
     _imageOutput.insert(pair<int, irtkGreyImage *> (index, new irtkGreyImage));
@@ -199,33 +276,12 @@ void irtkQtTwoDimensionalViewer::AddToMaps(irtkImage* newImage, int index) {
     _transformFilter.insert(pair<int, irtkImageTransformation *> (index, transformation));
 }
 
-/// free function used to parallelize the transformations of images
-void CalculateSingleTransform(irtkImageTransformation* &transform) {
-    transform->PutSourcePaddingValue(-1);
-    transform->Run();
-}
+///// free function used to parallelize the transformations of images
+//void CalculateSingleTransform(irtkImageTransformation* &transform) {
+//    transform->PutSourcePaddingValue(-1);
+//    transform->Run();
+//}
 
-void irtkQtTwoDimensionalViewer::CalculateOutputImages() {
-//    clock_t t, t2;
 
-//    t = clock();
-    irtkImageAttributes attr = InitializeAttributes();
-
-    map<int, irtkGreyImage *>::iterator it;
-    for (it = _imageOutput.begin(); it != _imageOutput.end(); it++) {
-        it->second->Initialize(attr);
-    }
-
-    map<int, irtkImageTransformation *>::iterator trit;
-    for (trit = _transformFilter.begin(); trit != _transformFilter.end(); trit++) {
-        trit->second->PutSourcePaddingValue(-1);
-        trit->second->Run();
-    }
-
-//    t2 = clock() - t;
-//    qDebug() << "Now running thread: " << QThread::currentThreadId()
-//             << " and it took me " << ((float)t2)/CLOCKS_PER_SEC
-//             << " seconds to calculate output images.\n";
-}
 
 

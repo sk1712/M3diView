@@ -81,17 +81,11 @@ void QtMainWindow::createMenu() {
 }
 
 void QtMainWindow::createToolBarActions() {
-    viewSelectedImageAction = new QAction(tr("View image"), this);
-    viewSelectedImageAction->setIcon(QIcon(":/icons/view_image.png"));
-    viewSelectedImageAction->setStatusTip(tr("View selected image"));
-
     zoomInAction = new QAction(tr("Zoom in"), this);
     zoomInAction->setIcon(QIcon(":/icons/zoom_in.png"));
-    zoomInAction->setEnabled(false);
 
     zoomOutAction = new QAction(tr("Zoom out"), this);
     zoomOutAction->setIcon(QIcon(":/icons/zoom_out.png"));
-    zoomOutAction->setEnabled(false);
 
     QMenu *opacityMenu = new QMenu();
     QWidgetAction *widgetAction = new QWidgetAction(opacityMenu);
@@ -146,13 +140,10 @@ void QtMainWindow::createMenuActions() {
 
 void QtMainWindow::connectWindowSignals() {
     // list view signals
-    connect(imageListView, SIGNAL(clicked(QModelIndex)),
-            this, SLOT(listViewClicked(QModelIndex)));
     connect(imageListView, SIGNAL(doubleClicked(QModelIndex)),
             this, SLOT(listViewDoubleClicked(QModelIndex)));
 
     // toolbar signals
-    connect(viewSelectedImageAction, SIGNAL(triggered()), this, SLOT(viewImage()));
     connect(zoomInAction, SIGNAL(triggered()), this, SLOT(zoomIn()));
     connect(zoomOutAction, SIGNAL(triggered()), this, SLOT(zoomOut()));
     connect(opacitySlider, SIGNAL(valueChanged(int)), this, SLOT(opacityValueChanged(int)));
@@ -251,7 +242,7 @@ Qt3dViewerWidget* QtMainWindow::createThreeDimensionalView() {
     viewer = irtkQtViewer::Instance()->CreateThreeDimensionalViewer();
     viewers.push_back(viewer);
     qtViewer = new Qt3dViewerWidget();
-    viewerWidgets.push_back(qtViewer); 
+    viewerWidgets.push_back(qtViewer);
 
     // register signals to expand or delete the viewer
     connect(qtViewer, SIGNAL(windowExpanded()), this, SLOT(showOnlyThisWidget()));
@@ -369,6 +360,60 @@ bool QtMainWindow::setDisplayedImages() {
     return atLeastOneImageVisible;
 }
 
+/// free function to parallelize initializing viewers
+void InitializeViewer(irtkQtBaseViewer* &viewer) {
+    viewer->InitializeCurrentTransformation();
+    viewer->CalculateCurrentOutput();
+}
+
+bool QtMainWindow::displaySingleImage(int index) {
+    irtkQtBaseViewer *viewer;
+    bool atLeastOneImageVisible = false;
+
+    QList<irtkQtImageObject*> & imageList = irtkQtViewer::Instance()->GetImageList();
+
+    // disconnect the viewers' signals
+    disconnectViewerSignals();
+
+    for (int i = 0; i < viewerWidgets.size(); i++) {
+        viewer = viewers[i];
+
+        try {
+            viewer->AddToDisplayedImages(imageList[index], index);
+            atLeastOneImageVisible = true;
+            viewerWidgets[i]->setEnabled(true);
+            viewer->SetDimensions(viewerWidgets[i]->getGlWidget()->customWidth(),
+                                  viewerWidgets[i]->getGlWidget()->customHeight());
+        }
+        catch (irtkException) {
+            createMessageBox("Invalid image file " + imageList[index]->GetPath(), QMessageBox::Critical);
+            imageList.removeAt(index);
+            break;
+        }
+    }
+
+    if (atLeastOneImageVisible) {
+        QtConcurrent::blockingMap(viewers, &InitializeViewer);
+    }
+
+    // re-register the viewers' signals
+    connectViewerSignals();
+
+    return atLeastOneImageVisible;
+}
+
+void QtMainWindow::deleteSingleImage(int index) {
+    // re-register the viewers' signals
+    disconnectViewerSignals();
+
+    for (int i = 0; i < viewers.size(); i++) {
+        viewers[i]->DeleteSingleImage(index);
+    }
+
+    // re-register the viewers' signals
+    connectViewerSignals();
+}
+
 void QtMainWindow::setUpViewerWidgets() {
     // update the viewers
     QtViewerWidget *viewerWidget;
@@ -378,7 +423,6 @@ void QtMainWindow::setUpViewerWidgets() {
         viewerWidget = viewerWidgets[i];
         viewer = viewers[i];
 
-        viewerWidget->setEnabled(true);
         viewerWidget->setMaximumSlice(viewer->GetSliceNumber());
         viewerWidget->setCurrentSlice(viewer->GetCurrentSlice());
         viewerWidget->getGlWidget()->updateDrawable(
@@ -386,42 +430,36 @@ void QtMainWindow::setUpViewerWidgets() {
     }
 }
 
-/// free function to parallelize initializing viewers
-void InitializeViewer(irtkQtBaseViewer* &viewer) {
-    viewer->InitializeTransformation();
-    viewer->CalculateOutputImages();
-}
+//void QtMainWindow::viewImage() {
+//    // if there are no viewers do nothing
+//    if ( viewers.size() == 0 ) return;
 
-void QtMainWindow::viewImage() {
-    // if there are no viewers do nothing
-    if ( viewers.size() == 0 ) return;
+//    // disconnect the viewers' signals
+//    disconnectViewerSignals();
 
-    // disconnect the viewers' signals
-    disconnectViewerSignals();
+//    // load the images to be displayed and add them to the viewers
+//    if ( !setDisplayedImages() ) {
+//        for (int i = 0; i < viewers.size(); i++) {
+//            viewerWidgets[i]->setEnabled(false);
+//            viewerWidgets[i]->getGlWidget()->updateDrawable(
+//                        QVector<QRgb**>::fromStdVector(viewers[i]->GetDrawable()));
+//        }
+//        return;
+//    }
 
-    // load the images to be displayed and add them to the viewers
-    if ( !setDisplayedImages() ) {
-        for (int i = 0; i < viewers.size(); i++) {
-            viewerWidgets[i]->setEnabled(false);
-            viewerWidgets[i]->getGlWidget()->updateDrawable(
-                        QVector<QRgb**>::fromStdVector(viewers[i]->GetDrawable()));
-        }
-        return;
-    }
+//    // enable zoom actions
+//    zoomInAction->setEnabled(true);
+//    zoomOutAction->setEnabled(true);
 
-    // enable zoom actions
-    zoomInAction->setEnabled(true);
-    zoomOutAction->setEnabled(true);
+//    // initialize the transformations and calculate output images in parallel
+//    //QtConcurrent::blockingMap(viewers, &InitializeViewer);
 
-    // initialize the transformations and calculate output images in parallel
-    QtConcurrent::blockingMap(viewers, &InitializeViewer);
+//    // set up the viewer widgets
+//    setUpViewerWidgets();
 
-    // set up the viewer widgets
-    setUpViewerWidgets();
-
-    // re-register the viewers' signals
-    connectViewerSignals();
-}
+//    // re-register the viewers' signals
+//    connectViewerSignals();
+//}
 
 void QtMainWindow::zoomIn() {
     Qt2dViewerWidget *viewerWidget;
@@ -555,31 +593,35 @@ void QtMainWindow::opacityValueChanged(int value) {
     QList<irtkQtImageObject*> list = irtkQtViewer::Instance()->GetImageList();
     int index = imageListView->currentIndex().row();
     if (!list.empty() && index >= 0) {
-        //list.at(index)->SetOpacity(value);
+        if (list[index]->IsVisible()) {
+            for (int i = 0; i < viewers.size(); i++) {
+                viewers[i]->SetOpacity(value, index);
+                viewerWidgets[i]->getGlWidget()->updateDrawable(
+                            QVector<QRgb**>::fromStdVector(viewers[i]->GetDrawable()));
+            }
+        }
     }
     opacityLabel->setText(QString::number(value));
-
-    // TO DO : change only the lookupTable for this image
-    viewImage();
-}
-
-void QtMainWindow::listViewClicked(QModelIndex index) {
-    QList<irtkQtImageObject*> list = irtkQtViewer::Instance()->GetImageList();
-    //opacitySlider->setValue(list.at(index.row())->GetOpacity());
 }
 
 void QtMainWindow::listViewDoubleClicked(QModelIndex index) {
     int i = index.row();
-    QList<irtkQtImageObject*> list = irtkQtViewer::Instance()->GetImageList();
-    bool visible = list.at(i)->IsVisible();
-    list.at(i)->SetVisible(!visible);
+    QList<irtkQtImageObject*> & list = irtkQtViewer::Instance()->GetImageList();
+    bool visible = !list.at(i)->IsVisible();
+    list.at(i)->SetVisible(visible);
+
+    if (visible) {
+        if (displaySingleImage(i))
+            setUpViewerWidgets();
+    }
+    else {
+        deleteSingleImage(i);
+        setUpViewerWidgets();
+    }
 
     delete imageModel;
     imageModel = new irtkImageListModel(list);
     imageListView->setModel(imageModel);
-
-    // TO DO : insert/delete only the current image
-    viewImage();
 }
 
 void QtMainWindow::moveImageUp() {
@@ -593,10 +635,14 @@ void QtMainWindow::moveImageUp() {
         imageListView->setModel(imageModel);
 
         imageListView->setCurrentIndex(imageModel->index(index-1, 0));
-    }
 
-    // TO DO : move only the current image
-    viewImage();
+        // TO DO : move only the current image
+        for (int i = 0; i < viewers.size(); i++) {
+            viewers[i]->MoveImage(index, index-1);
+            viewerWidgets[i]->getGlWidget()->updateDrawable(
+                        QVector<QRgb**>::fromStdVector(viewers[i]->GetDrawable()));
+        }
+    }
 }
 
 void QtMainWindow::moveImageDown() {
@@ -610,8 +656,12 @@ void QtMainWindow::moveImageDown() {
         imageListView->setModel(imageModel);
 
         imageListView->setCurrentIndex(imageModel->index(index+1, 0));
-    }
 
-    // TO DO : move only the current image
-    viewImage();
+        // TO DO : move only the current image
+        for (int i = 0; i < viewers.size(); i++) {
+            viewers[i]->MoveImage(index, index+1);
+            viewerWidgets[i]->getGlWidget()->updateDrawable(
+                        QVector<QRgb**>::fromStdVector(viewers[i]->GetDrawable()));
+        }
+    }
 }

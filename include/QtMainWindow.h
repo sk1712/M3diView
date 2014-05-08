@@ -121,6 +121,12 @@ private:
     /// set up viewers with images to be displayed
     bool setDisplayedImages();
 
+    /// add single image to displayed images
+    bool displaySingleImage(int index);
+
+    /// delete signle image from displayed images
+    void deleteSingleImage(int index);
+
     /// set up viewer widgets
     void setUpViewerWidgets();
 
@@ -130,7 +136,7 @@ private slots:
     void openImage();
 
     /// callback function for viewSelectedImageAction
-    void viewImage();
+    //void viewImage();
 
     /// callback function for zoomInAction
     void zoomIn();
@@ -167,9 +173,6 @@ private slots:
 
     /// callback function for opacity slider changing value
     void opacityValueChanged(int value);
-
-    /// callback function for list view being clicked
-    void listViewClicked(QModelIndex index);
 
     /// callback function for list view double clicked
     void listViewDoubleClicked(QModelIndex index);
