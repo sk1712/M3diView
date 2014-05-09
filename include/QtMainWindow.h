@@ -136,7 +136,7 @@ private slots:
     void openImage();
 
     /// callback function for viewSelectedImageAction
-    //void viewImage();
+    void viewImage();
 
     /// callback function for zoomInAction
     void zoomIn();
