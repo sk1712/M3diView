@@ -84,16 +84,30 @@ protected:
 
     /// add new image and corresponding tools to maps
     void AddToMaps(irtkImage* newImage, int index);
+
+    /// delete all elements of a map first and then clear
+    template<class T>
+    void DeleteMap(map<int, T> & mymap);
 };
 
 
 inline void irtkQtTwoDimensionalViewer::ClearDisplayedImages() {
-    DeleteMap(_image);
+    _image.clear();
+    _lookupTable.clear();
     DeleteMap(_imageOutput);
-    DeleteMap(_lookupTable);
     DeleteMap(_transform);
     DeleteMap(_interpolator);
     DeleteMap(_transformFilter);
+}
+
+template<class T>
+void irtkQtTwoDimensionalViewer::DeleteMap(map<int, T> & mymap) {
+    typename map<int, T>::iterator it;
+
+    for( it = mymap.begin(); it != mymap.end(); it++){
+            delete ((*it).second);
+    }
+    mymap.clear();
 }
 
 #endif // IRTKQTTWODIMENSIONALVIEWER_H

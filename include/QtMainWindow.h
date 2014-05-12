@@ -1,12 +1,12 @@
 #ifndef QTMAINWINDOW_H
 #define QTMAINWINDOW_H
 
+#include <irtkQtViewer.h>
+#include <irtkImageListModel.h>
+
 #include <Qt2dViewerWidget.h>
 #include <Qt3dViewerWidget.h>
 #include <QtToolWidget.h>
-
-#include <irtkQtViewer.h>
-#include <irtkImageListModel.h>
 
 #include <QMainWindow>
 #include <QListView>
@@ -135,7 +135,7 @@ private:
     bool setDisplayedImages();
 
     /// add single image to displayed images
-    bool displaySingleImage(int index);
+    void displaySingleImage(int index);
 
     /// delete signle image from displayed images
     void deleteSingleImage(int index);
@@ -183,6 +183,9 @@ private slots:
 
     /// callback function for updating origin
     void updateOrigin(double x, double y, double z);
+
+    /// callback function for colormap change
+    void colormapIndexChanged(int mode);
 
     /// callback function for opacity slider changing value
     void opacityValueChanged(int value);

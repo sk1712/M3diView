@@ -146,6 +146,7 @@ void QtMainWindow::connectWindowSignals() {
 }
 
 void QtMainWindow::connectToolSignals() {
+    connect(visualToolWidget, SIGNAL(colormapChanged(int)), this, SLOT(colormapIndexChanged(int)));
     connect(visualToolWidget, SIGNAL(opacityChanged(int)), this, SLOT(opacityValueChanged(int)));
 }
 
@@ -333,16 +334,9 @@ bool QtMainWindow::setDisplayedImages() {
 
     for (it = imageList.constBegin(); it != imageList.constEnd(); it++) {
         if ((*it)->IsVisible()) {
-            try {
-                viewer->AddToDisplayedImages(*it, imageList.indexOf(*it));
-                atLeastOneImageVisible = true;
-            }
-            catch (irtkException) {
-                createMessageBox("Invalid image file " + (*it)->GetPath(), QMessageBox::Critical);
-                break;
-            }
-
+            viewer->AddToDisplayedImages(*it, imageList.indexOf(*it));
             viewer->SetDimensions(glWidget->customWidth(), glWidget->customHeight());
+            atLeastOneImageVisible = true;
         }
     }
 
@@ -355,9 +349,9 @@ void InitializeViewer(irtkQtBaseViewer* &viewer) {
     viewer->CalculateCurrentOutput();
 }
 
-bool QtMainWindow::displaySingleImage(int index) {
+void QtMainWindow::displaySingleImage(int index) {
     irtkQtBaseViewer *viewer;
-    bool atLeastOneImageVisible = false;
+    QtViewerWidget *viewerWidget;
 
     QList<irtkQtImageObject*> & imageList = irtkQtViewer::Instance()->GetImageList();
 
@@ -366,29 +360,18 @@ bool QtMainWindow::displaySingleImage(int index) {
 
     for (int i = 0; i < viewerWidgets.size(); i++) {
         viewer = viewers[i];
+        viewerWidget = viewerWidgets[i];
 
-        try {
-            viewer->AddToDisplayedImages(imageList[index], index);
-            atLeastOneImageVisible = true;
-            viewerWidgets[i]->setEnabled(true);
-            viewer->SetDimensions(viewerWidgets[i]->getGlWidget()->customWidth(),
-                                  viewerWidgets[i]->getGlWidget()->customHeight());
-        }
-        catch (irtkException) {
-            createMessageBox("Invalid image file " + imageList[index]->GetPath(), QMessageBox::Critical);
-            imageList.removeAt(index);
-            break;
-        }
+        viewer->AddToDisplayedImages(imageList[index], index);
+        viewerWidget->setEnabled(true);
+        viewer->SetDimensions(viewerWidget->getGlWidget()->customWidth(),
+                              viewerWidget->getGlWidget()->customHeight());
     }
 
-    if (atLeastOneImageVisible) {
-        QtConcurrent::blockingMap(viewers, &InitializeViewer);
-    }
+    QtConcurrent::blockingMap(viewers, &InitializeViewer);
 
     // re-register the viewers' signals
     connectViewerSignals();
-
-    return atLeastOneImageVisible;
 }
 
 void QtMainWindow::deleteSingleImage(int index) {
@@ -575,13 +558,27 @@ void QtMainWindow::updateOrigin(double x, double y, double z) {
     connectViewerSignals();
 }
 
-void QtMainWindow::opacityValueChanged(int value) {
-    QList<irtkQtImageObject*> list = irtkQtViewer::Instance()->GetImageList();
+void QtMainWindow::colormapIndexChanged(int mode) {
+    QList<irtkQtImageObject*> & list = irtkQtViewer::Instance()->GetImageList();
     int index = imageListView->currentIndex().row();
     if (!list.empty() && index >= 0) {
         if (list[index]->IsVisible()) {
+            list[index]->SetColormap(static_cast<irtkQtLookupTable::irtkColorMode>(mode));
             for (int i = 0; i < viewers.size(); i++) {
-                viewers[i]->SetOpacity(value, index);
+                viewerWidgets[i]->getGlWidget()->updateDrawable(
+                            QVector<QRgb**>::fromStdVector(viewers[i]->GetDrawable()));
+            }
+        }
+    }
+}
+
+void QtMainWindow::opacityValueChanged(int value) {
+    QList<irtkQtImageObject*> & list = irtkQtViewer::Instance()->GetImageList();
+    int index = imageListView->currentIndex().row();
+    if (!list.empty() && index >= 0) {
+        if (list[index]->IsVisible()) {
+            list[index]->SetOpacity(value);
+            for (int i = 0; i < viewers.size(); i++) {
                 viewerWidgets[i]->getGlWidget()->updateDrawable(
                             QVector<QRgb**>::fromStdVector(viewers[i]->GetDrawable()));
             }
@@ -597,11 +594,15 @@ void QtMainWindow::listViewDoubleClicked(QModelIndex index) {
 
     // if image becomes visible display it
     if (visible) {
-        if (displaySingleImage(i)) {
+        try {
+            list[i]->CreateImage();
+            displaySingleImage(i);
             numDisplayedImages++;
             setUpViewerWidgets();
         }
-        else {
+        catch (irtkException) {
+            createMessageBox("Invalid image file " + list[i]->GetPath(), QMessageBox::Critical);
+            list.removeAt(i);
             QList<irtkQtBaseViewer*>::iterator it;
             for (it = viewers.begin(); it != viewers.end(); it++) {
                 (*it)->UpdateKeysAfterIndexDeleted(i);
@@ -616,6 +617,7 @@ void QtMainWindow::listViewDoubleClicked(QModelIndex index) {
             disableViewerWidgets();
         }
 
+        list[i]->DeleteImage();
         deleteSingleImage(i);
         setUpViewerWidgets();
     }
@@ -630,7 +632,7 @@ void QtMainWindow::listViewClicked(QModelIndex index) {
     QList<irtkQtImageObject*> & list = irtkQtViewer::Instance()->GetImageList();
 
     if (list[i]->IsVisible()) {
-        visualToolWidget->setMaximumDisplayValue(viewers[0]->GetMaxImageValue(i));
+        visualToolWidget->setMaximumDisplayValue(list[i]->GetMaxImageValue());
     }
 }
 

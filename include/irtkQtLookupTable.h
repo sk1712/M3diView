@@ -6,6 +6,16 @@
 
 class irtkQtLookupTable
 {
+public:
+
+    /// color modes
+    enum irtkColorMode {MODE_RED, MODE_GREEN, MODE_BLUE, MODE_LUMINANCE};
+
+    /// the corresponding lookup table
+    QRgb *lookupTable;
+
+private:
+
     /// alpha coefficient
     int _alpha;
 
@@ -15,9 +25,10 @@ class irtkQtLookupTable
     /// minimum and maximum image values
     double minImage, maxImage;
 
-public:
+    /// color mode
+    irtkColorMode _mode;
 
-    QRgb *lookupTable;
+public:
 
     /// class constructor
     irtkQtLookupTable(int min = 0, int max = 255);
@@ -57,6 +68,22 @@ public:
 
     /// set minimum and maximum image values
     void SetMinMaxImageValues(double min, double max);
+
+    /// set color mode
+    void SetColorMode(irtkColorMode mode);
+
+    /// get color mode
+    int GetColorMode() const;
+
+private:
+
+    void SetColorModeToRed();
+
+    void SetColorModeToGreen();
+
+    void SetColorModeToBlue();
+
+    void SetColorModeToLuminance();
 };
 
 
@@ -96,6 +123,10 @@ inline void irtkQtLookupTable::SetMinMaxDisplayValues(int min, int max) {
 inline void irtkQtLookupTable::SetMinMaxImageValues(double min, double max) {
     minImage = min;
     maxImage = max;
+}
+
+inline int irtkQtLookupTable::GetColorMode() const {
+    return _mode;
 }
 
 #endif // IRTKQTLOOKUPTABLE_H

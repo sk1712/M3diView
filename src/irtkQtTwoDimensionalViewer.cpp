@@ -92,7 +92,6 @@ void irtkQtTwoDimensionalViewer::InitializeCurrentTransformation() {
     double _targetMin, _targetMax;
 
     _image[currentIndex]->GetMinMaxAsDouble(&_targetMin, &_targetMax);
-    _lookupTable[currentIndex]->SetMinMaxImageValues(_targetMin, _targetMax);
 
     _transformFilter[currentIndex]->SetInput(_image[currentIndex]);
     _transformFilter[currentIndex]->PutScaleFactorAndOffset(255.0 / (_targetMax
@@ -181,14 +180,11 @@ void irtkQtTwoDimensionalViewer::AddToDisplayedImages(irtkQtImageObject *imageOb
 }
 
 void irtkQtTwoDimensionalViewer::DeleteSingleImage(int index) {
-    delete _image[index];
     _image.erase(index);
+    _lookupTable.erase(index);
 
     delete _imageOutput[index];
     _imageOutput.erase(index);
-
-    delete _lookupTable[index];
-    _lookupTable.erase(index);
 
     delete _transform[index];
     _transform.erase(index);

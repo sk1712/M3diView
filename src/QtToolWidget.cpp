@@ -64,7 +64,7 @@ void QtToolWidget::setOpacity(int opacity) {
 void QtToolWidget::connectSignals() {
     connect(minImageSlider, SIGNAL(valueChanged(int)), this, SLOT(minValueChanged(int)));
     connect(maxImageSlider, SIGNAL(valueChanged(int)), this, SLOT(maxValueChanged(int)));
-    connect(colormapCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(colormapValueChanged(int)));
+    connect(colormapCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(colormapIndexChanged(int)));
     connect(opacitySlider, SIGNAL(valueChanged(int)), this, SLOT(opacityValueChanged(int)));
 }
 
@@ -91,8 +91,8 @@ void QtToolWidget::maxValueChanged(int value) {
     maxImageLabel->setText(QString::number(value/10.0));
 }
 
-void QtToolWidget::colormapValueChanged(int value) {
-
+void QtToolWidget::colormapIndexChanged(int index) {
+    emit colormapChanged(index);
 }
 
 void QtToolWidget::opacityValueChanged(int value) {

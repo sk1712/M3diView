@@ -1,10 +1,7 @@
 #ifndef IRTKQTBASEVIEWER_H
 #define IRTKQTBASEVIEWER_H
 
-#include <irtkImage.h>
 #include <irtkTransformation.h>
-
-#include <irtkQtLookupTable.h>
 #include <irtkQtImageObject.h>
 
 #include <map>
@@ -122,24 +119,6 @@ public:
     /// update keys of maps after invalid image is delete
     virtual void UpdateKeysAfterIndexDeleted(int index) = 0;
 
-    /// set opacity for the corresponding image
-    void SetOpacity(int value, int index);
-
-    /// get opacity for the corresponding image
-    int GetOpacity(int index);
-
-    /// get minimum value for the corresponding image
-    int GetMinImageValue(int index);
-
-    /// get maximum value for the corresponding image
-    int GetMaxImageValue(int index);
-
-    /// get minimum display value for the corresponding image
-    int GetMinDisplayValue(int index);
-
-    /// get maximum display value for the corresponding image
-    int GetMaxDisplayValue(int index);
-
 public slots:
 
     /// callback function when image is resized to (width, height)
@@ -167,10 +146,6 @@ protected:
 
     /// set image orientation
     void SetOrientation(const double * xaxis, const double * yaxis, const double * zaxis);
-
-    /// delete all elements of a map first and then clear
-    template<class T>
-    void DeleteMap(map<int, T> & mymap);
 
     template<class T>
     void MoveImageUp(map<int, T> & mymap, int previousKey, int newKey);
@@ -240,36 +215,6 @@ inline int* irtkQtBaseViewer::GetSliceNumber() {
 
 inline int* irtkQtBaseViewer::GetCurrentSlice() {
     return currentSlice;
-}
-
-inline int irtkQtBaseViewer::GetOpacity(int index) {
-    return _lookupTable[index]->GetAlpha();
-}
-
-inline int irtkQtBaseViewer::GetMinImageValue(int index) {
-    return _lookupTable[index]->GetImageMinValue();
-}
-
-inline int irtkQtBaseViewer::GetMaxImageValue(int index) {
-    return _lookupTable[index]->GetImageMaxValue();
-}
-
-inline int irtkQtBaseViewer::GetMinDisplayValue(int index) {
-    return _lookupTable[index]->GetMinDisplayValue();
-}
-
-inline int irtkQtBaseViewer::GetMaxDisplayValue(int index) {
-    return _lookupTable[index]->GetMaxDisplayValue();
-}
-
-template<class T>
-void irtkQtBaseViewer::DeleteMap(map<int, T> & mymap) {
-    typename map<int, T>::iterator it;
-
-    for( it = mymap.begin(); it != mymap.end(); it++){
-            delete ((*it).second);
-    }
-    mymap.clear();
 }
 
 template<class T>

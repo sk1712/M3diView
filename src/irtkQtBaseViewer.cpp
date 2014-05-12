@@ -9,16 +9,9 @@ irtkQtBaseViewer::~irtkQtBaseViewer() {
 }
 
 void irtkQtBaseViewer::AddToDisplayedImages(irtkQtImageObject *imageObject, int index) {
-    irtkImage *newImage = NULL;
-
-    // check if image object can be constructed from the file
-    try {
-        newImage = irtkImage::New(imageObject->GetPath().toStdString().c_str());
-    }
-    catch (irtkException e) {
-        throw e;
-        return;
-    }
+    // place following line in QtMainWindow
+    // in order to do nothing when image is invalid
+    irtkImage* newImage = imageObject->GetImage();
 
     currentIndex = index;
     // if first image to be displayed make it target
@@ -36,7 +29,7 @@ void irtkQtBaseViewer::AddToDisplayedImages(irtkQtImageObject *imageObject, int 
 
     // if everything is fine add to vectors
     AddToMaps(newImage, index);
-    _lookupTable.insert(pair<int, irtkQtLookupTable*> ( index, new irtkQtLookupTable() ));
+    _lookupTable.insert(pair<int, irtkQtLookupTable*> ( index, imageObject->GetLookupTable() ));
 }
 
 void irtkQtBaseViewer::DeleteSingleImage(int index) {
@@ -44,10 +37,6 @@ void irtkQtBaseViewer::DeleteSingleImage(int index) {
     if (index < _image.begin()->first) {
         _targetImage = _image.begin()->second;
     }
-}
-
-void irtkQtBaseViewer::SetOpacity(int value, int index) {
-    _lookupTable[index]->SetAlpha(value);
 }
 
 irtkImageAttributes irtkQtBaseViewer::InitializeAttributes() {

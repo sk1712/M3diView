@@ -5,6 +5,7 @@
 #include <QLabel>
 #include <QSlider>
 
+
 class QtToolWidget : public QWidget
 {
     Q_OBJECT
@@ -55,11 +56,13 @@ private slots:
 
     void maxValueChanged(int value);
 
-    void colormapValueChanged(int value);
+    void colormapIndexChanged(int index);
 
     void opacityValueChanged(int value);
 
 signals:
+
+    void colormapChanged(int index);
 
     void opacityChanged(int value);
 };

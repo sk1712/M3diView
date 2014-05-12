@@ -93,9 +93,9 @@ private:
 
 
 inline void irtkQtThreeDimensionalViewer::ClearDisplayedImages() {
-    DeleteMap(_image);
+    _image.clear();
+    _lookupTable.clear();
     DeleteArrayMap(_imageOutput);
-    DeleteMap(_lookupTable);
     DeleteArrayMap(_transform);
     DeleteArrayMap(_interpolator);
     DeleteArrayMap(_transformFilter);
