@@ -4,6 +4,7 @@
 #include <QtViewerWidget.h>
 #include <QtThreeDimensionalGlWidget.h>
 
+
 class Qt3dViewerWidget : public QtViewerWidget
 {
     Q_OBJECT
@@ -41,14 +42,18 @@ protected:
 
 private slots:
 
+    /// callback function when axial slider value changes
     void axialSliceChanged(int value);
 
+    /// callback function when sagittal slider value changes
     void sagittalSliceChanged(int value);
 
+    /// callback function when coronal slider value changes
     void coronalSliceChanged(int value);
 
 signals:
 
+    /// signal emitted when one of the sliders' value changes
     void sliderValueChanged(int* value);
 };
 

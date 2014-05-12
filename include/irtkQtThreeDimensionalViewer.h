@@ -48,7 +48,7 @@ public:
     /// calculate single output image from the transformation
     void CalculateCurrentOutput();
 
-    /// delete all vector elements and clear vectors
+    /// delete all map elements and clear maps
     void ClearDisplayedImages();
 
     /// delete single image
@@ -56,6 +56,9 @@ public:
 
     /// move image with key previousKey to newKey
     void MoveImage(int previousKey, int newKey);
+
+    /// update key values after invalid image is deleted from the list
+    void UpdateKeysAfterIndexDeleted(int index);
 
 public slots:
 
@@ -73,7 +76,7 @@ protected:
     /// update the current slice (in image coordinates)
     void UpdateCurrentSlice();
 
-    /// add new image and corresponding tools to vectors
+    /// add new image and corresponding tools to maps
     void AddToMaps(irtkImage* newImage, int index);
 
     /// set the orientation according to the view value
@@ -84,7 +87,7 @@ protected:
 
 private:
 
-    /// delete array elements of a vector
+    /// delete array elements of a map
     template<class T> void DeleteArrayMap(map<int, T> & mymap);
 };
 

@@ -2,6 +2,7 @@
 
 #include <QGridLayout>
 
+
 Qt2dViewerWidget::Qt2dViewerWidget(QWidget *parent)
     : QtViewerWidget(parent)
 {

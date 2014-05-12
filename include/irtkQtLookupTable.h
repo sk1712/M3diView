@@ -3,6 +3,7 @@
 
 #include <QColor>
 
+
 class irtkQtLookupTable
 {
     /// alpha coefficient
@@ -10,6 +11,9 @@ class irtkQtLookupTable
 
     /// minimum and maximum display values
     int minDisplay, maxDisplay;
+
+    /// minimum and maximum image values
+    double minImage, maxImage;
 
 public:
 
@@ -42,8 +46,17 @@ public:
     /// get image maximum displayed value
     int GetMaxDisplayValue() const;
 
+    /// get actual image minimum value
+    int GetImageMinValue() const;
+
+    /// get actual image maximum value
+    int GetImageMaxValue() const;
+
     /// set minimum and maximum values
     void SetMinMaxDisplayValues(int min, int max);
+
+    /// set minimum and maximum image values
+    void SetMinMaxImageValues(double min, double max);
 };
 
 
@@ -67,10 +80,22 @@ inline int irtkQtLookupTable::GetMaxDisplayValue() const {
     return maxDisplay;
 }
 
+inline int irtkQtLookupTable::GetImageMinValue() const {
+    return minImage;
+}
+
+inline int irtkQtLookupTable::GetImageMaxValue() const {
+    return maxImage;
+}
+
 inline void irtkQtLookupTable::SetMinMaxDisplayValues(int min, int max) {
     minDisplay = min;
     maxDisplay = max;
 }
 
+inline void irtkQtLookupTable::SetMinMaxImageValues(double min, double max) {
+    minImage = min;
+    maxImage = max;
+}
 
 #endif // IRTKQTLOOKUPTABLE_H

@@ -1,7 +1,8 @@
 #include <irtkQtTwoDimensionalViewer.h>
 
-#include <time.h>
-#include <QDebug>
+//#include <time.h>
+//#include <QDebug>
+
 
 irtkQtTwoDimensionalViewer::irtkQtTwoDimensionalViewer(irtkViewMode viewMode) {
     ClearDisplayedImages();
@@ -17,6 +18,7 @@ irtkQtTwoDimensionalViewer::~irtkQtTwoDimensionalViewer() {
 
 vector<QRgb**> irtkQtTwoDimensionalViewer::GetDrawable() {
     vector<QRgb**> allDrawables;
+    // set background color to transparent black
     QRgb _backgroundColor = qRgba(0, 0, 0, 0);
 
     map<int, irtkGreyImage *>::iterator it;
@@ -90,6 +92,7 @@ void irtkQtTwoDimensionalViewer::InitializeCurrentTransformation() {
     double _targetMin, _targetMax;
 
     _image[currentIndex]->GetMinMaxAsDouble(&_targetMin, &_targetMax);
+    _lookupTable[currentIndex]->SetMinMaxImageValues(_targetMin, _targetMax);
 
     _transformFilter[currentIndex]->SetInput(_image[currentIndex]);
     _transformFilter[currentIndex]->PutScaleFactorAndOffset(255.0 / (_targetMax
@@ -113,6 +116,15 @@ void irtkQtTwoDimensionalViewer::MoveImage(int previousKey, int newKey) {
         MoveImageDown(_interpolator, previousKey, newKey);
         MoveImageDown(_transformFilter, previousKey, newKey);
     }
+}
+
+void irtkQtTwoDimensionalViewer::UpdateKeysAfterIndexDeleted(int index) {
+    irtkQtBaseViewer::UpdateKeysAfterIndexDeleted(_image, index);
+    irtkQtBaseViewer::UpdateKeysAfterIndexDeleted(_imageOutput, index);
+    irtkQtBaseViewer::UpdateKeysAfterIndexDeleted(_lookupTable, index);
+    irtkQtBaseViewer::UpdateKeysAfterIndexDeleted(_transform, index);
+    irtkQtBaseViewer::UpdateKeysAfterIndexDeleted(_interpolator, index);
+    irtkQtBaseViewer::UpdateKeysAfterIndexDeleted(_transformFilter, index);
 }
 
 void irtkQtTwoDimensionalViewer::GetLabels(char &top, char &bottom, char &left, char &right) {

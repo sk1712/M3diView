@@ -8,38 +8,6 @@ irtkQtBaseViewer::~irtkQtBaseViewer() {
     delete [] sliceNum;
 }
 
-irtkImageAttributes irtkQtBaseViewer::InitializeAttributes() {
-    irtkImageAttributes attr;
-
-    // image size
-    attr._x = _width;
-    attr._y = _height;
-    attr._z = 1;
-
-    // image origin in world coordinates
-    attr._xorigin = _originX;
-    attr._yorigin = _originY;
-    attr._zorigin = _originZ;
-
-    // voxel size
-    attr._dx = _dx;
-    attr._dy = _dy;
-    attr._dz = _dz;
-
-    // x, y, z axes
-    attr._xaxis[0] = _axisX[0];
-    attr._xaxis[1] = _axisX[1];
-    attr._xaxis[2] = _axisX[2];
-    attr._yaxis[0] = _axisY[0];
-    attr._yaxis[1] = _axisY[1];
-    attr._yaxis[2] = _axisY[2];
-    attr._zaxis[0] = _axisZ[0];
-    attr._zaxis[1] = _axisZ[1];
-    attr._zaxis[2] = _axisZ[2];
-
-    return attr;
-}
-
 void irtkQtBaseViewer::AddToDisplayedImages(irtkQtImageObject *imageObject, int index) {
     irtkImage *newImage = NULL;
 
@@ -72,6 +40,7 @@ void irtkQtBaseViewer::AddToDisplayedImages(irtkQtImageObject *imageObject, int 
 }
 
 void irtkQtBaseViewer::DeleteSingleImage(int index) {
+    // when an image is deleted update the target image
     if (index < _image.begin()->first) {
         _targetImage = _image.begin()->second;
     }
@@ -79,6 +48,38 @@ void irtkQtBaseViewer::DeleteSingleImage(int index) {
 
 void irtkQtBaseViewer::SetOpacity(int value, int index) {
     _lookupTable[index]->SetAlpha(value);
+}
+
+irtkImageAttributes irtkQtBaseViewer::InitializeAttributes() {
+    irtkImageAttributes attr;
+
+    // image size
+    attr._x = _width;
+    attr._y = _height;
+    attr._z = 1;
+
+    // image origin in world coordinates
+    attr._xorigin = _originX;
+    attr._yorigin = _originY;
+    attr._zorigin = _originZ;
+
+    // voxel size
+    attr._dx = _dx;
+    attr._dy = _dy;
+    attr._dz = _dz;
+
+    // x, y, z axes
+    attr._xaxis[0] = _axisX[0];
+    attr._xaxis[1] = _axisX[1];
+    attr._xaxis[2] = _axisX[2];
+    attr._yaxis[0] = _axisY[0];
+    attr._yaxis[1] = _axisY[1];
+    attr._yaxis[2] = _axisY[2];
+    attr._zaxis[0] = _axisZ[0];
+    attr._zaxis[1] = _axisZ[1];
+    attr._zaxis[2] = _axisZ[2];
+
+    return attr;
 }
 
 void irtkQtBaseViewer::InitializeOriginOrientation() {
@@ -101,7 +102,7 @@ void irtkQtBaseViewer::InitializeOriginOrientation() {
         *sliceNum = _targetImage->GetY();
         SetOrientation(x, z, y);
         break;
-    case VIEW_NONE:
+    case VIEW_3D:
         sliceNum[0] = _targetImage->GetX();
         sliceNum[1] = _targetImage->GetY();
         sliceNum[2] = _targetImage->GetZ();

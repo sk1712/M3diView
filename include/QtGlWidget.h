@@ -4,6 +4,13 @@
 #include <QGLWidget>
 #include <QWindow>
 #include <QColor>
+//#include <QDebug>
+
+#ifdef Q_OS_MAC
+#include "OpenGL/glu.h"
+#else
+#include "GL/glu.h"
+#endif
 
 
 class QtGlWidget : public QGLWidget

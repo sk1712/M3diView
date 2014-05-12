@@ -4,6 +4,7 @@
 #include <QSlider>
 #include <QToolButton>
 
+
 class QtGlWidget;
 
 class QtViewerWidget : public QWidget
@@ -22,7 +23,7 @@ protected:
     QToolButton *linkToolButton;
 
     /// flag for viewer linked to other viewers
-    int linked;
+    bool linked;
 
 public:
 

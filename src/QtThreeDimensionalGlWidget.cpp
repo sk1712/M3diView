@@ -1,13 +1,6 @@
 #include <QtThreeDimensionalGlWidget.h>
 
-#ifdef Q_OS_MAC
-#include "OpenGL/glu.h"
-#else
-#include "GL/glu.h"
-#endif
-
 #include <QMouseEvent>
-//#include <QDebug>
 
 
 QtThreeDimensionalGlWidget::QtThreeDimensionalGlWidget(QWidget *parent)
@@ -143,12 +136,12 @@ void QtThreeDimensionalGlWidget::drawBorders() {
 
 void QtThreeDimensionalGlWidget::createTextures() {
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
     glDeleteTextures(3, textures);
     glGenTextures(3, textures);
 
     // create texture for axial view
     glEnable(GL_TEXTURE_2D);
+
     glBindTexture(GL_TEXTURE_2D, textures[0]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
                     GL_NEAREST);
@@ -177,6 +170,7 @@ void QtThreeDimensionalGlWidget::createTextures() {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, dimensions[0],
             dimensions[2], 0, GL_RGBA, GL_UNSIGNED_BYTE,
             _drawable[0][2]);
+
     glDisable(GL_TEXTURE_2D);
 }
 

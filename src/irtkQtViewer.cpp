@@ -1,5 +1,6 @@
 #include <irtkQtViewer.h>
 
+
 irtkQtViewer* irtkQtViewer::viewInstance = NULL;
 
 irtkQtViewer::irtkQtViewer() {

@@ -4,8 +4,6 @@
 #include <QVBoxLayout>
 
 
-#include <QDebug>
-
 Qt3dViewerWidget::Qt3dViewerWidget(QWidget *parent)
     : QtViewerWidget(parent) {
     QGridLayout *layout = dynamic_cast<QGridLayout*>(this->layout());

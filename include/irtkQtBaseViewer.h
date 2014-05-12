@@ -20,7 +20,7 @@ class irtkQtBaseViewer : public QObject
 public:
 
     /// view modes
-    enum irtkViewMode {VIEW_AXIAL = 0, VIEW_SAGITTAL, VIEW_CORONAL, VIEW_NONE};
+    enum irtkViewMode {VIEW_AXIAL = 0, VIEW_SAGITTAL, VIEW_CORONAL, VIEW_3D};
 
 protected:
 
@@ -36,10 +36,10 @@ protected:
     /// dimensions
     int _width, _height;
 
-    /// view mode (axial, sagittal, coronal)
+    /// view mode (axial, sagittal, coronal, 3D)
     irtkViewMode _viewMode;
 
-    /// number of slices
+    /// number of slices in current view
     int* sliceNum;
 
     /// slices currently visible
@@ -119,8 +119,26 @@ public:
     /// move image with key previousKey to newKey
     virtual void MoveImage(int previousKey, int newKey) = 0;
 
+    /// update keys of maps after invalid image is delete
+    virtual void UpdateKeysAfterIndexDeleted(int index) = 0;
+
     /// set opacity for the corresponding image
     void SetOpacity(int value, int index);
+
+    /// get opacity for the corresponding image
+    int GetOpacity(int index);
+
+    /// get minimum value for the corresponding image
+    int GetMinImageValue(int index);
+
+    /// get maximum value for the corresponding image
+    int GetMaxImageValue(int index);
+
+    /// get minimum display value for the corresponding image
+    int GetMinDisplayValue(int index);
+
+    /// get maximum display value for the corresponding image
+    int GetMaxDisplayValue(int index);
 
 public slots:
 
@@ -159,6 +177,10 @@ protected:
 
     template<class T>
     void MoveImageDown(map<int, T> & mymap, int previousKey, int newKey);
+
+    /// update key values of maps after deleting invalid image
+    template<class T>
+    void UpdateKeysAfterIndexDeleted(map<int, T> & mymap, int index);
 
 signals:
 
@@ -220,8 +242,28 @@ inline int* irtkQtBaseViewer::GetCurrentSlice() {
     return currentSlice;
 }
 
+inline int irtkQtBaseViewer::GetOpacity(int index) {
+    return _lookupTable[index]->GetAlpha();
+}
+
+inline int irtkQtBaseViewer::GetMinImageValue(int index) {
+    return _lookupTable[index]->GetImageMinValue();
+}
+
+inline int irtkQtBaseViewer::GetMaxImageValue(int index) {
+    return _lookupTable[index]->GetImageMaxValue();
+}
+
+inline int irtkQtBaseViewer::GetMinDisplayValue(int index) {
+    return _lookupTable[index]->GetMinDisplayValue();
+}
+
+inline int irtkQtBaseViewer::GetMaxDisplayValue(int index) {
+    return _lookupTable[index]->GetMaxDisplayValue();
+}
+
 template<class T>
-inline void irtkQtBaseViewer::DeleteMap(map<int, T> & mymap) {
+void irtkQtBaseViewer::DeleteMap(map<int, T> & mymap) {
     typename map<int, T>::iterator it;
 
     for( it = mymap.begin(); it != mymap.end(); it++){
@@ -235,17 +277,23 @@ void irtkQtBaseViewer::MoveImageUp(map<int, T> & mymap, int previousKey, int new
     map<int, T> newmap;
     typename map<int, T>::iterator it;
 
+    int key;
+    T value;
+
     for (it = mymap.begin(); it != mymap.end(); it++) {
-        if ((it->first < newKey || it->first > previousKey)) {
-            newmap.insert(pair<int, T> (it->first, it->second));
+        key = it->first;
+        value = it->second;
+
+        if ((key < newKey || key > previousKey)) {
+            newmap.insert(pair<int, T> (key, value));
             continue;
         }
-        else if (it->first == previousKey) {
-            newmap.insert(pair<int, T> (newKey, it->second));
+        else if (key == previousKey) {
+            newmap.insert(pair<int, T> (newKey, value));
             continue;
         }
         else {
-            newmap.insert(pair<int, T> (it->first + 1, it->second));
+            newmap.insert(pair<int, T> (key + 1, value));
         }
     }
 
@@ -259,17 +307,49 @@ void irtkQtBaseViewer::MoveImageDown(map<int, T> & mymap, int previousKey, int n
     map<int, T> newmap;
     typename map<int, T>::iterator it;
 
+    int key;
+    T value;
+
     for (it = mymap.begin(); it != mymap.end(); it++) {
-        if ((it->first > newKey) || (it->first < previousKey)) {
-            newmap.insert(pair<int, T> (it->first, it->second));
+        key = it->first;
+        value = it->second;
+
+        if ((key > newKey) || (key < previousKey)) {
+            newmap.insert(pair<int, T> (key, value));
             continue;
         }
         else if (it->first == previousKey) {
-            newmap.insert(pair<int, T> (newKey, it->second));
+            newmap.insert(pair<int, T> (newKey, value));
             continue;
         }
         else {
-            newmap.insert(pair<int, T> (it->first - 1, it->second));
+            newmap.insert(pair<int, T> (key - 1, value));
+        }
+    }
+
+    mymap.clear();
+
+    mymap = newmap;
+}
+
+template<class T>
+void irtkQtBaseViewer::UpdateKeysAfterIndexDeleted(map<int, T> & mymap, int index) {
+    map<int, T> newmap;
+    typename map<int, T>::iterator it;
+
+    int key;
+    T value;
+
+    for (it = mymap.begin(); it != mymap.end(); it++) {
+        key = it->first;
+        value = it->second;
+
+        if (key < index) {
+            newmap.insert(pair<int, T> (key, value));
+            continue;
+        }
+        else {
+            newmap.insert(pair<int, T> (key - 1, value));
         }
     }
 

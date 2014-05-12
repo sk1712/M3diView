@@ -2,34 +2,18 @@
 
 irtkQtThreeDimensionalViewer::irtkQtThreeDimensionalViewer() {
     ClearDisplayedImages();
-    _viewMode = VIEW_NONE;
+
+    _viewMode = VIEW_3D;
     currentSlice = new int[3];
     sliceNum = new int[3];
-    // set all previous slices to 0 initially
+
+    // initialize all previous slices to 0
     for (int i = 0; i < 3; i++) previousSlice[i] = 0;
 }
 
 irtkQtThreeDimensionalViewer::~irtkQtThreeDimensionalViewer() {
     ClearDisplayedImages();
     delete [] currentSlice;
-}
-
-void irtkQtThreeDimensionalViewer::UpdateCurrentSlice() {
-    double x, y, z;
-
-    x = _originX;
-    y = _originY;
-    z = _originZ;
-
-    _targetImage->WorldToImage(x, y, z);
-
-    for (int i = 0; i < 3; i++) previousSlice[i] = currentSlice[i];
-
-    currentSlice[0] = (int) round(x);
-    currentSlice[1] = (int) round(y);
-    currentSlice[2] = (int) round(z);
-
-    cout << "number of images " << _image.size() << endl;
 }
 
 vector<QRgb**> irtkQtThreeDimensionalViewer::GetDrawable() {
@@ -84,62 +68,12 @@ void irtkQtThreeDimensionalViewer::InitializeCurrentTransformation() {
     double _targetMin, _targetMax;
 
     _image[currentIndex]->GetMinMaxAsDouble(&_targetMin, &_targetMax);
+    _lookupTable[currentIndex]->SetMinMaxImageValues(_targetMin, _targetMax);
 
     for (int dim = 0; dim < 3; dim++) {
         _transformFilter[currentIndex][dim]->SetInput(_image[currentIndex]);
         _transformFilter[currentIndex][dim]->PutScaleFactorAndOffset(255.0 / (_targetMax
             - _targetMin), -_targetMin * 255.0 / (_targetMax - _targetMin));
-    }
-}
-
-void irtkQtThreeDimensionalViewer::ResizeImage(int width, int height) {
-
-}
-
-void irtkQtThreeDimensionalViewer::ChangeSlice(int* slice) {
-    double originX, originY, originZ;
-
-    originX = slice[0];
-    originY = slice[1];
-    originZ = slice[2];
-
-    _targetImage->ImageToWorld(originX, originY, originZ);
-
-    emit OriginChanged(originX, originY, originZ);
-}
-
-void irtkQtThreeDimensionalViewer::ChangeOrigin(int x, int y) {
-
-}
-
-void irtkQtThreeDimensionalViewer::AddToMaps(irtkImage* newImage, int index) {
-    _image.insert(pair<int, irtkImage *> (index, newImage));
-
-    _imageOutput.insert(pair<int, irtkGreyImage **> (index, new irtkGreyImage*[3]));
-    _transform.insert(pair<int, irtkTransformation **> (index, new irtkTransformation*[3]));
-    _interpolator.insert(pair<int, irtkImageFunction **> (index, new irtkImageFunction*[3]));
-    _transformFilter.insert(pair<int, irtkImageTransformation **> (index, new irtkImageTransformation*[3]));
-
-    for (int dim = 0; dim < 3; dim++) {
-        _imageOutput[index][dim] = new irtkGreyImage;
-        _transform[index][dim] = new irtkAffineTransformation;
-        _interpolator[index][dim] = new irtkNearestNeighborInterpolateImageFunction;
-
-        irtkImageTransformation *transformation = new irtkImageTransformation;
-        transformation->SetOutput(_imageOutput[index][dim]);
-        transformation->SetTransformation(_transform[index][dim]);
-        transformation->PutInterpolator(_interpolator[index][dim]);
-        transformation->PutSourcePaddingValue(0);
-        _transformFilter[index][dim] = transformation;
-    }
-
-    for (int i = 0; i < 3; i++) previousSlice[i] = 0;
-}
-
-void CalculateSingleTransform(irtkImageTransformation** &transform) {
-    for (int i = 0; i < 3; i++) {
-        transform[i]->PutSourcePaddingValue(-1);
-        transform[i]->Run();
     }
 }
 
@@ -246,9 +180,83 @@ void irtkQtThreeDimensionalViewer::MoveImage(int previousKey, int newKey) {
         MoveImageDown(_interpolator, previousKey, newKey);
         MoveImageDown(_transformFilter, previousKey, newKey);
     }
-
-    cout << "first image key is " << _image.begin()->first << endl;
 }
+
+void irtkQtThreeDimensionalViewer::UpdateKeysAfterIndexDeleted(int index) {
+    irtkQtBaseViewer::UpdateKeysAfterIndexDeleted(_image, index);
+    irtkQtBaseViewer::UpdateKeysAfterIndexDeleted(_imageOutput, index);
+    irtkQtBaseViewer::UpdateKeysAfterIndexDeleted(_lookupTable, index);
+    irtkQtBaseViewer::UpdateKeysAfterIndexDeleted(_transform, index);
+    irtkQtBaseViewer::UpdateKeysAfterIndexDeleted(_interpolator, index);
+    irtkQtBaseViewer::UpdateKeysAfterIndexDeleted(_transformFilter, index);
+}
+
+void irtkQtThreeDimensionalViewer::ResizeImage(int width, int height) {
+
+}
+
+void irtkQtThreeDimensionalViewer::ChangeSlice(int* slice) {
+    double originX, originY, originZ;
+
+    originX = slice[0];
+    originY = slice[1];
+    originZ = slice[2];
+
+    _targetImage->ImageToWorld(originX, originY, originZ);
+
+    emit OriginChanged(originX, originY, originZ);
+}
+
+void irtkQtThreeDimensionalViewer::ChangeOrigin(int x, int y) {
+
+}
+
+void irtkQtThreeDimensionalViewer::UpdateCurrentSlice() {
+    double x, y, z;
+
+    x = _originX;
+    y = _originY;
+    z = _originZ;
+
+    _targetImage->WorldToImage(x, y, z);
+
+    for (int i = 0; i < 3; i++) previousSlice[i] = currentSlice[i];
+
+    currentSlice[0] = (int) round(x);
+    currentSlice[1] = (int) round(y);
+    currentSlice[2] = (int) round(z);
+}
+
+void irtkQtThreeDimensionalViewer::AddToMaps(irtkImage* newImage, int index) {
+    _image.insert(pair<int, irtkImage *> (index, newImage));
+
+    _imageOutput.insert(pair<int, irtkGreyImage **> (index, new irtkGreyImage*[3]));
+    _transform.insert(pair<int, irtkTransformation **> (index, new irtkTransformation*[3]));
+    _interpolator.insert(pair<int, irtkImageFunction **> (index, new irtkImageFunction*[3]));
+    _transformFilter.insert(pair<int, irtkImageTransformation **> (index, new irtkImageTransformation*[3]));
+
+    for (int dim = 0; dim < 3; dim++) {
+        _imageOutput[index][dim] = new irtkGreyImage;
+        _transform[index][dim] = new irtkAffineTransformation;
+        _interpolator[index][dim] = new irtkNearestNeighborInterpolateImageFunction;
+
+        irtkImageTransformation *transformation = new irtkImageTransformation;
+        transformation->SetOutput(_imageOutput[index][dim]);
+        transformation->SetTransformation(_transform[index][dim]);
+        transformation->PutInterpolator(_interpolator[index][dim]);
+        transformation->PutSourcePaddingValue(0);
+        _transformFilter[index][dim] = transformation;
+    }
+
+    for (int i = 0; i < 3; i++) previousSlice[i] = 0;
+}
+
+//void CalculateSingleTransform(irtkImageTransformation** &transform) {
+//    for (int i = 0; i < 3; i++) {
+//        transform[i]->PutSourcePaddingValue(-1);
+//        transform[i]->Run();
+//    }
+//}
 
 void irtkQtThreeDimensionalViewer::SetOrientation(int view) {
     double x[3], y[3], z[3];

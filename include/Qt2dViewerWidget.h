@@ -6,6 +6,7 @@
 
 #include <QLabel>
 
+
 class Qt2dViewerWidget : public QtViewerWidget
 {
     Q_OBJECT

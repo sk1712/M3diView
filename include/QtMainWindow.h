@@ -3,6 +3,7 @@
 
 #include <Qt2dViewerWidget.h>
 #include <Qt3dViewerWidget.h>
+#include <QtToolWidget.h>
 
 #include <irtkQtViewer.h>
 #include <irtkImageListModel.h>
@@ -25,8 +26,6 @@ class QtMainWindow : public QMainWindow
     QListView *imageListView;
     QTabWidget *toolsTabWidget;
     QWidget *mainViewWidget;
-    QSlider *opacitySlider;
-    QLabel *opacityLabel;
 
     /// window menus
     QMenu *fileMenu;
@@ -50,9 +49,11 @@ class QtMainWindow : public QMainWindow
     QAction *viewSelectedImageAction;
     QAction *zoomInAction;
     QAction *zoomOutAction;
-    QAction *opacityAction;
     QAction *moveUpAction;
     QAction *moveDownAction;
+
+    /// visualisation tool widget
+    QtToolWidget *visualToolWidget;
 
     /// list of viewer widgets
     QList<QtViewerWidget*> viewerWidgets;
@@ -65,6 +66,9 @@ class QtMainWindow : public QMainWindow
 
     /// flag for only one viewer visible
     bool singleViewerInScreen;
+
+    /// number of currently displayed images
+    int numDisplayedImages;
 
 public:
 
@@ -88,14 +92,23 @@ private:
     /// create menu actions
     void createMenuActions();
 
+    /// define the size of splitter elements
+    void fixSplitterGeometry();
+
     /// connect window signals that won't be disconnected
     void connectWindowSignals();
+
+    /// connect visualisation tools signals to slots
+    void connectToolSignals();
 
     /// disconnect signals between viewers and viewerWidgets
     void disconnectViewerSignals();
 
     /// connect signals between viewers and viewerWidgets
     void connectViewerSignals();
+
+    /// disable viewer widgets when no image is visible
+    void disableViewerWidgets();
 
     /// create new 2D viewer
     Qt2dViewerWidget* createTwoDimensionalView(irtkQtBaseViewer::irtkViewMode viewMode);
@@ -107,7 +120,7 @@ private:
     void clearLists();
 
     /// check if image is already loaded
-    bool imageInList(const QString fileName);
+    bool imageInList(const QString fileName) const;
 
     /// add widget to mainViewWidget
     void addToViewWidget(QWidget *widget);
@@ -176,6 +189,9 @@ private slots:
 
     /// callback function for list view double clicked
     void listViewDoubleClicked(QModelIndex index);
+
+    /// callback function for list view cliked
+    void listViewClicked(QModelIndex index);
 
     /// callback function for moving image up in the list
     void moveImageUp();

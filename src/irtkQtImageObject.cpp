@@ -2,6 +2,7 @@
 
 #include <QFileInfo>
 
+
 irtkQtImageObject::irtkQtImageObject(const QString &path)
     : _path(path)
 {

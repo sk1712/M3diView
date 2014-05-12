@@ -48,16 +48,19 @@ public:
     /// move image with key previousKey to newKey
     void MoveImage(int previousKey, int newKey);
 
+    /// update key values after invalid image is deleted from the list
+    void UpdateKeysAfterIndexDeleted(int index);
+
     /// get the labels displayed on the screen
     void GetLabels(char &top, char &bottom, char &left, char &right);
 
     /// get the object name for the corresponding view (useful for the styling)
     string GetObjectName();
 
-    /// delete all vector elements and clear vectors
+    /// delete all map elements and clear maps
     void ClearDisplayedImages();
 
-    /// add image object to the vector of images to be displayed
+    /// add image object to the map of images to be displayed
     void AddToDisplayedImages(irtkQtImageObject *imageObject, int index);
 
     /// delete single image
@@ -79,7 +82,7 @@ protected:
     /// update the slice currently visible (in image coordinates)
     void UpdateCurrentSlice();
 
-    /// add new image and corresponding tools to vectors
+    /// add new image and corresponding tools to maps
     void AddToMaps(irtkImage* newImage, int index);
 };
 

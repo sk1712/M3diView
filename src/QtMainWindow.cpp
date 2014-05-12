@@ -1,5 +1,6 @@
 #include <QtMainWindow.h>
 
+
 #include <QDesktopWidget>
 #include <QMenuBar>
 #include <QToolBar>
@@ -11,36 +12,31 @@
 
 
 QtMainWindow::QtMainWindow() {
-    // set the sizes for the splitter elements according to the desktop size
-    QDesktopWidget desktop;
-    QRect screenSize = desktop.availableGeometry(this);
-    QList<int> horizontalSize, verticalSize;
-    horizontalSize << screenSize.width() * 0.15f << screenSize.width() * 0.85f;
-    verticalSize << screenSize.height() *0.4f << screenSize.height() * 0.6f;
-
     horizontalSplitter = new QSplitter(this);
     verticalSplitter = new QSplitter(Qt::Vertical, horizontalSplitter);
-    verticalSplitter->setSizes(horizontalSize);
     imageListView = new QListView(verticalSplitter);
+
+    visualToolWidget = new QtToolWidget;
     toolsTabWidget = new QTabWidget(verticalSplitter);
+    toolsTabWidget->addTab(visualToolWidget, tr("Visualisation"));
 
     mainViewWidget = new QWidget(horizontalSplitter);
-    QGridLayout *layout = new QGridLayout();
+    QGridLayout *layout = new QGridLayout;
     mainViewWidget->setLayout(layout);
 
     createMenuActions();
     createToolBarActions();
     createMenu();
     createToolBar();
+
     connectWindowSignals();
+    connectToolSignals();
 
-    opacitySlider->setValue(255);
-
-    verticalSplitter->setSizes(verticalSize);
-    horizontalSplitter->setSizes(horizontalSize);
+    fixSplitterGeometry();
 
     setCentralWidget(horizontalSplitter);
     singleViewerInScreen = false;
+    numDisplayedImages = 0;
     imageModel = NULL;
 }
 
@@ -58,9 +54,6 @@ void QtMainWindow::createToolBar() {
 
     toolbar->addAction(zoomInAction);
     toolbar->addAction(zoomOutAction);
-    toolbar->addSeparator();
-
-    toolbar->addAction(opacityAction);
 }
 
 void QtMainWindow::createMenu() {
@@ -86,27 +79,6 @@ void QtMainWindow::createToolBarActions() {
 
     zoomOutAction = new QAction(tr("Zoom out"), this);
     zoomOutAction->setIcon(QIcon(":/icons/zoom_out.png"));
-
-    QMenu *opacityMenu = new QMenu();
-    QWidgetAction *widgetAction = new QWidgetAction(opacityMenu);
-
-    QWidget *opacityWidget = new QWidget();
-    QVBoxLayout *menuLayout = new QVBoxLayout();
-    opacityWidget->setLayout(menuLayout);
-    opacitySlider = new QSlider(Qt::Vertical);
-    opacitySlider->setRange(0, 255);
-    menuLayout->addWidget(opacitySlider);
-
-    opacityLabel = new QLabel();
-    opacityLabel->setFixedWidth(30);
-    menuLayout->addWidget(opacityLabel);
-
-    widgetAction->setDefaultWidget(opacityWidget);
-    opacityMenu->addAction(widgetAction);
-
-    opacityAction = new QAction(tr("Opacity"), this);
-    opacityAction->setIcon(QIcon(":/icons/opacity.png"));
-    opacityAction->setMenu(opacityMenu);
 
     moveUpAction = new QAction(tr("Move image up"), this);
     moveUpAction->setIcon(QIcon(":/icons/arrow_up.png"));
@@ -138,16 +110,28 @@ void QtMainWindow::createMenuActions() {
     clearViewsAction->setStatusTip(tr("Delete all views"));
 }
 
+void QtMainWindow::fixSplitterGeometry() {
+    // set the sizes for the splitter elements according to the desktop size
+    QDesktopWidget desktop;
+    QRect screenSize = desktop.availableGeometry(this);
+    QList<int> horizontalSize, verticalSize;
+    horizontalSize << screenSize.width() * 0.15f << screenSize.width() * 0.85f;
+    verticalSize << screenSize.height() *0.6f << screenSize.height() * 0.4f;
+
+    verticalSplitter->setSizes(verticalSize);
+    horizontalSplitter->setSizes(horizontalSize);
+}
+
 void QtMainWindow::connectWindowSignals() {
     // list view signals
     connect(imageListView, SIGNAL(doubleClicked(QModelIndex)),
             this, SLOT(listViewDoubleClicked(QModelIndex)));
+    connect(imageListView, SIGNAL(clicked(QModelIndex)),
+            this, SLOT(listViewClicked(QModelIndex)));
 
     // toolbar signals
     connect(zoomInAction, SIGNAL(triggered()), this, SLOT(zoomIn()));
     connect(zoomOutAction, SIGNAL(triggered()), this, SLOT(zoomOut()));
-    connect(opacitySlider, SIGNAL(valueChanged(int)), this, SLOT(opacityValueChanged(int)));
-
     connect(moveUpAction, SIGNAL(triggered()), this, SLOT(moveImageUp()));
     connect(moveDownAction, SIGNAL(triggered()), this, SLOT(moveImageDown()));
 
@@ -159,6 +143,10 @@ void QtMainWindow::connectWindowSignals() {
     connect(viewOrthogonalAction, SIGNAL(triggered()), this, SLOT(createOrthogonalView()));
     connect(view3DAction, SIGNAL(triggered()), this, SLOT(create3dView()));
     connect(clearViewsAction, SIGNAL(triggered()), this, SLOT(clearViews()));
+}
+
+void QtMainWindow::connectToolSignals() {
+    connect(visualToolWidget, SIGNAL(opacityChanged(int)), this, SLOT(opacityValueChanged(int)));
 }
 
 void QtMainWindow::disconnectViewerSignals() {
@@ -213,6 +201,13 @@ void QtMainWindow::connectViewerSignals() {
     }
 }
 
+void QtMainWindow::disableViewerWidgets() {
+    QList<QtViewerWidget*>::iterator it;
+    for (it = viewerWidgets.begin(); it != viewerWidgets.end(); it++) {
+        (*it)->setEnabled(false);
+    }
+}
+
 Qt2dViewerWidget* QtMainWindow::createTwoDimensionalView(irtkQtBaseViewer::irtkViewMode viewMode) {
     irtkQtTwoDimensionalViewer* viewer;
     Qt2dViewerWidget *qtViewer;
@@ -263,7 +258,7 @@ void QtMainWindow::clearLists() {
     viewerWidgets.clear();
 }
 
-bool QtMainWindow::imageInList(const QString fileName) {
+bool QtMainWindow::imageInList(const QString fileName) const {
     QList<irtkQtImageObject*> list = irtkQtViewer::Instance()->GetImageList();
     QList<irtkQtImageObject*>::const_iterator it;
     for (it = list.constBegin(); it != list.constEnd(); it++) {
@@ -333,8 +328,6 @@ bool QtMainWindow::setDisplayedImages() {
 
     bool atLeastOneImageVisible = false;
 
-    viewer->ClearDisplayedImages();
-
     QList<irtkQtImageObject*> imageList = irtkQtViewer::Instance()->GetImageList();
     QList<irtkQtImageObject*>::const_iterator it;
 
@@ -402,8 +395,9 @@ void QtMainWindow::deleteSingleImage(int index) {
     // re-register the viewers' signals
     disconnectViewerSignals();
 
-    for (int i = 0; i < viewers.size(); i++) {
-        viewers[i]->DeleteSingleImage(index);
+    QList<irtkQtBaseViewer*>::iterator it;
+    for (it = viewers.begin(); it != viewers.end(); it++) {
+        (*it)->DeleteSingleImage(index);
     }
 
     // re-register the viewers' signals
@@ -593,20 +587,35 @@ void QtMainWindow::opacityValueChanged(int value) {
             }
         }
     }
-    opacityLabel->setText(QString::number(value));
 }
 
 void QtMainWindow::listViewDoubleClicked(QModelIndex index) {
     int i = index.row();
     QList<irtkQtImageObject*> & list = irtkQtViewer::Instance()->GetImageList();
-    bool visible = !list.at(i)->IsVisible();
-    list.at(i)->SetVisible(visible);
+    bool visible = !list[i]->IsVisible();
+    list[i]->SetVisible(visible);
 
+    // if image becomes visible display it
     if (visible) {
-        if (displaySingleImage(i))
+        if (displaySingleImage(i)) {
+            numDisplayedImages++;
             setUpViewerWidgets();
+        }
+        else {
+            QList<irtkQtBaseViewer*>::iterator it;
+            for (it = viewers.begin(); it != viewers.end(); it++) {
+                (*it)->UpdateKeysAfterIndexDeleted(i);
+            }
+        }
     }
+    // otherwise delete it and decrease the number of visible images
     else {
+        numDisplayedImages--;
+
+        if (numDisplayedImages == 0) {
+            disableViewerWidgets();
+        }
+
         deleteSingleImage(i);
         setUpViewerWidgets();
     }
@@ -614,6 +623,15 @@ void QtMainWindow::listViewDoubleClicked(QModelIndex index) {
     delete imageModel;
     imageModel = new irtkImageListModel(list);
     imageListView->setModel(imageModel);
+}
+
+void QtMainWindow::listViewClicked(QModelIndex index) {
+    int i = index.row();
+    QList<irtkQtImageObject*> & list = irtkQtViewer::Instance()->GetImageList();
+
+    if (list[i]->IsVisible()) {
+        visualToolWidget->setMaximumDisplayValue(viewers[0]->GetMaxImageValue(i));
+    }
 }
 
 void QtMainWindow::moveImageUp() {

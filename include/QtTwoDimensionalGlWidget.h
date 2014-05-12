@@ -5,6 +5,7 @@
 
 #include <QVector>
 
+
 class QtTwoDimensionalGlWidget : public QtGlWidget
 {
     Q_OBJECT

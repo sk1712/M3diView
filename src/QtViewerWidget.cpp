@@ -3,6 +3,7 @@
 #include <QGridLayout>
 #include <QHBoxLayout>
 
+
 QtViewerWidget::QtViewerWidget(QWidget *parent) : QWidget(parent) {
     linked = true;
 

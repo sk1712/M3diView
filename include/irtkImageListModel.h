@@ -5,6 +5,7 @@
 
 #include <QAbstractListModel>
 
+
 class irtkImageListModel : public QAbstractListModel
 {
     Q_OBJECT
