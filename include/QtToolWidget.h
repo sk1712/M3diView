@@ -28,13 +28,17 @@ public:
     /// class destructor
     //~QtToolWidget();
 
-    void setMaximumDisplayValue(int maxDisplay);
+    void setMaximumImageValue(double maxImage);
 
-    void setImageMin(int min);
+    void setMinimumImageValue(double minImage);
 
-    void setImageMax(int max);
+    void setDisplayMin(int min);
+
+    void setDisplayMax(int max);
 
     void setOpacity(int opacity);
+
+    void setColormap(int index);
 
 private:
 

@@ -68,19 +68,22 @@ public:
     int GetOpacity();
 
     /// get minimum value for the corresponding image
-    int GetMinImageValue();
+    double GetMinImageValue();
 
     /// get maximum value for the corresponding image
-    int GetMaxImageValue();
+    double GetMaxImageValue();
 
     /// get minimum display value for the corresponding image
     int GetMinDisplayValue();
 
     /// get maximum display value for the corresponding image
-    int GetMaxDisplayValue();
+    int GetMaxDisplayValue() const;
 
     /// set colormap for the corresponding image
     void SetColormap(irtkQtLookupTable::irtkColorMode mode);
+
+    /// get colormap for the corresponding image
+    int GetColormap() const;
 };
 
 
@@ -124,8 +127,8 @@ inline int irtkQtImageObject::GetOpacity() {
     return opacity;
 }
 
-inline int irtkQtImageObject::GetMinImageValue() {
-    int minValue = 0;
+inline double irtkQtImageObject::GetMinImageValue() {
+    double minValue = 0;
 
     if (_lookupTable) {
         minValue = _lookupTable->GetImageMinValue();
@@ -134,8 +137,8 @@ inline int irtkQtImageObject::GetMinImageValue() {
     return minValue;
 }
 
-inline int irtkQtImageObject::GetMaxImageValue() {
-    int maxValue = 0;
+inline double irtkQtImageObject::GetMaxImageValue() {
+    double maxValue = 0;
 
     if (_lookupTable) {
         maxValue = _lookupTable->GetImageMaxValue();
@@ -154,7 +157,7 @@ inline int irtkQtImageObject::GetMinDisplayValue() {
     return minDisplay;
 }
 
-inline int irtkQtImageObject::GetMaxDisplayValue() {
+inline int irtkQtImageObject::GetMaxDisplayValue() const {
     int maxDisplay = 0;
 
     if (_lookupTable) {
@@ -168,6 +171,16 @@ inline void irtkQtImageObject::SetColormap(irtkQtLookupTable::irtkColorMode mode
     if (_lookupTable) {
         _lookupTable->SetColorMode(mode);
     }
+}
+
+inline int irtkQtImageObject::GetColormap() const {
+    int colormapIndex = -1;
+
+    if (_lookupTable) {
+        colormapIndex = _lookupTable->GetColorMode();
+    }
+
+    return colormapIndex;
 }
 
 #endif // IRTKQTIMAGEOBJECT_H

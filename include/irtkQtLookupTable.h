@@ -58,10 +58,10 @@ public:
     int GetMaxDisplayValue() const;
 
     /// get actual image minimum value
-    int GetImageMinValue() const;
+    double GetImageMinValue() const;
 
     /// get actual image maximum value
-    int GetImageMaxValue() const;
+    double GetImageMaxValue() const;
 
     /// set minimum and maximum values
     void SetMinMaxDisplayValues(int min, int max);
@@ -107,11 +107,13 @@ inline int irtkQtLookupTable::GetMaxDisplayValue() const {
     return maxDisplay;
 }
 
-inline int irtkQtLookupTable::GetImageMinValue() const {
+// TO DO : decide whether to use double or integer
+inline double irtkQtLookupTable::GetImageMinValue() const {
     return minImage;
 }
 
-inline int irtkQtLookupTable::GetImageMaxValue() const {
+// TO DO : decide whether to use double or integer
+inline double irtkQtLookupTable::GetImageMaxValue() const {
     return maxImage;
 }
 

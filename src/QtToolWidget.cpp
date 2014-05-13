@@ -44,21 +44,32 @@ QtToolWidget::QtToolWidget(QWidget * parent) : QWidget(parent) {
     setLayout(formLayout);
 }
 
-void QtToolWidget::setMaximumDisplayValue(int maxDisplay) {
-    minImageSlider->setMaximum(maxDisplay);
-    maxImageSlider->setMaximum(maxDisplay);
+void QtToolWidget::setMaximumImageValue(double maxImage) {
+    minImageSlider->setMaximum(maxImage * 10);
+    maxImageSlider->setMaximum(maxImage * 10);
 }
 
-void QtToolWidget::setImageMin(int min) {
-    minValueChanged(min);
+void QtToolWidget::setMinimumImageValue(double minImage) {
+    minImageSlider->setMinimum(minImage * 10);
+    maxImageSlider->setMinimum(minImage * 10);
 }
 
-void QtToolWidget::setImageMax(int max) {
-    maxValueChanged(max);
+void QtToolWidget::setDisplayMin(int min) {
+    minImageSlider->setValue(min);
+}
+
+void QtToolWidget::setDisplayMax(int max) {
+    maxImageSlider->setValue(max);
 }
 
 void QtToolWidget::setOpacity(int opacity) {
-    opacityValueChanged(opacity);
+    opacitySlider->setValue(opacity);
+}
+
+void QtToolWidget::setColormap(int index) {
+    if (index >= 0) {
+        colormapCombo->setCurrentIndex(index);
+    }
 }
 
 void QtToolWidget::connectSignals() {
@@ -71,8 +82,8 @@ void QtToolWidget::connectSignals() {
 void QtToolWidget::initializeValues() {
     opacitySlider->setMaximum(255);
     opacitySlider->setValue(255);
-    minImageSlider->setValue(255);
-    maxImageSlider->setValue(255);
+    minImageSlider->setValue(0);
+    maxImageSlider->setValue(0);
     colormapCombo->setCurrentIndex(3);
 }
 

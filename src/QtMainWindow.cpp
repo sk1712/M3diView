@@ -630,9 +630,17 @@ void QtMainWindow::listViewDoubleClicked(QModelIndex index) {
 void QtMainWindow::listViewClicked(QModelIndex index) {
     int i = index.row();
     QList<irtkQtImageObject*> & list = irtkQtViewer::Instance()->GetImageList();
+    irtkQtImageObject* imageObject = list[i];
 
-    if (list[i]->IsVisible()) {
-        visualToolWidget->setMaximumDisplayValue(list[i]->GetMaxImageValue());
+    if (imageObject->IsVisible()) {
+        visualToolWidget->setEnabled(true);
+        visualToolWidget->setColormap(imageObject->GetColormap());
+        visualToolWidget->setOpacity(imageObject->GetOpacity());
+        visualToolWidget->setMinimumImageValue(imageObject->GetMinImageValue());
+        visualToolWidget->setMaximumImageValue(imageObject->GetMaxImageValue());
+    }
+    else {
+        visualToolWidget->setEnabled(false);
     }
 }
 
