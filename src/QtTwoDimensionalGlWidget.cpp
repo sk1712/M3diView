@@ -19,7 +19,7 @@ void QtTwoDimensionalGlWidget::drawImage() const {
         // Set raster position
         glRasterPos2f(0, 0);
         // Draw pixelmap
-        glDrawPixels(_width, _height, GL_RGBA, GL_UNSIGNED_BYTE,
+        glDrawPixels(_width, _height, GL_BGRA, GL_UNSIGNED_BYTE,
                      (*rit)[0]);
     }
 }

@@ -43,28 +43,24 @@ void irtkQtLookupTable::SetColorMode(irtkColorMode mode) {
 }
 
 void irtkQtLookupTable::SetColorModeToRed() {
-    qDebug() << "setting color mode to red";
     for (int i = 0; i <= 255; i++) {
-        lookupTable[i] = qRgba(0, 0, i, _alpha);
+        lookupTable[i] = qRgba(i, 0, 0, _alpha);
     }
 }
 
 void irtkQtLookupTable::SetColorModeToGreen() {
-    qDebug() << "setting color mode to green";
     for (int i = 0; i <= 255; i++) {
         lookupTable[i] = qRgba(0, i, 0, _alpha);
     }
 }
 
 void irtkQtLookupTable::SetColorModeToBlue() {
-    qDebug() << "setting color mode to blue";
     for (int i = 0; i <= 255; i++) {
-        lookupTable[i] = qRgba(i, 0, 0, _alpha);
+        lookupTable[i] = qRgba(0, 0, i, _alpha);
     }
 }
 
 void irtkQtLookupTable::SetColorModeToLuminance() {
-    qDebug() << "setting color mode to luminance";
     for (int i = 0; i <= 255; i++) {
         lookupTable[i] = qRgba(i, i, i, _alpha);
     }

@@ -148,7 +148,7 @@ void QtThreeDimensionalGlWidget::createTextures() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
                     GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, dimensions[0],
-            dimensions[1], 0, GL_RGBA, GL_UNSIGNED_BYTE,
+            dimensions[1], 0, GL_BGRA, GL_UNSIGNED_BYTE,
             _drawable[0][0]);
 
     // create texture for sagittal view
@@ -158,7 +158,7 @@ void QtThreeDimensionalGlWidget::createTextures() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
                     GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, dimensions[1],
-            dimensions[2], 0, GL_RGBA, GL_UNSIGNED_BYTE,
+            dimensions[2], 0, GL_BGRA, GL_UNSIGNED_BYTE,
             _drawable[0][1]);
 
     // create texture for coronal view
@@ -168,7 +168,7 @@ void QtThreeDimensionalGlWidget::createTextures() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
                     GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, dimensions[0],
-            dimensions[2], 0, GL_RGBA, GL_UNSIGNED_BYTE,
+            dimensions[2], 0, GL_BGRA, GL_UNSIGNED_BYTE,
             _drawable[0][2]);
 
     glDisable(GL_TEXTURE_2D);

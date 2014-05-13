@@ -109,31 +109,65 @@ inline irtkQtLookupTable* irtkQtImageObject::GetLookupTable() const {
 }
 
 inline void irtkQtImageObject::SetOpacity(int value) {
-    _lookupTable->SetAlpha(value);
+    if (_lookupTable) {
+        _lookupTable->SetAlpha(value);
+    }
 }
 
 inline int irtkQtImageObject::GetOpacity() {
-    return _lookupTable->GetAlpha();
+    int opacity = 0;
+
+    if (_lookupTable) {
+        opacity = _lookupTable->GetAlpha();
+    }
+
+    return opacity;
 }
 
 inline int irtkQtImageObject::GetMinImageValue() {
-    return _lookupTable->GetImageMinValue();
+    int minValue = 0;
+
+    if (_lookupTable) {
+        minValue = _lookupTable->GetImageMinValue();
+    }
+
+    return minValue;
 }
 
 inline int irtkQtImageObject::GetMaxImageValue() {
-    return _lookupTable->GetImageMaxValue();
+    int maxValue = 0;
+
+    if (_lookupTable) {
+        maxValue = _lookupTable->GetImageMaxValue();
+    }
+
+    return maxValue;
 }
 
 inline int irtkQtImageObject::GetMinDisplayValue() {
-    return _lookupTable->GetMinDisplayValue();
+    int minDisplay = 0;
+
+    if (_lookupTable) {
+        minDisplay = _lookupTable->GetMinDisplayValue();
+    }
+
+    return minDisplay;
 }
 
 inline int irtkQtImageObject::GetMaxDisplayValue() {
-    return _lookupTable->GetMaxDisplayValue();
+    int maxDisplay = 0;
+
+    if (_lookupTable) {
+        maxDisplay = _lookupTable->GetMaxDisplayValue();
+    }
+
+    return maxDisplay;
 }
 
 inline void irtkQtImageObject::SetColormap(irtkQtLookupTable::irtkColorMode mode) {
-    _lookupTable->SetColorMode(mode);
+    if (_lookupTable) {
+        _lookupTable->SetColorMode(mode);
+    }
 }
 
 #endif // IRTKQTIMAGEOBJECT_H
