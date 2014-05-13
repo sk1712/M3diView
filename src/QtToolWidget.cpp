@@ -8,7 +8,6 @@
 
 QtToolWidget::QtToolWidget(QWidget * parent) : QWidget(parent) {
     QFormLayout *formLayout = new QFormLayout;
-    formLayout->setFormAlignment(Qt::AlignHCenter | Qt::AlignTop);
 
     QWidget *minImageWidget = new QWidget;
     QHBoxLayout *minImageLayout = new QHBoxLayout(minImageWidget);
