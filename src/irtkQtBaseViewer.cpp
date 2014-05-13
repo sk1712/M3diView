@@ -19,7 +19,8 @@ void irtkQtBaseViewer::AddToDisplayedImages(irtkQtImageObject *imageObject, int 
         _targetImage = newImage;
         InitializeOriginOrientation();
     }
-    else {
+    else if (index < _image.begin()->first) {
+        _targetImage = newImage;
         /// check whether image dimensions agree instead
 //        if (!(_targetImage->GetImageAttributes() == newImage->GetImageAttributes())) {
 //            delete newImage;
@@ -37,6 +38,10 @@ void irtkQtBaseViewer::DeleteSingleImage(int index) {
     if (index < _image.begin()->first) {
         _targetImage = _image.begin()->second;
     }
+}
+
+void irtkQtBaseViewer::MoveImage(int, int) {
+    _targetImage = _image.begin()->second;
 }
 
 irtkImageAttributes irtkQtBaseViewer::InitializeAttributes() {

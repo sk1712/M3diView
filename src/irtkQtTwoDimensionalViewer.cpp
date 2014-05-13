@@ -115,6 +115,8 @@ void irtkQtTwoDimensionalViewer::MoveImage(int previousKey, int newKey) {
         MoveImageDown(_interpolator, previousKey, newKey);
         MoveImageDown(_transformFilter, previousKey, newKey);
     }
+
+    irtkQtBaseViewer::MoveImage(previousKey, newKey);
 }
 
 void irtkQtTwoDimensionalViewer::UpdateKeysAfterIndexDeleted(int index) {

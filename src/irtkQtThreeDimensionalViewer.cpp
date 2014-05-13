@@ -176,6 +176,8 @@ void irtkQtThreeDimensionalViewer::MoveImage(int previousKey, int newKey) {
         MoveImageDown(_interpolator, previousKey, newKey);
         MoveImageDown(_transformFilter, previousKey, newKey);
     }
+
+    irtkQtBaseViewer::MoveImage(previousKey, newKey);
 }
 
 void irtkQtThreeDimensionalViewer::UpdateKeysAfterIndexDeleted(int index) {

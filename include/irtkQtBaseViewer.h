@@ -114,7 +114,7 @@ public:
     virtual void DeleteSingleImage(int index);
 
     /// move image with key previousKey to newKey
-    virtual void MoveImage(int previousKey, int newKey) = 0;
+    virtual void MoveImage(int previousKey, int newKey);
 
     /// update keys of maps after invalid image is delete
     virtual void UpdateKeysAfterIndexDeleted(int index) = 0;
