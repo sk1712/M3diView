@@ -32,9 +32,9 @@ public:
 
     void setMinimumImageValue(double minImage);
 
-    void setDisplayMin(int min);
+    void setDisplayMin(double min);
 
-    void setDisplayMax(int max);
+    void setDisplayMax(double max);
 
     void setOpacity(int opacity);
 
@@ -65,6 +65,10 @@ private slots:
     void opacityValueChanged(int value);
 
 signals:
+
+    void minChanged(double value);
+
+    void maxChanged(double value);
 
     void colormapChanged(int index);
 

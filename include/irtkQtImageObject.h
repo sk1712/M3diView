@@ -73,11 +73,17 @@ public:
     /// get maximum value for the corresponding image
     double GetMaxImageValue();
 
+    /// set minimum display value for the corresponding image
+    void SetMinDisplayValue(double min);
+
     /// get minimum display value for the corresponding image
-    int GetMinDisplayValue();
+    double GetMinDisplayValue();
+
+    /// set maximum display value for the corresponding image
+    void SetMaxDisplayValue(double max);
 
     /// get maximum display value for the corresponding image
-    int GetMaxDisplayValue() const;
+    double GetMaxDisplayValue() const;
 
     /// set colormap for the corresponding image
     void SetColormap(irtkQtLookupTable::irtkColorMode mode);
@@ -147,8 +153,14 @@ inline double irtkQtImageObject::GetMaxImageValue() {
     return maxValue;
 }
 
-inline int irtkQtImageObject::GetMinDisplayValue() {
-    int minDisplay = 0;
+inline void irtkQtImageObject::SetMinDisplayValue(double min) {
+    if (_lookupTable) {
+        _lookupTable->SetMinDisplayValue(min);
+    }
+}
+
+inline double irtkQtImageObject::GetMinDisplayValue() {
+    double minDisplay = 0;
 
     if (_lookupTable) {
         minDisplay = _lookupTable->GetMinDisplayValue();
@@ -157,7 +169,13 @@ inline int irtkQtImageObject::GetMinDisplayValue() {
     return minDisplay;
 }
 
-inline int irtkQtImageObject::GetMaxDisplayValue() const {
+inline void irtkQtImageObject::SetMaxDisplayValue(double max) {
+    if (_lookupTable) {
+        _lookupTable->SetMaxDisplayValue(max);
+    }
+}
+
+inline double irtkQtImageObject::GetMaxDisplayValue() const {
     int maxDisplay = 0;
 
     if (_lookupTable) {

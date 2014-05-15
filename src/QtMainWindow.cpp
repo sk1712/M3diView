@@ -148,6 +148,8 @@ void QtMainWindow::connectWindowSignals() {
 void QtMainWindow::connectToolSignals() {
     connect(visualToolWidget, SIGNAL(colormapChanged(int)), this, SLOT(colormapIndexChanged(int)));
     connect(visualToolWidget, SIGNAL(opacityChanged(int)), this, SLOT(opacityValueChanged(int)));
+    connect(visualToolWidget, SIGNAL(minChanged(double)), this, SLOT(minDisplayValueChanged(double)));
+    connect(visualToolWidget, SIGNAL(maxChanged(double)), this, SLOT(maxDisplayValueChanged(double)));
 }
 
 void QtMainWindow::disconnectViewerSignals() {
@@ -558,6 +560,34 @@ void QtMainWindow::updateOrigin(double x, double y, double z) {
     connectViewerSignals();
 }
 
+void QtMainWindow::minDisplayValueChanged(double value) {
+    QList<irtkQtImageObject*> & list = irtkQtViewer::Instance()->GetImageList();
+    int index = imageListView->currentIndex().row();
+    if (!list.empty() && index >= 0) {
+        if (list[index]->IsVisible()) {
+            list[index]->SetMinDisplayValue(value);
+            for (int i = 0; i < viewers.size(); i++) {
+                viewerWidgets[i]->getGlWidget()->updateDrawable(
+                            QVector<QRgb**>::fromStdVector(viewers[i]->GetDrawable()));
+            }
+        }
+    }
+}
+
+void QtMainWindow::maxDisplayValueChanged(double value) {
+    QList<irtkQtImageObject*> & list = irtkQtViewer::Instance()->GetImageList();
+    int index = imageListView->currentIndex().row();
+    if (!list.empty() && index >= 0) {
+        if (list[index]->IsVisible()) {
+            list[index]->SetMaxDisplayValue(value);
+            for (int i = 0; i < viewers.size(); i++) {
+                viewerWidgets[i]->getGlWidget()->updateDrawable(
+                            QVector<QRgb**>::fromStdVector(viewers[i]->GetDrawable()));
+            }
+        }
+    }
+}
+
 void QtMainWindow::colormapIndexChanged(int mode) {
     QList<irtkQtImageObject*> & list = irtkQtViewer::Instance()->GetImageList();
     int index = imageListView->currentIndex().row();
@@ -638,6 +668,8 @@ void QtMainWindow::listViewClicked(QModelIndex index) {
         visualToolWidget->setOpacity(imageObject->GetOpacity());
         visualToolWidget->setMinimumImageValue(imageObject->GetMinImageValue());
         visualToolWidget->setMaximumImageValue(imageObject->GetMaxImageValue());
+        visualToolWidget->setDisplayMax(imageObject->GetMaxDisplayValue());
+        visualToolWidget->setDisplayMin(imageObject->GetMinDisplayValue());
     }
     else {
         visualToolWidget->setEnabled(false);

@@ -20,7 +20,7 @@ private:
     int _alpha;
 
     /// minimum and maximum display values
-    int minDisplay, maxDisplay;
+    double minDisplay, maxDisplay;
 
     /// minimum and maximum image values
     double minImage, maxImage;
@@ -31,7 +31,7 @@ private:
 public:
 
     /// class constructor
-    irtkQtLookupTable(int min = 0, int max = 255);
+    irtkQtLookupTable();
 
     /// class destructor
     ~irtkQtLookupTable();
@@ -46,16 +46,16 @@ public:
     int GetAlpha() const;
 
     /// set image minimum displayed value
-    void SetMinDisplayValue(int value);
+    void SetMinDisplayValue(double value);
 
     /// get image minimum displayed value
-    int GetMinDisplayValue() const;
+    double GetMinDisplayValue() const;
 
     /// set image maximum displayed value
-    void SetMaxDisplayValue(int value);
+    void SetMaxDisplayValue(double value);
 
     /// get image maximum displayed value
-    int GetMaxDisplayValue() const;
+    double GetMaxDisplayValue() const;
 
     /// get actual image minimum value
     double GetImageMinValue() const;
@@ -64,7 +64,7 @@ public:
     double GetImageMaxValue() const;
 
     /// set minimum and maximum values
-    void SetMinMaxDisplayValues(int min, int max);
+    void SetMinMaxDisplayValues(double min, double max);
 
     /// set minimum and maximum image values
     void SetMinMaxImageValues(double min, double max);
@@ -91,19 +91,21 @@ inline int irtkQtLookupTable::GetAlpha() const {
     return _alpha;
 }
 
-inline void irtkQtLookupTable::SetMinDisplayValue(int value) {
+inline void irtkQtLookupTable::SetMinDisplayValue(double value) {
     minDisplay = value;
+    Initialize();
 }
 
-inline int irtkQtLookupTable::GetMinDisplayValue() const {
+inline double irtkQtLookupTable::GetMinDisplayValue() const {
     return minDisplay;
 }
 
-inline void irtkQtLookupTable::SetMaxDisplayValue(int value) {
+inline void irtkQtLookupTable::SetMaxDisplayValue(double value) {
     maxDisplay = value;
+    Initialize();
 }
 
-inline int irtkQtLookupTable::GetMaxDisplayValue() const {
+inline double irtkQtLookupTable::GetMaxDisplayValue() const {
     return maxDisplay;
 }
 
@@ -117,7 +119,7 @@ inline double irtkQtLookupTable::GetImageMaxValue() const {
     return maxImage;
 }
 
-inline void irtkQtLookupTable::SetMinMaxDisplayValues(int min, int max) {
+inline void irtkQtLookupTable::SetMinMaxDisplayValues(double min, double max) {
     minDisplay = min;
     maxDisplay = max;
 }

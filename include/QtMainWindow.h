@@ -184,6 +184,12 @@ private slots:
     /// callback function for updating origin
     void updateOrigin(double x, double y, double z);
 
+    /// callback function for min display image value changed
+    void minDisplayValueChanged(double value);
+
+    /// callback function for max display image value changed
+    void maxDisplayValueChanged(double value);
+
     /// callback function for colormap change
     void colormapIndexChanged(int mode);
 

@@ -53,12 +53,12 @@ void QtToolWidget::setMinimumImageValue(double minImage) {
     maxImageSlider->setMinimum(minImage * 10);
 }
 
-void QtToolWidget::setDisplayMin(int min) {
-    minImageSlider->setValue(min);
+void QtToolWidget::setDisplayMin(double min) {
+    minImageSlider->setValue(min * 10);
 }
 
-void QtToolWidget::setDisplayMax(int max) {
-    maxImageSlider->setValue(max);
+void QtToolWidget::setDisplayMax(double max) {
+    maxImageSlider->setValue(max * 10);
 }
 
 void QtToolWidget::setOpacity(int opacity) {
@@ -95,10 +95,12 @@ void QtToolWidget::fillColorCombo() {
 
 void QtToolWidget::minValueChanged(int value) {
     minImageLabel->setText(QString::number(value/10.0));
+    emit minChanged(value/10.0);
 }
 
 void QtToolWidget::maxValueChanged(int value) {
     maxImageLabel->setText(QString::number(value/10.0));
+    emit maxChanged(value/10.0);
 }
 
 void QtToolWidget::colormapIndexChanged(int index) {

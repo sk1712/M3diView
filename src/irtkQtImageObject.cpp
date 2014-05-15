@@ -34,6 +34,8 @@ void irtkQtImageObject::CreateImage() {
 
     _image->GetMinMaxAsDouble(&imageMin, &imageMax);
     _lookupTable->SetMinMaxImageValues(imageMin, imageMax);
+    _lookupTable->SetMinMaxDisplayValues(imageMin, imageMax);
+    _lookupTable->Initialize();
 }
 
 void irtkQtImageObject::DeleteImage() {
