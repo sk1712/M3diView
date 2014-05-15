@@ -1,13 +1,15 @@
 #include <QtToolWidget.h>
 
 #include <QFormLayout>
+#include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QString>
 
 #include <QDebug>
 
 QtToolWidget::QtToolWidget(QWidget * parent) : QWidget(parent) {
-    QFormLayout *formLayout = new QFormLayout;
+    //QFormLayout *formLayout = new QFormLayout;
+    QVBoxLayout *verticalLayout = new QVBoxLayout;
 
     QWidget *minImageWidget = new QWidget;
     QHBoxLayout *minImageLayout = new QHBoxLayout(minImageWidget);
@@ -15,7 +17,10 @@ QtToolWidget::QtToolWidget(QWidget * parent) : QWidget(parent) {
     minImageLayout->addWidget(minImageSlider);
     minImageLabel = new QLabel();
     minImageLayout->addWidget(minImageLabel);
-    formLayout->addRow(tr("Min. greyvalue"), minImageWidget);
+
+    verticalLayout->addWidget(new QLabel("Min. greyvalue"));
+    verticalLayout->addWidget(minImageWidget);
+    //formLayout->addRow(tr("Min. greyvalue"), minImageWidget);
 
     QWidget *maxImageWidget = new QWidget;
     QHBoxLayout *maxImageLayout = new QHBoxLayout(maxImageWidget);
@@ -23,7 +28,10 @@ QtToolWidget::QtToolWidget(QWidget * parent) : QWidget(parent) {
     maxImageLayout->addWidget(maxImageSlider);
     maxImageLabel = new QLabel();
     maxImageLayout->addWidget(maxImageLabel);
-    formLayout->addRow(tr("Max. greyvalue"), maxImageWidget);
+
+    verticalLayout->addWidget(new QLabel("Max. greyvalue"));
+    verticalLayout->addWidget(maxImageWidget);
+    //formLayout->addRow(tr("Max. greyvalue"), maxImageWidget);
 
     QWidget *opacityWidget = new QWidget;
     QHBoxLayout *opacityLayout = new QHBoxLayout(opacityWidget);
@@ -31,16 +39,22 @@ QtToolWidget::QtToolWidget(QWidget * parent) : QWidget(parent) {
     opacityLayout->addWidget(opacitySlider);
     opacityLabel = new QLabel(opacityWidget);
     opacityLayout->addWidget(opacityLabel);
-    formLayout->addRow(tr("Opacity"), opacityWidget);
+
+    verticalLayout->addWidget(new QLabel("Opacity"));
+    verticalLayout->addWidget(opacityWidget);
+    //formLayout->addRow(tr("Opacity"), opacityWidget);
 
     colormapCombo = new QComboBox();
-    formLayout->addRow(tr("Colormap"), colormapCombo);
+    //formLayout->addRow(tr("Colormap"), colormapCombo);
     fillColorCombo();
+    verticalLayout->addWidget(new QLabel("Colormap"));
+    verticalLayout->addWidget(colormapCombo);
 
     connectSignals();
+    fixWidgetSizes();
     initializeValues();
 
-    setLayout(formLayout);
+    setLayout(verticalLayout);
 }
 
 void QtToolWidget::setMaximumImageValue(double maxImage) {
@@ -78,6 +92,15 @@ void QtToolWidget::connectSignals() {
     connect(opacitySlider, SIGNAL(valueChanged(int)), this, SLOT(opacityValueChanged(int)));
 }
 
+void QtToolWidget::fixWidgetSizes() {
+    minImageSlider->setFixedWidth(120);
+    minImageLabel->setFixedWidth(60);
+    maxImageSlider->setFixedWidth(120);
+    maxImageLabel->setFixedWidth(60);
+    opacitySlider->setFixedWidth(120);
+    opacityLabel->setFixedWidth(60);
+}
+
 void QtToolWidget::initializeValues() {
     opacitySlider->setMaximum(255);
     opacitySlider->setValue(255);
@@ -95,11 +118,13 @@ void QtToolWidget::fillColorCombo() {
 
 void QtToolWidget::minValueChanged(int value) {
     minImageLabel->setText(QString::number(value/10.0));
+    maxImageSlider->setMinimum(value);
     emit minChanged(value/10.0);
 }
 
 void QtToolWidget::maxValueChanged(int value) {
     maxImageLabel->setText(QString::number(value/10.0));
+    minImageSlider->setMaximum(value);
     emit maxChanged(value/10.0);
 }
 

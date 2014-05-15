@@ -45,6 +45,8 @@ private:
     /// register observers
     void connectSignals();
 
+    void fixWidgetSizes();
+
     /// initialize values
     void initializeValues();
 
