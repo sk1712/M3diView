@@ -114,6 +114,7 @@ void QtToolWidget::fillColorCombo() {
     colormapCombo->addItem("Green");
     colormapCombo->addItem("Blue");
     colormapCombo->addItem("Grey");
+    colormapCombo->addItem("Inverse");
 }
 
 void QtToolWidget::minValueChanged(int value) {

@@ -41,6 +41,9 @@ void irtkQtLookupTable::Initialize() {
     case MODE_LUMINANCE:
         SetColorModeToLuminance();
         break;
+    case MODE_INVERSE:
+        SetColorModeToInverse();
+        break;
     }
 }
 
@@ -110,5 +113,21 @@ void irtkQtLookupTable::SetColorModeToLuminance() {
     }
     for (int i = maxD + 1; i <= 255; i++) {
         lookupTable[i] = qRgba(255, 255, 255, _alpha);
+    }
+}
+
+void irtkQtLookupTable::SetColorModeToInverse() {
+    int minD = round((minDisplay - minImage) * 255 / (maxImage - minImage));
+    int maxD = round((maxDisplay - minImage) * 255 / (maxImage - minImage));
+
+    for (int i = 0; i <= minD; i++) {
+        lookupTable[i] = qRgba(255, 255, 255, _alpha);
+    }
+    for (int i = minD + 1; i <= maxD; i++) {
+        int value = round((maxD - i) * 255 / (maxD - minD));
+        lookupTable[i] = qRgba(value, value, value, _alpha);
+    }
+    for (int i = maxD + 1; i <= 255; i++) {
+        lookupTable[i] = qRgba(0, 0, 0, _alpha);
     }
 }
