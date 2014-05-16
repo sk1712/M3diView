@@ -187,9 +187,6 @@ void QtThreeDimensionalGlWidget::deleteDrawable() {
 
 void QtThreeDimensionalGlWidget::updateDrawable(QVector<QRgb**> drawable) {
     QtGlWidget::updateDrawable(drawable);
-    if (!_drawable.empty()) {
-        createTextures();
-    }
     update();
 }
 
@@ -227,6 +224,7 @@ void QtThreeDimensionalGlWidget::paintGL() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     if (!_drawable.empty()) {
+        createTextures();
         drawImage();
         drawBorders();
     }
