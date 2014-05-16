@@ -176,7 +176,7 @@ inline void irtkQtImageObject::SetMaxDisplayValue(double max) {
 }
 
 inline double irtkQtImageObject::GetMaxDisplayValue() const {
-    int maxDisplay = 0;
+    double maxDisplay = 0;
 
     if (_lookupTable) {
         maxDisplay = _lookupTable->GetMaxDisplayValue();

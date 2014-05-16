@@ -2,7 +2,7 @@
 #define IRTKQTLOOKUPTABLE_H
 
 #include <QColor>
-
+#include <QDebug>
 
 class irtkQtLookupTable
 {
@@ -77,14 +77,19 @@ public:
 
 private:
 
+    /// red color mode
     void SetColorModeToRed();
 
+    /// green color mode
     void SetColorModeToGreen();
 
+    /// blue color mode
     void SetColorModeToBlue();
 
+    /// color mode luminance
     void SetColorModeToLuminance();
 
+    /// color mode inverse luminance
     void SetColorModeToInverse();
 };
 
@@ -111,12 +116,10 @@ inline double irtkQtLookupTable::GetMaxDisplayValue() const {
     return maxDisplay;
 }
 
-// TO DO : decide whether to use double or integer
 inline double irtkQtLookupTable::GetImageMinValue() const {
     return minImage;
 }
 
-// TO DO : decide whether to use double or integer
 inline double irtkQtLookupTable::GetImageMaxValue() const {
     return maxImage;
 }
@@ -124,6 +127,7 @@ inline double irtkQtLookupTable::GetImageMaxValue() const {
 inline void irtkQtLookupTable::SetMinMaxDisplayValues(double min, double max) {
     minDisplay = min;
     maxDisplay = max;
+    Initialize();
 }
 
 inline void irtkQtLookupTable::SetMinMaxImageValues(double min, double max) {

@@ -2,8 +2,6 @@
 
 #include <math.h>
 
-#include <QDebug>
-
 
 irtkQtLookupTable::irtkQtLookupTable() {
     _alpha = 255;
