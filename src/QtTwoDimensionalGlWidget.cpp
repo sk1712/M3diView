@@ -1,5 +1,5 @@
 #include <QtTwoDimensionalGlWidget.h>
-
+#include <QDebug>
 
 QtTwoDimensionalGlWidget::QtTwoDimensionalGlWidget(QWidget *parent)
     :QtGlWidget(parent) {
@@ -22,6 +22,8 @@ void QtTwoDimensionalGlWidget::drawImage() const {
         glDrawPixels(_width, _height, GL_BGRA, GL_UNSIGNED_BYTE,
                      (*rit)[0]);
     }
+
+    qDebug() << "Drawing image";
 }
 
 void QtTwoDimensionalGlWidget::drawCursor() const {
@@ -34,6 +36,8 @@ void QtTwoDimensionalGlWidget::drawCursor() const {
     glVertex2f(_width/2, _height/2-10);
     glVertex2f(_width/2, _height/2+10);
     glEnd();
+
+    qDebug() << "Drawing cursor";
 }
 
 void QtTwoDimensionalGlWidget::drawLabels() {
@@ -45,6 +49,8 @@ void QtTwoDimensionalGlWidget::drawLabels() {
     renderText(width()/2-5, height()-5, bottom, arialFont);
     renderText(5, height()/2+5, left, arialFont);
     renderText(width()-15, height()/2+5, right, arialFont);
+
+    qDebug() << "Drawing labels";
 }
 
 void QtTwoDimensionalGlWidget::updateDrawable(QVector<QRgb**> drawable) {
