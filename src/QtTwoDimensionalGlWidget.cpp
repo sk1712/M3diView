@@ -1,5 +1,5 @@
 #include <QtTwoDimensionalGlWidget.h>
-#include <QDebug>
+
 
 QtTwoDimensionalGlWidget::QtTwoDimensionalGlWidget(QWidget *parent)
     :QtGlWidget(parent) {

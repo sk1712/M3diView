@@ -11,7 +11,6 @@
 #include <QMainWindow>
 #include <QListView>
 #include <QTabWidget>
-#include <QSplitter>
 #include <QMessageBox>
 #include <QWidgetAction>
 
@@ -21,8 +20,6 @@ class QtMainWindow : public QMainWindow
     Q_OBJECT
 
     /// main window widgets
-    QSplitter *horizontalSplitter;
-    QSplitter *verticalSplitter;
     QListView *imageListView;
     QTabWidget *toolsTabWidget;
     QWidget *mainViewWidget;
@@ -80,6 +77,9 @@ public:
 
 private:
 
+    /// create dock windows
+    void createDockWindows();
+
     /// create window toolbar
     void createToolBar();
 
@@ -91,9 +91,6 @@ private:
 
     /// create menu actions
     void createMenuActions();
-
-    /// define the size of splitter elements
-    void fixSplitterGeometry();
 
     /// connect window signals that won't be disconnected
     void connectWindowSignals();

@@ -1,14 +1,13 @@
 #include <QtToolWidget.h>
 
-#include <QFormLayout>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QSpacerItem>
 #include <QString>
 
 #include <QDebug>
 
 QtToolWidget::QtToolWidget(QWidget * parent) : QWidget(parent) {
-    //QFormLayout *formLayout = new QFormLayout;
     QVBoxLayout *verticalLayout = new QVBoxLayout;
 
     QWidget *minImageWidget = new QWidget;
@@ -20,7 +19,6 @@ QtToolWidget::QtToolWidget(QWidget * parent) : QWidget(parent) {
 
     verticalLayout->addWidget(new QLabel("Min. greyvalue"));
     verticalLayout->addWidget(minImageWidget);
-    //formLayout->addRow(tr("Min. greyvalue"), minImageWidget);
 
     QWidget *maxImageWidget = new QWidget;
     QHBoxLayout *maxImageLayout = new QHBoxLayout(maxImageWidget);
@@ -31,7 +29,6 @@ QtToolWidget::QtToolWidget(QWidget * parent) : QWidget(parent) {
 
     verticalLayout->addWidget(new QLabel("Max. greyvalue"));
     verticalLayout->addWidget(maxImageWidget);
-    //formLayout->addRow(tr("Max. greyvalue"), maxImageWidget);
 
     QWidget *opacityWidget = new QWidget;
     QHBoxLayout *opacityLayout = new QHBoxLayout(opacityWidget);
@@ -42,13 +39,15 @@ QtToolWidget::QtToolWidget(QWidget * parent) : QWidget(parent) {
 
     verticalLayout->addWidget(new QLabel("Opacity"));
     verticalLayout->addWidget(opacityWidget);
-    //formLayout->addRow(tr("Opacity"), opacityWidget);
 
     colormapCombo = new QComboBox();
-    //formLayout->addRow(tr("Colormap"), colormapCombo);
     fillColorCombo();
     verticalLayout->addWidget(new QLabel("Colormap"));
     verticalLayout->addWidget(colormapCombo);
+
+    QSpacerItem* spacer = new QSpacerItem( 20, 20, QSizePolicy::Minimum,
+    QSizePolicy::Expanding );
+    verticalLayout->addItem( spacer );
 
     connectSignals();
     fixWidgetSizes();

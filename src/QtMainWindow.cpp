@@ -1,7 +1,6 @@
 #include <QtMainWindow.h>
 
-
-#include <QDesktopWidget>
+#include <QDockWidget>
 #include <QMenuBar>
 #include <QToolBar>
 #include <QFileDialog>
@@ -12,32 +11,20 @@
 
 
 QtMainWindow::QtMainWindow() {
-    horizontalSplitter = new QSplitter(this);
-    verticalSplitter = new QSplitter(Qt::Vertical, horizontalSplitter);
-    imageListView = new QListView(verticalSplitter);
-
-    visualToolWidget = new QtToolWidget;
-    toolsTabWidget = new QTabWidget(verticalSplitter);
-    toolsTabWidget->addTab(visualToolWidget, tr("Visualisation"));
-
-    mainViewWidget = new QWidget(horizontalSplitter);
+    mainViewWidget = new QWidget();
     QGridLayout *layout = new QGridLayout;
     mainViewWidget->setLayout(layout);
-    layout->setSpacing(0);
-    layout->setMargin(0);
-    layout->setContentsMargins(0,0,0,0);
+    setCentralWidget(mainViewWidget);
 
     createMenuActions();
     createToolBarActions();
     createMenu();
     createToolBar();
+    createDockWindows();
 
     connectWindowSignals();
     connectToolSignals();
 
-    fixSplitterGeometry();
-
-    setCentralWidget(horizontalSplitter);
     singleViewerInScreen = false;
     numDisplayedImages = 0;
     imageModel = NULL;
@@ -46,6 +33,25 @@ QtMainWindow::QtMainWindow() {
 QtMainWindow::~QtMainWindow() {
     clearLists();
     irtkQtViewer::Destroy();
+}
+
+void QtMainWindow::createDockWindows() {
+    QDockWidget *dock = new QDockWidget(tr("Image list"), this);
+    dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    imageListView = new QListView(dock);
+    dock->setWidget(imageListView);
+    addDockWidget(Qt::LeftDockWidgetArea, dock);
+    viewMenu->addAction(dock->toggleViewAction());
+
+    dock = new QDockWidget(tr("Tools"), this);
+    dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    toolsTabWidget = new QTabWidget(dock);
+    dock->setWidget(toolsTabWidget);
+    visualToolWidget = new QtToolWidget;
+    visualToolWidget->setEnabled(false);
+    toolsTabWidget->addTab(visualToolWidget, tr("Visualisation"));
+    addDockWidget(Qt::LeftDockWidgetArea, dock);
+    viewMenu->addAction(dock->toggleViewAction());
 }
 
 void QtMainWindow::createToolBar() {
@@ -74,6 +80,7 @@ void QtMainWindow::createMenu() {
 
     viewMenu->addSeparator();
     viewMenu->addAction(clearViewsAction);
+    viewMenu->addSeparator();
 }
 
 void QtMainWindow::createToolBarActions() {
@@ -94,35 +101,23 @@ void QtMainWindow::createMenuActions() {
     openTargetAction = new QAction(tr("&Open image file(s)..."), this);
     openTargetAction->setStatusTip(tr("Load new image file(s)"));
 
-    viewAxialAction = new QAction(tr("Axial View"), this);
+    viewAxialAction = new QAction(tr("Axial"), this);
     viewAxialAction->setStatusTip(tr("Add axial view"));
 
-    viewCoronalAction = new QAction(tr("Coronal View"), this);
+    viewCoronalAction = new QAction(tr("Coronal"), this);
     viewCoronalAction->setStatusTip(tr("Add coronal view"));
 
-    viewSagittalAction = new QAction(tr("Sagittal View"), this);
+    viewSagittalAction = new QAction(tr("Sagittal"), this);
     viewSagittalAction->setStatusTip(tr("Add sagittal view"));
 
-    viewOrthogonalAction = new QAction(tr("Orthogonal View"), this);
+    viewOrthogonalAction = new QAction(tr("Orthogonal"), this);
     viewOrthogonalAction->setStatusTip(tr("Add orthogonal view"));
 
-    view3DAction = new QAction(tr("3D view"), this);
+    view3DAction = new QAction(tr("3D"), this);
     view3DAction->setStatusTip(tr("Add 3D view"));
 
-    clearViewsAction = new QAction(tr("Clear views"), this);
+    clearViewsAction = new QAction(tr("Clear all"), this);
     clearViewsAction->setStatusTip(tr("Delete all views"));
-}
-
-void QtMainWindow::fixSplitterGeometry() {
-    // set the sizes for the splitter elements according to the desktop size
-    QDesktopWidget desktop;
-    QRect screenSize = desktop.availableGeometry(this);
-    QList<int> horizontalSize, verticalSize;
-    horizontalSize << screenSize.width() * 0.15f << screenSize.width() * 0.85f;
-    verticalSize << screenSize.height() *0.6f << screenSize.height() * 0.4f;
-
-    verticalSplitter->setSizes(verticalSize);
-    horizontalSplitter->setSizes(horizontalSize);
 }
 
 void QtMainWindow::connectWindowSignals() {
