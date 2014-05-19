@@ -28,6 +28,9 @@ class QtThreeDimensionalGlWidget : public QtGlWidget
     /// texture parameters where images are stored
     GLuint textures[3];
 
+    /// flags used to rotate model and/or move camera when drawing
+    bool doRotation, moveCamera;
+
 public:
 
     /// class constructor

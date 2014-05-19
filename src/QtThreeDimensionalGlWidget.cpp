@@ -9,6 +9,9 @@ QtThreeDimensionalGlWidget::QtThreeDimensionalGlWidget(QWidget *parent)
     verticalRotation = 5.0f;
     cameraFOV = 45.0f;
 
+    doRotation = false;
+    moveCamera = false;
+
     connectSignals();
 }
 
@@ -223,6 +226,28 @@ void QtThreeDimensionalGlWidget::resizeGL(int w, int h) {
 void QtThreeDimensionalGlWidget::paintGL() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    if (doRotation) {
+        glMatrixMode(GL_MODELVIEW);
+        GLfloat currentModelViewMatrix[16];
+        glGetFloatv(GL_MODELVIEW_MATRIX, currentModelViewMatrix);
+        // x axis rotation
+        glRotatef(horizontalRotation, currentModelViewMatrix[1],
+        currentModelViewMatrix[5], currentModelViewMatrix[9]);
+        glGetFloatv(GL_MODELVIEW_MATRIX, currentModelViewMatrix);
+        // y axis rotation
+        glRotatef(verticalRotation, currentModelViewMatrix[0],
+        currentModelViewMatrix[4], currentModelViewMatrix[8]);
+        glGetFloatv(GL_MODELVIEW_MATRIX, currentModelViewMatrix);
+        glLoadMatrixf(currentModelViewMatrix);
+    }
+
+    if (moveCamera) {
+        glMatrixMode(GL_PROJECTION);
+        GLfloat aspect = (GLfloat) width / (GLfloat) height;
+        glLoadIdentity();
+        gluPerspective(cameraFOV, aspect, 0.1f, 1000.0f);
+    }
+
     if (!_drawable.empty()) {
         createTextures();
         drawImage();
@@ -231,21 +256,9 @@ void QtThreeDimensionalGlWidget::paintGL() {
 }
 
 void QtThreeDimensionalGlWidget::rotate() {
-    glMatrixMode(GL_MODELVIEW);
-
-    GLfloat currentModelViewMatrix[16];
-    glGetFloatv(GL_MODELVIEW_MATRIX, currentModelViewMatrix);
-    // x axis rotation
-    glRotatef(horizontalRotation, currentModelViewMatrix[1],
-            currentModelViewMatrix[5], currentModelViewMatrix[9]);
-    glGetFloatv(GL_MODELVIEW_MATRIX, currentModelViewMatrix);
-    // y axis rotation
-    glRotatef(verticalRotation, currentModelViewMatrix[0],
-            currentModelViewMatrix[4], currentModelViewMatrix[8]);
-    glGetFloatv(GL_MODELVIEW_MATRIX, currentModelViewMatrix);
-    glLoadMatrixf(currentModelViewMatrix);
-
-    update();
+    doRotation = true;
+    updateGL();
+    doRotation = false;
 }
 
 void QtThreeDimensionalGlWidget::mousePressEvent(QMouseEvent *event) {
@@ -314,11 +327,8 @@ void QtThreeDimensionalGlWidget::rotateDown() {
 }
 
 void QtThreeDimensionalGlWidget::changeZoom(int numSteps) {
+    moveCamera = true;
     cameraFOV -= numSteps*2.5;
-    glMatrixMode(GL_PROJECTION);
-    GLfloat aspect = (GLfloat) width / (GLfloat) height;
-    glLoadIdentity();
-    gluPerspective(cameraFOV, aspect, 0.1f, 1000.0f);
-
-    update();
+    updateGL();
+    moveCamera = false;
 }
