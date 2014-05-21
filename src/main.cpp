@@ -2,10 +2,16 @@
 
 #include <QApplication>
 #include <QFile>
+#include <QGLFormat>
 
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
+
+    if ( !QGLFormat::hasOpenGL() ) {
+        cerr << "The window system does not have OpenGL support" << endl;
+        return -1;
+    }
 
     QtMainWindow window;
     window.setWindowState(Qt::WindowMaximized);
