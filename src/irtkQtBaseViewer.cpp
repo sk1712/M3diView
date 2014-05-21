@@ -9,8 +9,6 @@ irtkQtBaseViewer::~irtkQtBaseViewer() {
 }
 
 void irtkQtBaseViewer::AddToDisplayedImages(irtkQtImageObject *imageObject, int index) {
-    // place following line in QtMainWindow
-    // in order to do nothing when image is invalid
     irtkImage* newImage = imageObject->GetImage();
 
     currentIndex = index;
@@ -28,7 +26,7 @@ void irtkQtBaseViewer::AddToDisplayedImages(irtkQtImageObject *imageObject, int 
 //        }
     }
 
-    // if everything is fine add to vectors
+    // if everything is fine add to maps
     AddToMaps(newImage, index);
     _lookupTable.insert(pair<int, irtkQtLookupTable*> ( index, imageObject->GetLookupTable() ));
 }
@@ -41,6 +39,7 @@ void irtkQtBaseViewer::DeleteSingleImage(int index) {
 }
 
 void irtkQtBaseViewer::MoveImage(int, int) {
+    // always make first image in the map the target image
     _targetImage = _image.begin()->second;
 }
 

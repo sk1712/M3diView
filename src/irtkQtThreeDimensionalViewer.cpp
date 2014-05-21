@@ -246,7 +246,7 @@ void irtkQtThreeDimensionalViewer::AddToMaps(irtkImage* newImage, int index) {
         _transformFilter[index][dim] = transformation;
     }
 
-    for (int i = 0; i < 3; i++) previousSlice[i] = 0;
+    //for (int i = 0; i < 3; i++) previousSlice[i] = 0;
 }
 
 //void CalculateSingleTransform(irtkImageTransformation** &transform) {

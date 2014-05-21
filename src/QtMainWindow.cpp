@@ -310,16 +310,18 @@ void QtMainWindow::openImage() {
                                                           &selfilter);
 #endif
 
+    irtkQtViewer* instance = irtkQtViewer::Instance();
+
     QStringList::const_iterator it;
     for (it = fileNames.constBegin(); it != fileNames.constEnd(); it++) {
         if ( !imageInList(*it) ) {
-            irtkQtViewer* instance = irtkQtViewer::Instance();
             instance->CreateImage((*it));
-            delete imageModel;
-            imageModel = new irtkImageListModel(instance->GetImageList());
-            imageListView->setModel(imageModel);
         }
     }
+
+    delete imageModel;
+    imageModel = new irtkImageListModel(instance->GetImageList());
+    imageListView->setModel(imageModel);
 }
 
 bool QtMainWindow::setDisplayedImages() {
@@ -392,6 +394,9 @@ void QtMainWindow::setUpViewerWidgets() {
     QtViewerWidget *viewerWidget;
     irtkQtBaseViewer *viewer;
 
+    // disconnect the viewers' signals
+    disconnectViewerSignals();
+
     for (int i = 0; i < viewers.size(); i++) {
         viewerWidget = viewerWidgets[i];
         viewer = viewers[i];
@@ -401,6 +406,9 @@ void QtMainWindow::setUpViewerWidgets() {
         viewerWidget->getGlWidget()->updateDrawable(
                     QVector<QRgb**>::fromStdVector(viewer->GetDrawable()));
     }
+
+    // re-register the viewers' signals
+    connectViewerSignals();
 }
 
 void QtMainWindow::viewImage() {
