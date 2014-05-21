@@ -28,11 +28,13 @@ QVariant irtkImageListModel::data(const QModelIndex &index, int role) const {
         case Qt::DisplayRole :
             return _imageList.at(index.row())->GetFileName();
             break;
-        // icon shown next the item
+        // icon shown next to the item
         case Qt::DecorationRole :
             if (_imageList.at(index.row())->IsVisible())
+                // if image is visible show eye icon
                 return QIcon(":/icons/eye.png");
             else {
+                // else show white icon
                 QPixmap pixmap(16, 16);
                 pixmap.fill();
                 QIcon icon(pixmap);
@@ -51,5 +53,3 @@ QVariant irtkImageListModel::data(const QModelIndex &index, int role) const {
 int irtkImageListModel::rowCount(const QModelIndex &parent) const {
     return _imageList.size();
 }
-
-

@@ -64,6 +64,7 @@ inline QtGlWidget* Qt3dViewerWidget::getGlWidget() const {
 inline void Qt3dViewerWidget::setCurrentSlice(int *current) {
     glWidget->setCurrentSlice(current);
 
+    // current = current slice in X([0]), Y([1]) and Z([2]) direction
     axialSlider->setValue(current[2]);
     sagittalSlider->setValue(current[0]);
     coronalSlider->setValue(current[1]);
@@ -72,6 +73,7 @@ inline void Qt3dViewerWidget::setCurrentSlice(int *current) {
 inline void Qt3dViewerWidget::setMaximumSlice(int *dim) {
     glWidget->setDimensions(dim);
 
+    // dim = number of slices in X([0]), Y([1]) and Z([2]) direction
     axialSlider->setMaximum(dim[2]);
     sagittalSlider->setMaximum(dim[0]);
     coronalSlider->setMaximum(dim[1]);

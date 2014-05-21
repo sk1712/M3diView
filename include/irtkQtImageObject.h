@@ -26,9 +26,6 @@ class irtkQtImageObject
     /// the corresponding lookuptable
     irtkQtLookupTable* _lookupTable;
 
-    /// image min and max values
-    double imageMin, imageMax;
-
 public:
 
     /// image object constructor

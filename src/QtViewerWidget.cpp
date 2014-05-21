@@ -5,8 +5,6 @@
 
 
 QtViewerWidget::QtViewerWidget(QWidget *parent) : QWidget(parent) {
-    linked = true;
-
     QGridLayout *layout = new QGridLayout();
 
     QWidget *toolWidget = new QWidget();
@@ -22,6 +20,9 @@ QtViewerWidget::QtViewerWidget(QWidget *parent) : QWidget(parent) {
     layout->addWidget(toolWidget, 1, 0, Qt::AlignLeft);
 
     setLayout(layout);
+
+    // by default link viewer to the rest of the viewers
+    linked = true;
 }
 
 void QtViewerWidget::createToolButtons() {

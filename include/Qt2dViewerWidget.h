@@ -60,7 +60,7 @@ private:
     void initializeParameters();
 
     /// connect signals
-    virtual void connectSignals();
+    void connectSignals();
 
 private slots:
 

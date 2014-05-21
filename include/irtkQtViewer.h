@@ -7,8 +7,11 @@
 
 class irtkQtViewer
 {
-    /// list with loaded images
+    /// list of loaded images
     QList<irtkQtImageObject*> _imageObjects;
+
+    /// instance of class (singleton)
+    static irtkQtViewer* viewInstance;
 
     /// private constructor
     irtkQtViewer();
@@ -19,10 +22,11 @@ class irtkQtViewer
     /// assignment operator
     irtkQtViewer& operator=(irtkQtViewer const&);
 
-    /// instance of class (singleton)
-    static irtkQtViewer* viewInstance;
+    /// delete all image objects
+    void DestroyImages();
 
 public:
+
     /// get instance of class
     static irtkQtViewer* Instance();
 
@@ -32,10 +36,7 @@ public:
     /// create image object from the given file name
     void CreateImage(QString imageFileName);
 
-    /// delete all image objects
-    void DestroyImages();
-
-    /// create an 2D viewer of certain view (axial, sagittal, coronal)
+    /// create a 2D viewer of certain view (axial, sagittal, coronal)
     /// defined by viewMode
     irtkQtTwoDimensionalViewer* CreateTwoDimensionalViewer(irtkQtBaseViewer::irtkViewMode viewMode);
 

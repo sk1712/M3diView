@@ -36,10 +36,10 @@ public:
     /// get OpenGL widget of viewer
     virtual QtGlWidget* getGlWidget() const = 0;
 
-    /// set viewer's current slice
+    /// set viewer's current slices
     virtual void setCurrentSlice(int* current) = 0;
 
-    /// set viewer's maximum slice
+    /// set viewer's maximum slices
     virtual void setMaximumSlice(int* maxSlice) = 0;
 
     /// set viewer enabled

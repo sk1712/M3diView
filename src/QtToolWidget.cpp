@@ -8,52 +8,26 @@
 #include <QDebug>
 
 QtToolWidget::QtToolWidget(QWidget * parent) : QWidget(parent) {
-    QVBoxLayout *verticalLayout = new QVBoxLayout;
-
-    QWidget *minImageWidget = new QWidget;
-    QHBoxLayout *minImageLayout = new QHBoxLayout(minImageWidget);
     minImageSlider = new QSlider(Qt::Horizontal);
-    minImageLayout->addWidget(minImageSlider);
     minImageLabel = new QLabel();
-    minImageLayout->addWidget(minImageLabel);
 
-    verticalLayout->addWidget(new QLabel("Min. greyvalue"));
-    verticalLayout->addWidget(minImageWidget);
-
-    QWidget *maxImageWidget = new QWidget;
-    QHBoxLayout *maxImageLayout = new QHBoxLayout(maxImageWidget);
     maxImageSlider = new QSlider(Qt::Horizontal);
-    maxImageLayout->addWidget(maxImageSlider);
     maxImageLabel = new QLabel();
-    maxImageLayout->addWidget(maxImageLabel);
 
-    verticalLayout->addWidget(new QLabel("Max. greyvalue"));
-    verticalLayout->addWidget(maxImageWidget);
-
-    QWidget *opacityWidget = new QWidget;
-    QHBoxLayout *opacityLayout = new QHBoxLayout(opacityWidget);
     opacitySlider = new QSlider(Qt::Horizontal);
-    opacityLayout->addWidget(opacitySlider);
-    opacityLabel = new QLabel(opacityWidget);
-    opacityLayout->addWidget(opacityLabel);
-
-    verticalLayout->addWidget(new QLabel("Opacity"));
-    verticalLayout->addWidget(opacityWidget);
+    opacityLabel = new QLabel();
 
     colormapCombo = new QComboBox();
     fillColorCombo();
-    verticalLayout->addWidget(new QLabel("Colormap"));
-    verticalLayout->addWidget(colormapCombo);
 
-    QSpacerItem* spacer = new QSpacerItem( 20, 20, QSizePolicy::Minimum,
-    QSizePolicy::Expanding );
-    verticalLayout->addItem( spacer );
-
+    // add the widgets to the layout
+    addWidgetsToLayout();
+    // connect signals to slots
     connectSignals();
+    // fix size of specific widgets
     fixWidgetSizes();
+    // initialize the values
     initializeValues();
-
-    setLayout(verticalLayout);
 }
 
 void QtToolWidget::setMaximumImageValue(double maxImage) {
@@ -82,6 +56,43 @@ void QtToolWidget::setColormap(int index) {
     if (index >= 0) {
         colormapCombo->setCurrentIndex(index);
     }
+}
+
+void QtToolWidget::addWidgetsToLayout() {
+    QVBoxLayout *verticalLayout = new QVBoxLayout;
+
+    QWidget *minImageWidget = new QWidget;
+    QHBoxLayout *minImageLayout = new QHBoxLayout(minImageWidget);
+    minImageLayout->addWidget(minImageSlider);
+    minImageLayout->addWidget(minImageLabel);
+
+    verticalLayout->addWidget(new QLabel("Min. greyvalue"));
+    verticalLayout->addWidget(minImageWidget);
+
+    QWidget *maxImageWidget = new QWidget;
+    QHBoxLayout *maxImageLayout = new QHBoxLayout(maxImageWidget);
+    maxImageLayout->addWidget(maxImageSlider);
+    maxImageLayout->addWidget(maxImageLabel);
+
+    verticalLayout->addWidget(new QLabel("Max. greyvalue"));
+    verticalLayout->addWidget(maxImageWidget);
+
+    QWidget *opacityWidget = new QWidget;
+    QHBoxLayout *opacityLayout = new QHBoxLayout(opacityWidget);
+    opacityLayout->addWidget(opacitySlider);
+    opacityLayout->addWidget(opacityLabel);
+
+    verticalLayout->addWidget(new QLabel("Opacity"));
+    verticalLayout->addWidget(opacityWidget);
+
+    verticalLayout->addWidget(new QLabel("Colormap"));
+    verticalLayout->addWidget(colormapCombo);
+
+    QSpacerItem* spacer = new QSpacerItem( 20, 20, QSizePolicy::Minimum,
+    QSizePolicy::Expanding );
+    verticalLayout->addItem( spacer );
+
+    setLayout(verticalLayout);
 }
 
 void QtToolWidget::connectSignals() {
