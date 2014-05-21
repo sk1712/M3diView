@@ -289,16 +289,19 @@ void irtkQtThreeDimensionalViewer::ChangeViewSlice(int view) {
         originZ = currentSlice[2];
         _dx = _targetImage->GetXSize();
         _dy = _targetImage->GetYSize();
+        _dz = 1;
         break;
     case VIEW_SAGITTAL :
         originX = currentSlice[0];
         _dx = _targetImage->GetYSize();
         _dy = _targetImage->GetZSize();
+        _dz = 1;
         break;
     case VIEW_CORONAL :
         originY = currentSlice[1];
         _dx = _targetImage->GetXSize();
         _dy = _targetImage->GetZSize();
+        _dz = 1;
         break;
     default:
         cerr << "Not a valid type of two dimensional viewer" << endl;
