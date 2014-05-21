@@ -25,6 +25,7 @@ void irtkQtImageObject::CreateImage() {
     try {
         _image = irtkImage::New(_path.toStdString().c_str());
     }
+    // if not, throw an exception and return
     catch (irtkException e) {
         throw e;
         return;

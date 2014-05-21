@@ -22,8 +22,11 @@ irtkQtViewer* irtkQtViewer::Instance() {
 }
 
 void irtkQtViewer::Destroy() {
+    // if there is a view instance
     if (viewInstance) {
+        // delete all images in the list
         viewInstance->DestroyImages();
+        // and then delete the instance itselfs
         delete viewInstance;
     }
 }
@@ -31,6 +34,7 @@ void irtkQtViewer::Destroy() {
 void irtkQtViewer::CreateImage(QString imageFileName) {
     irtkQtImageObject* newImage = NULL;
 
+    // create a new irtkQtImageObject and add it to the list
     newImage = new irtkQtImageObject(imageFileName);
     _imageObjects.append(newImage);
 }

@@ -114,8 +114,8 @@ void QtToolWidget::fixWidgetSizes() {
 void QtToolWidget::initializeValues() {
     opacitySlider->setMaximum(255);
     opacitySlider->setValue(255);
-    minImageSlider->setValue(0);
-    maxImageSlider->setValue(0);
+    minImageSlider->setRange(0, 0);
+    maxImageSlider->setRange(0, 0);
     colormapCombo->setCurrentIndex(3);
 }
 
