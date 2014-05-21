@@ -39,7 +39,9 @@ void QtGlWidget::mousePressEvent(QMouseEvent *event) {
 }
 
 void QtGlWidget::wheelEvent(QWheelEvent *event) {
+    // delta = the distance that the wheel is rotated, in eighths of a degree
     int numDegrees = event->delta() /8;
+    // most mouse types work in steps of 15 degrees
     int numSteps = numDegrees / 15;
 
     emit wheelMoved(numSteps);

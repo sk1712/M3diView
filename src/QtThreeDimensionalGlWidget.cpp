@@ -1,7 +1,7 @@
 #include <QtThreeDimensionalGlWidget.h>
 
 #include <QMouseEvent>
-
+#include <QDebug>
 
 QtThreeDimensionalGlWidget::QtThreeDimensionalGlWidget(QWidget *parent)
     :QtGlWidget(parent) {

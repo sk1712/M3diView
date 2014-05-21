@@ -1,14 +1,14 @@
 #include <irtkQtTwoDimensionalViewer.h>
 
 //#include <time.h>
-//#include <QDebug>
 
 
 irtkQtTwoDimensionalViewer::irtkQtTwoDimensionalViewer(irtkViewMode viewMode) {
-    ClearDisplayedImages();
     _viewMode = viewMode;
     currentSlice = new int[1];
     sliceNum = new int[1];
+
+    ClearDisplayedImages();
 }
 
 irtkQtTwoDimensionalViewer::~irtkQtTwoDimensionalViewer() {    
