@@ -1,14 +1,16 @@
 #include <QtThreeDimensionalGlWidget.h>
 
 #include <QMouseEvent>
-#include <QDebug>
+
 
 QtThreeDimensionalGlWidget::QtThreeDimensionalGlWidget(QWidget *parent)
     :QtGlWidget(parent) {
+    // rotate model when first displaying to show that it is 3D
     horizontalRotation = 5.0f;
     verticalRotation = 5.0f;
     cameraFOV = 45.0f;
 
+    // initialize rotation and zoom flags to false
     doRotation = false;
     moveCamera = false;
 
@@ -19,6 +21,122 @@ QtThreeDimensionalGlWidget::~QtThreeDimensionalGlWidget() {
     deleteDrawable();
 }
 
+void QtThreeDimensionalGlWidget::updateDrawable(QVector<QRgb**> drawable) {
+    QtGlWidget::updateDrawable(drawable);
+    update();
+}
+
+void QtThreeDimensionalGlWidget::initializeGL() {
+    // Set background depth to farthest
+    glClearDepth(1.0f);
+    glEnable(GL_DEPTH_TEST);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
+    glDepthFunc(GL_LEQUAL);
+    glShadeModel(GL_FLAT); // Enable flat shading
+    // Nice perspective corrections
+    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+    qglClearColor(Qt::black);
+}
+
+void QtThreeDimensionalGlWidget::resizeGL(int w, int h) {
+    glViewport(0, 0, w, h);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    // Move into the screen
+    glTranslatef(0.0f, 0.0f, -400.0f);
+    // Rotate about (0,1,0)-axis
+    glRotatef((GLfloat) horizontalRotation, 0.0f, 1.0f, 0.0f);
+    // Rotate about (1,0,0)-axis
+    glRotatef((GLfloat) verticalRotation, 1.0f, 0.0f, 0.0f);
+    glMatrixMode(GL_PROJECTION);
+    GLfloat aspect = (GLfloat) w / (GLfloat) h;
+    width = w; height = h;
+    glLoadIdentity();
+    gluPerspective(cameraFOV, aspect, 0.1f, 1000.0f);
+}
+
+void QtThreeDimensionalGlWidget::paintGL() {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    if (doRotation) {
+        glMatrixMode(GL_MODELVIEW);
+        GLfloat currentModelViewMatrix[16];
+        glGetFloatv(GL_MODELVIEW_MATRIX, currentModelViewMatrix);
+        // x axis rotation
+        glRotatef(horizontalRotation, currentModelViewMatrix[1],
+        currentModelViewMatrix[5], currentModelViewMatrix[9]);
+        glGetFloatv(GL_MODELVIEW_MATRIX, currentModelViewMatrix);
+        // y axis rotation
+        glRotatef(verticalRotation, currentModelViewMatrix[0],
+        currentModelViewMatrix[4], currentModelViewMatrix[8]);
+        glGetFloatv(GL_MODELVIEW_MATRIX, currentModelViewMatrix);
+        glLoadMatrixf(currentModelViewMatrix);
+    }
+
+    if (moveCamera) {
+        // move camera towards/away from the screen
+        glMatrixMode(GL_PROJECTION);
+        GLfloat aspect = (GLfloat) width / (GLfloat) height;
+        glLoadIdentity();
+        gluPerspective(cameraFOV, aspect, 0.1f, 1000.0f);
+    }
+
+    if (!_drawable.empty()) {
+        createTextures();
+        drawImage();
+        drawBorders();
+    }
+}
+
+void QtThreeDimensionalGlWidget::rotate() {
+    doRotation = true;
+    updateGL();
+    doRotation = false;
+}
+
+void QtThreeDimensionalGlWidget::deleteDrawable() {
+    QVector<QRgb**>::iterator it;
+
+    for (it = _drawable.begin(); it != _drawable.end(); it++) {
+        for (int i = 0; i < 3; i++)
+            delete [] (*it)[i];
+    }
+
+    _drawable.clear();
+}
+
+void QtThreeDimensionalGlWidget::mousePressEvent(QMouseEvent *event) {
+    switch(event->button()) {
+    case Qt::LeftButton:
+        setMouseTracking(true);
+        lastPosition = event->pos();
+        break;
+    default:
+        event->ignore();
+        break;
+    }
+}
+
+void QtThreeDimensionalGlWidget::mouseReleaseEvent(QMouseEvent *event) {
+    switch(event->button()) {
+    case Qt::LeftButton:
+        setMouseTracking(false);
+        break;
+    default:
+        event->ignore();
+        break;
+    }
+}
+
+void QtThreeDimensionalGlWidget::mouseMoveEvent(QMouseEvent *event) {
+    horizontalRotation = (event->pos().x() - lastPosition.x()) * 1.0f;
+    verticalRotation = (event->pos().y() - lastPosition.y()) * 1.0;
+
+    lastPosition = event->pos();
+    rotate();
+}
+
 void QtThreeDimensionalGlWidget::drawImage() const {
     glEnable(GL_TEXTURE_2D);
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
@@ -27,7 +145,6 @@ void QtThreeDimensionalGlWidget::drawImage() const {
     float width, height, slice;
 
     // axial view
-    // Define vertices in counter-clockwise (CCW) order with normal pointing out
     width = (float) dimensions[0]/2;
     height = (float) dimensions[1]/2;
     slice = currentSlice[2] - dimensions[2]/2.0;
@@ -175,121 +292,6 @@ void QtThreeDimensionalGlWidget::createTextures() {
             _drawable[0][2]);
 
     glDisable(GL_TEXTURE_2D);
-}
-
-void QtThreeDimensionalGlWidget::deleteDrawable() {
-    QVector<QRgb**>::iterator it;
-
-    for (it = _drawable.begin(); it != _drawable.end(); it++) {
-        for (int i = 0; i < 3; i++)
-            delete [] (*it)[i];
-    }
-
-    _drawable.clear();
-}
-
-void QtThreeDimensionalGlWidget::updateDrawable(QVector<QRgb**> drawable) {
-    QtGlWidget::updateDrawable(drawable);
-    update();
-}
-
-void QtThreeDimensionalGlWidget::initializeGL() {
-    // Set background depth to farthest
-    glClearDepth(1.0f);
-    glEnable(GL_DEPTH_TEST);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_BLEND);
-    glDepthFunc(GL_LEQUAL);
-    glShadeModel(GL_FLAT); // Enable flat shading
-    // Nice perspective corrections
-    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-    qglClearColor(Qt::black);
-}
-
-void QtThreeDimensionalGlWidget::resizeGL(int w, int h) {
-    glViewport(0, 0, w, h);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    // Move into the screen
-    glTranslatef(0.0f, 0.0f, -400.0f);
-    // Rotate about (0,1,0)-axis
-    glRotatef((GLfloat) horizontalRotation, 0.0f, 1.0f, 0.0f);
-    // Rotate about (1,0,0)-axis
-    glRotatef((GLfloat) verticalRotation, 1.0f, 0.0f, 0.0f);
-    glMatrixMode(GL_PROJECTION);
-    GLfloat aspect = (GLfloat) w / (GLfloat) h;
-    width = w; height = h;
-    glLoadIdentity();
-    gluPerspective(cameraFOV, aspect, 0.1f, 1000.0f);
-}
-
-void QtThreeDimensionalGlWidget::paintGL() {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    if (doRotation) {
-        glMatrixMode(GL_MODELVIEW);
-        GLfloat currentModelViewMatrix[16];
-        glGetFloatv(GL_MODELVIEW_MATRIX, currentModelViewMatrix);
-        // x axis rotation
-        glRotatef(horizontalRotation, currentModelViewMatrix[1],
-        currentModelViewMatrix[5], currentModelViewMatrix[9]);
-        glGetFloatv(GL_MODELVIEW_MATRIX, currentModelViewMatrix);
-        // y axis rotation
-        glRotatef(verticalRotation, currentModelViewMatrix[0],
-        currentModelViewMatrix[4], currentModelViewMatrix[8]);
-        glGetFloatv(GL_MODELVIEW_MATRIX, currentModelViewMatrix);
-        glLoadMatrixf(currentModelViewMatrix);
-    }
-
-    if (moveCamera) {
-        glMatrixMode(GL_PROJECTION);
-        GLfloat aspect = (GLfloat) width / (GLfloat) height;
-        glLoadIdentity();
-        gluPerspective(cameraFOV, aspect, 0.1f, 1000.0f);
-    }
-
-    if (!_drawable.empty()) {
-        createTextures();
-        drawImage();
-        drawBorders();
-    }
-}
-
-void QtThreeDimensionalGlWidget::rotate() {
-    doRotation = true;
-    updateGL();
-    doRotation = false;
-}
-
-void QtThreeDimensionalGlWidget::mousePressEvent(QMouseEvent *event) {
-    switch(event->button()) {
-    case Qt::LeftButton:
-        setMouseTracking(true);
-        lastPosition = event->pos();
-        break;
-    default:
-        event->ignore();
-        break;
-    }
-}
-
-void QtThreeDimensionalGlWidget::mouseReleaseEvent(QMouseEvent *event) {
-    switch(event->button()) {
-    case Qt::LeftButton:
-        setMouseTracking(false);
-        break;
-    default:
-        event->ignore();
-        break;
-    }
-}
-
-void QtThreeDimensionalGlWidget::mouseMoveEvent(QMouseEvent *event) {
-    horizontalRotation = (event->pos().x() - lastPosition.x()) * 1.0f;
-    verticalRotation = (event->pos().y() - lastPosition.y()) * 1.0;
-
-    lastPosition = event->pos();
-    rotate();
 }
 
 void QtThreeDimensionalGlWidget::connectSignals() {

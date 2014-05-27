@@ -10,43 +10,6 @@ QtTwoDimensionalGlWidget::~QtTwoDimensionalGlWidget() {
     deleteDrawable();
 }
 
-void QtTwoDimensionalGlWidget::drawImage() const {
-    QVector<QRgb**>::const_iterator rit;
-
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    // draw last image in the list first and the others on top of it
-    for (rit = _drawable.constEnd()-1; rit >= _drawable.constBegin(); rit--) {
-        // Set raster position
-        glRasterPos2f(0, 0);
-        // Draw pixelmap
-        glDrawPixels(_width, _height, GL_BGRA, GL_UNSIGNED_BYTE,
-                     (*rit)[0]);
-    }
-}
-
-void QtTwoDimensionalGlWidget::drawCursor() const {
-    qglColor(Qt::green);
-    glBegin(GL_LINES);
-    glVertex2f(_width/2-10, _height/2);
-    glVertex2f(_width/2+10, _height/2);
-    glEnd();
-    glBegin(GL_LINES);
-    glVertex2f(_width/2, _height/2-10);
-    glVertex2f(_width/2, _height/2+10);
-    glEnd();
-}
-
-void QtTwoDimensionalGlWidget::drawLabels() {
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-    qglColor(Qt::green);
-    QFont arialFont("Arial", 12, QFont::Bold, false);
-
-    renderText(width()/2-5, 15, top, arialFont);
-    renderText(width()/2-5, height()-5, bottom, arialFont);
-    renderText(5, height()/2+5, left, arialFont);
-    renderText(width()-15, height()/2+5, right, arialFont);
-}
-
 void QtTwoDimensionalGlWidget::updateDrawable(QVector<QRgb**> drawable) {
     QtGlWidget::updateDrawable(drawable);
     QtTwoDimensionalGlWidget::update();
@@ -85,6 +48,43 @@ void QtTwoDimensionalGlWidget::paintGL() {
     }
     drawCursor();
     drawLabels();
+}
+
+void QtTwoDimensionalGlWidget::drawImage() const {
+    QVector<QRgb**>::const_iterator rit;
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    // draw last image in the list first and the others on top of it
+    for (rit = _drawable.constEnd()-1; rit >= _drawable.constBegin(); rit--) {
+        // Set raster position
+        glRasterPos2f(0, 0);
+        // Draw pixelmap
+        glDrawPixels(_width, _height, GL_BGRA, GL_UNSIGNED_BYTE,
+                     (*rit)[0]);
+    }
+}
+
+void QtTwoDimensionalGlWidget::drawCursor() const {
+    qglColor(Qt::green);
+    glBegin(GL_LINES);
+    glVertex2f(_width/2-10, _height/2);
+    glVertex2f(_width/2+10, _height/2);
+    glEnd();
+    glBegin(GL_LINES);
+    glVertex2f(_width/2, _height/2-10);
+    glVertex2f(_width/2, _height/2+10);
+    glEnd();
+}
+
+void QtTwoDimensionalGlWidget::drawLabels() {
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+    qglColor(Qt::green);
+    QFont arialFont("Arial", 12, QFont::Bold, false);
+
+    renderText(width()/2-5, 15, top, arialFont);
+    renderText(width()/2-5, height()-5, bottom, arialFont);
+    renderText(5, height()/2+5, left, arialFont);
+    renderText(width()-15, height()/2+5, right, arialFont);
 }
 
 void QtTwoDimensionalGlWidget::deleteDrawable() {

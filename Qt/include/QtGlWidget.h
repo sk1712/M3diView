@@ -82,6 +82,8 @@ signals:
     void upKeyPressed();
     void downKeyPressed();
 
+    /// signal emitted when widget is resized
+    void resized(int w, int h);
 };
 
 #endif // QTGLWIDGET_H

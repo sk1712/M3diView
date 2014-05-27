@@ -18,7 +18,7 @@ irtkQtThreeDimensionalViewer::~irtkQtThreeDimensionalViewer() {
 
 vector<QRgb**> irtkQtThreeDimensionalViewer::GetDrawable() {
     vector<QRgb**> allDrawables;
-    QRgb _backgroundColor = qRgba(0, 0, 0, 1);
+    QRgb _backgroundColor = qRgba(0, 0, 0, 0);
 
     int dimensions[3][2] = {
         {sliceNum[0], sliceNum[1]},

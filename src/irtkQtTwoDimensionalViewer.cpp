@@ -60,10 +60,12 @@ void irtkQtTwoDimensionalViewer::CalculateOutputImages() {
         it->second->Initialize(attr);
     }
 
+    irtkImageTransformation* transformFilter;
     map<int, irtkImageTransformation *>::iterator trit;
     for (trit = _transformFilter.begin(); trit != _transformFilter.end(); trit++) {
-        trit->second->PutSourcePaddingValue(-1);
-        trit->second->Run();
+        transformFilter = trit->second;
+        transformFilter->PutSourcePaddingValue(-1);
+        transformFilter->Run();
     }
 
 //    t2 = clock() - t;
@@ -76,8 +78,9 @@ void irtkQtTwoDimensionalViewer::CalculateCurrentOutput() {
     irtkImageAttributes attr = InitializeAttributes();
     _imageOutput[currentIndex]->Initialize(attr);
 
-    _transformFilter[currentIndex]->PutSourcePaddingValue(-1);
-    _transformFilter[currentIndex]->Run();
+    irtkImageTransformation* transformFilter = _transformFilter[currentIndex];
+    transformFilter->PutSourcePaddingValue(-1);
+    transformFilter->Run();
 }
 
 void irtkQtTwoDimensionalViewer::InitializeTransformation() {
@@ -93,8 +96,9 @@ void irtkQtTwoDimensionalViewer::InitializeCurrentTransformation() {
 
     _image[currentIndex]->GetMinMaxAsDouble(&_targetMin, &_targetMax);
 
-    _transformFilter[currentIndex]->SetInput(_image[currentIndex]);
-    _transformFilter[currentIndex]->PutScaleFactorAndOffset(255.0 / (_targetMax
+    irtkImageTransformation* transformFilter = _transformFilter[currentIndex];
+    transformFilter->SetInput(_image[currentIndex]);
+    transformFilter->PutScaleFactorAndOffset(255.0 / (_targetMax
         - _targetMin), -_targetMin * 255.0 / (_targetMax - _targetMin));
 }
 
@@ -231,6 +235,7 @@ void irtkQtTwoDimensionalViewer::ChangeOrigin(int x, int y) {
 
     irtkGreyImage *_targetImageOutput = _imageOutput.begin()->second;
 
+    // changes the origin on image click (x, y widget coordinates)
     originX = x;
     originY = _height - y;
     originZ = 0;

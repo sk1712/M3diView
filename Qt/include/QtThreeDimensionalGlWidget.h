@@ -3,8 +3,6 @@
 
 #include <QtGlWidget.h>
 
-#include <QPoint>
-
 
 class QtThreeDimensionalGlWidget : public QtGlWidget
 {
@@ -38,15 +36,6 @@ public:
 
     /// class destructor
     ~QtThreeDimensionalGlWidget();
-
-    /// draw planes with textured images on screen
-    void drawImage() const;
-
-    /// draw borders of planes with different colours
-    void drawBorders();
-
-    /// map 2D images to textures
-    void createTextures();
 
     /// set image dimensions (in image coordinates)
     void setDimensions(int *dim);
@@ -84,6 +73,15 @@ protected:
     void mouseMoveEvent(QMouseEvent *event);
 
 private:
+
+    /// draw planes with textured images on screen
+    void drawImage() const;
+
+    /// draw borders of planes with different colours
+    void drawBorders();
+
+    /// map 2D images to textures
+    void createTextures();
 
     /// register the signals of the widget
     void connectSignals();

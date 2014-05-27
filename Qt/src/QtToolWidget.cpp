@@ -18,7 +18,6 @@ QtToolWidget::QtToolWidget(QWidget * parent) : QWidget(parent) {
     opacityLabel = new QLabel();
 
     colormapCombo = new QComboBox();
-    fillColorCombo();
 
     // add the widgets to the layout
     addWidgetsToLayout();
@@ -56,6 +55,10 @@ void QtToolWidget::setColormap(int index) {
     if (index >= 0) {
         colormapCombo->setCurrentIndex(index);
     }
+}
+
+void QtToolWidget::fillColorCombo(const QStringList &values) {
+    colormapCombo->addItems(values);
 }
 
 void QtToolWidget::addWidgetsToLayout() {
@@ -116,15 +119,6 @@ void QtToolWidget::initializeValues() {
     opacitySlider->setValue(255);
     minImageSlider->setRange(0, 0);
     maxImageSlider->setRange(0, 0);
-    colormapCombo->setCurrentIndex(3);
-}
-
-void QtToolWidget::fillColorCombo() {
-    colormapCombo->addItem("Red");
-    colormapCombo->addItem("Green");
-    colormapCombo->addItem("Blue");
-    colormapCombo->addItem("Grey");
-    colormapCombo->addItem("Inverse");
 }
 
 void QtToolWidget::minValueChanged(int value) {

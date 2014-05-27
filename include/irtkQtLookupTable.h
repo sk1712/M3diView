@@ -2,7 +2,7 @@
 #define IRTKQTLOOKUPTABLE_H
 
 #include <QColor>
-#include <QDebug>
+
 
 class irtkQtLookupTable
 {
@@ -28,6 +28,9 @@ private:
     /// color mode
     irtkColorMode _mode;
 
+    /// string list with names of color modes
+    static QStringList _colorStringList;
+
 public:
 
     /// class constructor
@@ -38,6 +41,12 @@ public:
 
     /// initialize look up table
     void Initialize();
+
+    /// fill the values of _colorStringList
+    static void SetColorModeList();
+
+    /// get the values of _colorStringList
+    static QStringList GetColorModeList();
 
     /// set image alpha value
     void SetAlpha(int a);
@@ -100,7 +109,6 @@ inline int irtkQtLookupTable::GetAlpha() const {
 
 inline void irtkQtLookupTable::SetMinDisplayValue(double value) {
     minDisplay = value;
-    Initialize();
 }
 
 inline double irtkQtLookupTable::GetMinDisplayValue() const {
@@ -109,7 +117,6 @@ inline double irtkQtLookupTable::GetMinDisplayValue() const {
 
 inline void irtkQtLookupTable::SetMaxDisplayValue(double value) {
     maxDisplay = value;
-    Initialize();
 }
 
 inline double irtkQtLookupTable::GetMaxDisplayValue() const {
@@ -127,7 +134,6 @@ inline double irtkQtLookupTable::GetImageMaxValue() const {
 inline void irtkQtLookupTable::SetMinMaxDisplayValues(double min, double max) {
     minDisplay = min;
     maxDisplay = max;
-    Initialize();
 }
 
 inline void irtkQtLookupTable::SetMinMaxImageValues(double min, double max) {

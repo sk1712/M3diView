@@ -21,15 +21,6 @@ public:
     /// class destructor
     ~QtTwoDimensionalGlWidget();
 
-    /// draw image on screen
-    void drawImage() const;
-
-    /// draw cursor on screen
-    void drawCursor() const;
-
-    /// draw four labels on screen
-    void drawLabels();
-
     /// set viewer labels
     void setLabels(const char t, const char b, const char l, const char r);
 
@@ -50,10 +41,17 @@ protected:
     /// delete the drawable
     void deleteDrawable();
 
-signals:
+private:
 
-    /// signal emitted when widget is resized
-    void resized(int w, int h);
+    /// draw image on screen
+    void drawImage() const;
+
+    /// draw cursor on screen
+    void drawCursor() const;
+
+    /// draw four labels on screen
+    void drawLabels();
+
 };
 
 

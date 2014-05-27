@@ -1,5 +1,6 @@
 #include <irtkQtBaseViewer.h>
 
+
 irtkQtBaseViewer::irtkQtBaseViewer() {
 
 }
@@ -14,12 +15,13 @@ void irtkQtBaseViewer::AddToDisplayedImages(irtkQtImageObject *imageObject, int 
     currentIndex = index;
     // if first image to be displayed make it target
     if (_image.size() == 0) {
-        _targetImage = newImage;
-        InitializeOriginOrientation();
+        SetTarget(newImage);
+        InitializeOrigin();
+        InitializeOrientation();
     }
     else if (index < _image.begin()->first) {
-        _targetImage = newImage;
-        /// check whether image dimensions agree instead
+        SetTarget(newImage);
+        /// check whether image dimensions agree
 //        if (!(_targetImage->GetImageAttributes() == newImage->GetImageAttributes())) {
 //            delete newImage;
 //            return;
@@ -34,13 +36,15 @@ void irtkQtBaseViewer::AddToDisplayedImages(irtkQtImageObject *imageObject, int 
 void irtkQtBaseViewer::DeleteSingleImage(int index) {
     // when an image is deleted update the target image
     if (index < _image.begin()->first) {
-        _targetImage = _image.begin()->second;
+        SetTarget(_image.begin()->second);
+        InitializeOrientation();
     }
 }
 
 void irtkQtBaseViewer::MoveImage(int, int) {
     // always make first image in the map the target image
-    _targetImage = _image.begin()->second;
+    SetTarget(_image.begin()->second);
+    InitializeOrientation();
 }
 
 irtkImageAttributes irtkQtBaseViewer::InitializeAttributes() {
@@ -75,25 +79,19 @@ irtkImageAttributes irtkQtBaseViewer::InitializeAttributes() {
     return attr;
 }
 
-void irtkQtBaseViewer::InitializeOriginOrientation() {
-    double x[3], y[3], z[3];
-
-    // get original image orientation and origin
-    _targetImage->GetOrientation(x, y, z);
+void irtkQtBaseViewer::InitializeOrigin() {
+    // get original image origin
     _targetImage->GetOrigin(_originX, _originY, _originZ);
 
     switch (_viewMode) {
     case VIEW_AXIAL :
         *sliceNum = _targetImage->GetZ();
-        SetOrientation(x, y, z);
         break;
     case VIEW_SAGITTAL :
         *sliceNum = _targetImage->GetX();
-        SetOrientation(y, z, x);
         break;
     case VIEW_CORONAL :
         *sliceNum = _targetImage->GetY();
-        SetOrientation(x, z, y);
         break;
     case VIEW_3D:
         sliceNum[0] = _targetImage->GetX();
@@ -107,6 +105,31 @@ void irtkQtBaseViewer::InitializeOriginOrientation() {
     }
 
     UpdateCurrentSlice();
+}
+
+void irtkQtBaseViewer::InitializeOrientation() {
+    double x[3], y[3], z[3];
+
+    // get original image orientation
+    _targetImage->GetOrientation(x, y, z);
+
+    switch (_viewMode) {
+    case VIEW_AXIAL :
+        SetOrientation(x, y, z);
+        break;
+    case VIEW_SAGITTAL :
+        SetOrientation(y, z, x);
+        break;
+    case VIEW_CORONAL :
+        SetOrientation(x, z, y);
+        break;
+    case VIEW_3D :
+        break;
+    default:
+        cerr << "Not a valid type of viewer" << endl;
+        exit(1);
+        break;
+    }
 }
 
 void irtkQtBaseViewer::SetOrientation(const double * xaxis, const double * yaxis, const double * zaxis) {

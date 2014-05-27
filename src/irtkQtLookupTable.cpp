@@ -3,6 +3,8 @@
 #include <math.h>
 
 
+QStringList irtkQtLookupTable::_colorStringList;
+
 irtkQtLookupTable::irtkQtLookupTable() {
     _alpha = 255;
 
@@ -22,7 +24,6 @@ irtkQtLookupTable::~irtkQtLookupTable() {
 
 void irtkQtLookupTable::SetAlpha(int a) {
     _alpha = a;
-    Initialize();
 }
 
 void irtkQtLookupTable::Initialize() {
@@ -45,9 +46,20 @@ void irtkQtLookupTable::Initialize() {
     }
 }
 
+void irtkQtLookupTable::SetColorModeList() {
+    _colorStringList << "Red"
+                     << "Green"
+                     << "Blue"
+                     << "Grey"
+                     << "Inverse";
+}
+
+QStringList irtkQtLookupTable::GetColorModeList() {
+    return _colorStringList;
+}
+
 void irtkQtLookupTable::SetColorMode(irtkColorMode mode) {
     _mode = mode;
-    Initialize();
 }
 
 void irtkQtLookupTable::SetColorModeToRed() {

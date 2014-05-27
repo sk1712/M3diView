@@ -48,6 +48,9 @@ public:
     /// set colormap
     void setColormap(int index);
 
+    /// fill values of colormap combobox
+    void fillColorCombo(const QStringList &values);
+
 private:
 
     /// create tool widgets
@@ -64,9 +67,6 @@ private:
 
     /// create tools
     void createTools();
-
-    /// fill values of colormap combobox
-    void fillColorCombo();
 
 private slots:
 

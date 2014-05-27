@@ -31,12 +31,14 @@ void irtkQtImageObject::CreateImage() {
         return;
     }
 
+    // set up the look up table
     _lookupTable = new irtkQtLookupTable;
 
     double imageMin, imageMax;
     _image->GetMinMaxAsDouble(&imageMin, &imageMax);
     _lookupTable->SetMinMaxImageValues(imageMin, imageMax);
     _lookupTable->SetMinMaxDisplayValues(imageMin, imageMax);
+    _lookupTable->Initialize();
 }
 
 void irtkQtImageObject::DeleteImage() {

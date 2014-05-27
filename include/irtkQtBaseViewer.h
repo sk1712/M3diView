@@ -116,7 +116,7 @@ public:
     /// move image with key previousKey to newKey
     virtual void MoveImage(int previousKey, int newKey);
 
-    /// update keys of maps after invalid image is delete
+    /// update keys of maps after invalid image is deleted
     virtual void UpdateKeysAfterIndexDeleted(int index) = 0;
 
 public slots:
@@ -136,7 +136,10 @@ protected:
     irtkImageAttributes InitializeAttributes();
 
     /// initialize image origin and orientation
-    void InitializeOriginOrientation();
+    void InitializeOrigin();
+
+    /// initialize image orientation
+    void InitializeOrientation();
 
     /// update the current slice (in image coordinates) corresponding to the world coordinates
     virtual void UpdateCurrentSlice() = 0;
@@ -147,9 +150,11 @@ protected:
     /// set image orientation
     void SetOrientation(const double * xaxis, const double * yaxis, const double * zaxis);
 
+    /// move one of the displayed images higher in hierarchy
     template<class T>
     void MoveImageUp(map<int, T> & mymap, int previousKey, int newKey);
 
+    /// move one of the displayed images lower in hierarchy
     template<class T>
     void MoveImageDown(map<int, T> & mymap, int previousKey, int newKey);
 

@@ -74,7 +74,7 @@ public:
     void SetMinDisplayValue(double min);
 
     /// get minimum display value for the corresponding image
-    double GetMinDisplayValue();
+    double GetMinDisplayValue() const;
 
     /// set maximum display value for the corresponding image
     void SetMaxDisplayValue(double max);
@@ -117,6 +117,7 @@ inline irtkQtLookupTable* irtkQtImageObject::GetLookupTable() const {
 inline void irtkQtImageObject::SetOpacity(int value) {
     if (_lookupTable) {
         _lookupTable->SetAlpha(value);
+        _lookupTable->Initialize();
     }
 }
 
@@ -153,10 +154,11 @@ inline double irtkQtImageObject::GetMaxImageValue() {
 inline void irtkQtImageObject::SetMinDisplayValue(double min) {
     if (_lookupTable) {
         _lookupTable->SetMinDisplayValue(min);
+        _lookupTable->Initialize();
     }
 }
 
-inline double irtkQtImageObject::GetMinDisplayValue() {
+inline double irtkQtImageObject::GetMinDisplayValue() const {
     double minDisplay = 0;
 
     if (_lookupTable) {
@@ -169,6 +171,7 @@ inline double irtkQtImageObject::GetMinDisplayValue() {
 inline void irtkQtImageObject::SetMaxDisplayValue(double max) {
     if (_lookupTable) {
         _lookupTable->SetMaxDisplayValue(max);
+        _lookupTable->Initialize();
     }
 }
 
@@ -185,6 +188,7 @@ inline double irtkQtImageObject::GetMaxDisplayValue() const {
 inline void irtkQtImageObject::SetColormap(irtkQtLookupTable::irtkColorMode mode) {
     if (_lookupTable) {
         _lookupTable->SetColorMode(mode);
+        _lookupTable->Initialize();
     }
 }
 

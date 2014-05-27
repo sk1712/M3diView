@@ -12,7 +12,6 @@
 #include <QListView>
 #include <QTabWidget>
 #include <QMessageBox>
-#include <QWidgetAction>
 
 
 class QtMainWindow : public QMainWindow
@@ -139,6 +138,9 @@ private:
 
     /// set up viewer widgets
     void setUpViewerWidgets();
+
+    /// update all drawables
+    void updateDrawables();
 
 private slots:
 
