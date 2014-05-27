@@ -12,7 +12,7 @@ QtTwoDimensionalGlWidget::~QtTwoDimensionalGlWidget() {
 
 void QtTwoDimensionalGlWidget::updateDrawable(QVector<QRgb**> drawable) {
     QtGlWidget::updateDrawable(drawable);
-    QtTwoDimensionalGlWidget::update();
+    updateGL();
 }
 
 void QtTwoDimensionalGlWidget::initializeGL() {
