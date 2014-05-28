@@ -18,6 +18,7 @@ QtMainWindow::QtMainWindow() {
 
     createMenuActions();
     createToolBarActions();
+    createImageMenuActions();
     createMenu();
     createToolBar();
     createDockWindows();
@@ -27,6 +28,7 @@ QtMainWindow::QtMainWindow() {
 
     singleViewerInScreen = false;
     numDisplayedImages = 0;
+    currentImageIndex = -1;
     imageModel = NULL;
 }
 
@@ -40,6 +42,8 @@ void QtMainWindow::createDockWindows() {
     QDockWidget *dock = new QDockWidget(tr("Image list"), this);
     dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     imageListView = new QListView(dock);
+    // show a menu on list view right click
+    imageListView->setContextMenuPolicy(Qt::CustomContextMenu);
     dock->setWidget(imageListView);
     addDockWidget(Qt::LeftDockWidgetArea, dock);
     viewMenu->addAction(dock->toggleViewAction());
@@ -126,12 +130,22 @@ void QtMainWindow::createMenuActions() {
     clearViewsAction->setStatusTip(tr("Delete all views"));
 }
 
+void QtMainWindow::createImageMenuActions() {
+    deleteImageAction = new QAction(tr("Delete"), this);
+    deleteImageAction->setIcon(QIcon(":/icons/erase.png"));
+}
+
 void QtMainWindow::connectWindowSignals() {
     // list view signals
     connect(imageListView, SIGNAL(doubleClicked(QModelIndex)),
             this, SLOT(listViewDoubleClicked(QModelIndex)));
     connect(imageListView, SIGNAL(clicked(QModelIndex)),
             this, SLOT(listViewClicked(QModelIndex)));
+    connect(imageListView, SIGNAL(customContextMenuRequested(QPoint)),
+            this, SLOT(listViewShowContextMenu(QPoint)));
+
+    // image menu signals
+    connect(deleteImageAction, SIGNAL(triggered()), this, SLOT(deleteThisImage()));
 
     // toolbar signals
     connect(zoomInAction, SIGNAL(triggered()), this, SLOT(zoomIn()));
@@ -378,10 +392,15 @@ void QtMainWindow::displaySingleImage(int index) {
         viewerWidget->setEnabled(true);
         viewer->SetDimensions(viewerWidget->getGlWidget()->customWidth(),
                               viewerWidget->getGlWidget()->customHeight());
+
+        ////
+        viewer->InitializeCurrentTransformation();
+        viewer->CalculateCurrentOutput();
+        ////
     }
 
     //// TO DO
-    QtConcurrent::blockingMap(viewers, &InitializeViewer);
+    //QtConcurrent::blockingMap(viewers, &InitializeViewer);
 
     // re-register the viewers' signals
     connectViewerSignals();
@@ -454,6 +473,31 @@ void QtMainWindow::viewImage() {
 
     // re-register the viewers' signals
     connectViewerSignals();
+}
+
+void QtMainWindow::deleteThisImage() {
+    QList<irtkQtImageObject*> & list = irtkQtViewer::Instance()->GetImageList();
+    bool visible = list[currentImageIndex]->IsVisible();
+
+    if (visible) {
+        numDisplayedImages--;
+        deleteSingleImage(currentImageIndex);
+        setUpViewerWidgets();
+    }
+
+    // delete item from the list
+    delete list.takeAt(currentImageIndex);
+
+    // update the map keys of the images currently displayed
+    QList<irtkQtBaseViewer*>::iterator it;
+    for (it = viewers.begin(); it != viewers.end(); it++) {
+        (*it)->UpdateKeysAfterIndexDeleted(currentImageIndex);
+    }
+
+    // update the model
+    delete imageModel;
+    imageModel = new irtkImageListModel(list);
+    imageListView->setModel(imageModel);
 }
 
 void QtMainWindow::zoomIn() {
@@ -686,6 +730,19 @@ void QtMainWindow::listViewClicked(QModelIndex index) {
     }
     else {
         visualToolWidget->setEnabled(false);
+    }
+}
+
+void QtMainWindow::listViewShowContextMenu(const QPoint &pos) {
+    QMenu imageMenu;
+    imageMenu.addAction(deleteImageAction);
+
+    QPoint globalPos = imageListView->mapToGlobal(pos);
+    currentImageIndex = imageListView->indexAt(pos).row();
+
+    // show the menu only if the current image index is valid
+    if (currentImageIndex >= 0 && currentImageIndex < imageModel->rowCount()) {
+        imageMenu.exec( globalPos );
     }
 }
 

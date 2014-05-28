@@ -11,5 +11,6 @@
         <file>icons/arrow_down.png</file>
         <file>icons/arrow_up.png</file>
         <file>stylesheets/stylesheet.qss</file>
+        <file>icons/erase.png</file>
     </qresource>
 </RCC>

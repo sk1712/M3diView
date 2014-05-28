@@ -48,6 +48,9 @@ class QtMainWindow : public QMainWindow
     QAction *moveUpAction;
     QAction *moveDownAction;
 
+    /// image actions
+    QAction *deleteImageAction;
+
     /// visualisation tool widget
     QtToolWidget *visualToolWidget;
 
@@ -65,6 +68,9 @@ class QtMainWindow : public QMainWindow
 
     /// number of currently displayed images
     int numDisplayedImages;
+
+    /// image index currently clicked
+    int currentImageIndex;
 
 public:
 
@@ -90,6 +96,9 @@ private:
 
     /// create menu actions
     void createMenuActions();
+
+    /// create image menu actions
+    void createImageMenuActions();
 
     /// connect window signals that won't be disconnected
     void connectWindowSignals();
@@ -150,6 +159,9 @@ private slots:
     /// callback function for viewSelectedImageAction
     void viewImage();
 
+    /// callback function for deleteImageAction
+    void deleteThisImage();
+
     /// callback function for zoomInAction
     void zoomIn();
 
@@ -200,6 +212,9 @@ private slots:
 
     /// callback function for list view cliked
     void listViewClicked(QModelIndex index);
+
+    /// callback function for list view right click
+    void listViewShowContextMenu(const QPoint& pos);
 
     /// callback function for moving image up in the list
     void moveImageUp();

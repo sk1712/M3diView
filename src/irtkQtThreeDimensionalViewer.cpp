@@ -68,7 +68,7 @@ void irtkQtThreeDimensionalViewer::InitializeTransformation() {
 void irtkQtThreeDimensionalViewer::InitializeCurrentTransformation() {
     double _targetMin, _targetMax;
 
-    _image[currentIndex]->GetMinMaxAsDouble(&_targetMin, &_targetMax);
+    _lookupTable[currentIndex]->GetMinMaxImageValues(_targetMin, _targetMax);
 
     for (int dim = 0; dim < 3; dim++) {
         _transformFilter[currentIndex][dim]->SetInput(_image[currentIndex]);

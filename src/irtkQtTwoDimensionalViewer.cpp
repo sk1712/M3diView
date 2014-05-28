@@ -95,7 +95,7 @@ void irtkQtTwoDimensionalViewer::InitializeTransformation() {
 void irtkQtTwoDimensionalViewer::InitializeCurrentTransformation() {
     double _targetMin, _targetMax;
 
-    _image[currentIndex]->GetMinMaxAsDouble(&_targetMin, &_targetMax);
+    _lookupTable[currentIndex]->GetMinMaxImageValues(_targetMin, _targetMax);
 
     irtkImageTransformation* transformFilter = _transformFilter[currentIndex];
     transformFilter->SetInput(_image[currentIndex]);
