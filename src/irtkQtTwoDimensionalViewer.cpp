@@ -28,13 +28,14 @@ vector<QRgb**> irtkQtTwoDimensionalViewer::GetDrawable() {
         irtkGreyPixel *original = it->second->GetPointerToVoxels();
         QRgb *drawn = drawable[0];
 
+        irtkQtLookupTable *luTable = _lookupTable[it->first];
         int i, j;
 
         // Create a drawable for all images
         for (j = 0; j < _height; j++) {
             for (i = 0; i < _width; i++) {
                 if (*original >= 0) {
-                    *drawn = _lookupTable[it->first]->lookupTable[*original];
+                    *drawn = luTable->lookupTable[*original];
                 } else {
                     *drawn = _backgroundColor;
                 }

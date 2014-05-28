@@ -35,12 +35,13 @@ vector<QRgb**> irtkQtThreeDimensionalViewer::GetDrawable() {
             irtkGreyPixel *original = it->second[dim]->GetPointerToVoxels();
             QRgb *drawn = drawable[dim];
 
+            irtkQtLookupTable *luTable = _lookupTable[it->first];
             int i, j;
 
             for (j = 0; j < dimensions[dim][0]; j++) {
                 for (i = 0; i < dimensions[dim][1]; i++) {
                     if (*original >= 0) {
-                        *drawn = _lookupTable[it->first]->lookupTable[*original];
+                        *drawn = luTable->lookupTable[*original];
                     } else {
                         *drawn = _backgroundColor;
                     }
