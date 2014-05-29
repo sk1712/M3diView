@@ -4,7 +4,7 @@
 #include <irtkTransformation.h>
 #include <irtkQtImageObject.h>
 
-#include <map>
+#include <qtconcurrentrun.h>
 
 #include <QObject>
 #include <QVector>

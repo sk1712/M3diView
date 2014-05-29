@@ -369,12 +369,6 @@ bool QtMainWindow::setDisplayedImages() {
     return atLeastOneImageVisible;
 }
 
-/// free function to parallelize initializing viewers
-void InitializeViewer(irtkQtBaseViewer* &viewer) {
-    viewer->InitializeCurrentTransformation();
-    viewer->CalculateCurrentOutput();
-}
-
 void QtMainWindow::displaySingleImage(int index) {
     irtkQtBaseViewer *viewer;
     QtViewerWidget *viewerWidget;
@@ -393,14 +387,9 @@ void QtMainWindow::displaySingleImage(int index) {
         viewer->SetDimensions(viewerWidget->getGlWidget()->customWidth(),
                               viewerWidget->getGlWidget()->customHeight());
 
-        ////
         viewer->InitializeCurrentTransformation();
         viewer->CalculateCurrentOutput();
-        ////
     }
-
-    //// TO DO
-    //QtConcurrent::blockingMap(viewers, &InitializeViewer);
 
     // re-register the viewers' signals
     connectViewerSignals();
@@ -612,6 +601,7 @@ void QtMainWindow::updateOrigin(double x, double y, double z) {
         index++;
     bool isSenderLinked = viewerWidgets[index]->isLinked();
 
+    // calculate the new output images
     for (int i = 0; i < viewers.size(); i++) {
         viewer = viewers[i];
         viewerWidget = viewerWidgets[i];
@@ -620,6 +610,16 @@ void QtMainWindow::updateOrigin(double x, double y, double z) {
              ( (isSenderLinked && viewerWidget->isLinked()) || (viewer == senderViewer) ) ) {
             viewer->SetOrigin(x, y, z);
             viewer->CalculateOutputImages();
+        }
+    }
+
+    // update the viewers with the new output images
+    for (int i = 0; i < viewers.size(); i++) {
+        viewer = viewers[i];
+        viewerWidget = viewerWidgets[i];
+
+        if ( viewerWidget->getGlWidget()->isEnabled() &&
+             ( (isSenderLinked && viewerWidget->isLinked()) || (viewer == senderViewer) ) ) {
             viewerWidget->setCurrentSlice(viewer->GetCurrentSlice());
             viewerWidget->getGlWidget()->updateDrawable(
                         QVector<QRgb**>::fromStdVector(viewer->GetDrawable()));

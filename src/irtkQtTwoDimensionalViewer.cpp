@@ -1,7 +1,5 @@
 #include <irtkQtTwoDimensionalViewer.h>
 
-//#include <time.h>
-
 
 irtkQtTwoDimensionalViewer::irtkQtTwoDimensionalViewer(irtkViewMode viewMode) {
     _viewMode = viewMode;
@@ -50,10 +48,13 @@ vector<QRgb**> irtkQtTwoDimensionalViewer::GetDrawable() {
     return allDrawables;
 }
 
-void irtkQtTwoDimensionalViewer::CalculateOutputImages() {
-//    clock_t t, t2;
+///// free function used to parallelize the transformations of images
+void CalculateSingleTransform(irtkImageTransformation* transform) {
+    transform->PutSourcePaddingValue(-1);
+    transform->Run();
+}
 
-//    t = clock();
+void irtkQtTwoDimensionalViewer::CalculateOutputImages() {
     irtkImageAttributes attr = InitializeAttributes();
 
     map<int, irtkGreyImage *>::iterator it;
@@ -61,18 +62,20 @@ void irtkQtTwoDimensionalViewer::CalculateOutputImages() {
         it->second->Initialize(attr);
     }
 
+    QFuture<void> threads[_transformFilter.size()];
+    int t_index = 0;
+
     irtkImageTransformation* transformFilter;
     map<int, irtkImageTransformation *>::iterator trit;
     for (trit = _transformFilter.begin(); trit != _transformFilter.end(); trit++) {
         transformFilter = trit->second;
-        transformFilter->PutSourcePaddingValue(-1);
-        transformFilter->Run();
+        threads[t_index] = QtConcurrent::run(CalculateSingleTransform, transformFilter);
+        t_index++;
     }
 
-//    t2 = clock() - t;
-//    qDebug() << "Now running thread: " << QThread::currentThreadId()
-//             << " and it took me " << ((float)t2)/CLOCKS_PER_SEC
-//             << " seconds to calculate output images.\n";
+    for (int i = 0; i < t_index; i++) {
+        threads[i].waitForFinished();
+    }
 }
 
 void irtkQtTwoDimensionalViewer::CalculateCurrentOutput() {
@@ -292,11 +295,7 @@ void irtkQtTwoDimensionalViewer::AddToMaps(irtkImage* newImage, int index) {
     _transformFilter.insert(pair<int, irtkImageTransformation *> (index, transformation));
 }
 
-///// free function used to parallelize the transformations of images
-//void CalculateSingleTransform(irtkImageTransformation* &transform) {
-//    transform->PutSourcePaddingValue(-1);
-//    transform->Run();
-//}
+
 
 
 

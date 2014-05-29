@@ -77,6 +77,14 @@ void irtkQtThreeDimensionalViewer::InitializeCurrentTransformation() {
     }
 }
 
+///// free function used to parallelize the transformations of images
+void CalculateSingleTransform(irtkImageTransformation** transform) {
+    for (int i = 0; i < 3; i++) {
+        transform[i]->PutSourcePaddingValue(-1);
+        transform[i]->Run();
+    }
+}
+
 void irtkQtThreeDimensionalViewer::CalculateOutputImages() {
     irtkImageAttributes attr[3];
     // width of output image
@@ -100,19 +108,29 @@ void irtkQtThreeDimensionalViewer::CalculateOutputImages() {
             for (image_it = _imageOutput.begin(); image_it != _imageOutput.end(); image_it++) {
                 image_it->second[i]->Initialize(attr[i]);
             }
-
-            map<int, irtkImageTransformation **>::iterator trans_it;
-            for (trans_it = _transformFilter.begin(); trans_it != _transformFilter.end(); trans_it++) {
-                trans_it->second[i]->PutSourcePaddingValue(-1);
-                trans_it->second[i]->Run();
-            }
         }
     }
 
+    // run the transformation for the different images in parallel
+    QFuture<void> threads[_transformFilter.size()];
+    int t_index = 0;
+
+    irtkImageTransformation** transformFilter;
+    map<int, irtkImageTransformation **>::iterator trans_it;
+    for (trans_it = _transformFilter.begin(); trans_it != _transformFilter.end(); trans_it++) {
+        transformFilter = trans_it->second;
+        threads[t_index] = QtConcurrent::run(CalculateSingleTransform, transformFilter);
+        t_index++;
+    }
+
+    for (int i = 0; i < t_index; i++) {
+        threads[i].waitForFinished();
+    }
+
+    // restore current origin
     _originX = originX_backup;
     _originY = originY_backup;
     _originZ = originZ_backup;
-    //QtConcurrent::blockingMap(_transformFilter, &CalculateSingleTransform);
 }
 
 void irtkQtThreeDimensionalViewer::CalculateCurrentOutput() {
@@ -249,13 +267,6 @@ void irtkQtThreeDimensionalViewer::AddToMaps(irtkImage* newImage, int index) {
 
     //for (int i = 0; i < 3; i++) previousSlice[i] = 0;
 }
-
-//void CalculateSingleTransform(irtkImageTransformation** &transform) {
-//    for (int i = 0; i < 3; i++) {
-//        transform[i]->PutSourcePaddingValue(-1);
-//        transform[i]->Run();
-//    }
-//}
 
 void irtkQtThreeDimensionalViewer::SetOrientation(int view) {
     double x[3], y[3], z[3];
