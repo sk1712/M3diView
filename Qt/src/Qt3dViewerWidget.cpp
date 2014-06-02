@@ -19,16 +19,19 @@ Qt3dViewerWidget::Qt3dViewerWidget(QWidget *parent)
     axialSlider = new QSlider(Qt::Vertical);
     axialSlider->setMinimum(1);
     axialSlider->setObjectName("axial");
+    axialSlider->setTracking(false);
     sliderLayout->addWidget(axialSlider);
 
     sagittalSlider = new QSlider(Qt::Vertical);
     sagittalSlider->setMinimum(1);
     sagittalSlider->setObjectName("sagittal");
+    sagittalSlider->setTracking(false);
     sliderLayout->addWidget(sagittalSlider);
 
     coronalSlider = new QSlider(Qt::Vertical);
     coronalSlider->setMinimum(1);
     coronalSlider->setObjectName("coronal");
+    coronalSlider->setTracking(false);
     sliderLayout->addWidget(coronalSlider);
 
     layout->addWidget(sliderWidget, 0, 1);
