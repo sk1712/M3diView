@@ -112,7 +112,7 @@ void irtkQtThreeDimensionalViewer::CalculateOutputImages() {
     }
 
     // run the transformation for the different images in parallel
-    QFuture<void> threads[_transformFilter.size()];
+    QFuture<void> *threads = new QFuture<void>[_transformFilter.size()];
     int t_index = 0;
 
     irtkImageTransformation** transformFilter;
@@ -126,6 +126,8 @@ void irtkQtThreeDimensionalViewer::CalculateOutputImages() {
     for (int i = 0; i < t_index; i++) {
         threads[i].waitForFinished();
     }
+
+    delete [] threads;
 
     // restore current origin
     _originX = originX_backup;
