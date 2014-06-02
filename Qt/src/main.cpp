@@ -14,7 +14,8 @@ int main(int argc, char *argv[])
     }
 
     QtMainWindow window;
-    window.setWindowState(Qt::WindowMaximized);
+    window.resize(1000, 800);
+    //window.setWindowState(Qt::WindowMaximized);
     window.show();
 
 #ifdef Q_OS_MAC
