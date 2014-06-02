@@ -589,6 +589,10 @@ void QtMainWindow::clearViews() {
     singleViewerInScreen = false;
 }
 
+void CalculateOutputImage(irtkQtBaseViewer* viewer) {
+    viewer->CalculateOutputImages();
+}
+
 void QtMainWindow::updateOrigin(double x, double y, double z) {
     irtkQtBaseViewer *senderViewer, *viewer;
     QtViewerWidget *viewerWidget;
@@ -601,6 +605,9 @@ void QtMainWindow::updateOrigin(double x, double y, double z) {
         index++;
     bool isSenderLinked = viewerWidgets[index]->isLinked();
 
+    QFuture<void> threads[viewers.size()];
+    int t_index = 0;
+
     // calculate the new output images
     for (int i = 0; i < viewers.size(); i++) {
         viewer = viewers[i];
@@ -609,8 +616,13 @@ void QtMainWindow::updateOrigin(double x, double y, double z) {
         if ( viewerWidget->getGlWidget()->isEnabled() &&
              ( (isSenderLinked && viewerWidget->isLinked()) || (viewer == senderViewer) ) ) {
             viewer->SetOrigin(x, y, z);
-            viewer->CalculateOutputImages();
+            threads[t_index] = QtConcurrent::run(CalculateOutputImage, viewer);
+            t_index++;
         }
+    }
+
+    for (int i = 0; i < t_index; i++) {
+        threads[i].waitForFinished();
     }
 
     // update the viewers with the new output images
