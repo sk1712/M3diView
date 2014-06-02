@@ -62,7 +62,7 @@ void irtkQtTwoDimensionalViewer::CalculateOutputImages() {
         it->second->Initialize(attr);
     }
 
-    QFuture<void> threads[_transformFilter.size()];
+    QFuture<void> *threads = new QFuture<void>[_transformFilter.size()];
     int t_index = 0;
 
     irtkImageTransformation* transformFilter;
@@ -76,6 +76,7 @@ void irtkQtTwoDimensionalViewer::CalculateOutputImages() {
     for (int i = 0; i < t_index; i++) {
         threads[i].waitForFinished();
     }
+    delete [] threads;
 }
 
 void irtkQtTwoDimensionalViewer::CalculateCurrentOutput() {
