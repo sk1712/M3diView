@@ -5,19 +5,18 @@
 #include <QSpacerItem>
 #include <QString>
 
-#include <QDebug>
 
 QtToolWidget::QtToolWidget(QWidget * parent) : QWidget(parent) {
     minImageSlider = new QSlider(Qt::Horizontal);
-    minImageLabel = new QLabel();
+    minImageLabel = new QLabel;
 
     maxImageSlider = new QSlider(Qt::Horizontal);
-    maxImageLabel = new QLabel();
+    maxImageLabel = new QLabel;
 
     opacitySlider = new QSlider(Qt::Horizontal);
-    opacityLabel = new QLabel();
+    opacityLabel = new QLabel;
 
-    colormapCombo = new QComboBox();
+    colormapCombo = new QComboBox;
 
     // add the widgets to the layout
     addWidgetsToLayout();

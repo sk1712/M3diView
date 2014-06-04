@@ -38,17 +38,17 @@ QtMainWindow::~QtMainWindow() {
 }
 
 void QtMainWindow::createDockWindows() {
-    // create image list dock widget
+    // Create image list dock widget
     QDockWidget *dock = new QDockWidget(tr("Image list"), this);
     dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     imageListView = new QListView(dock);
-    // show a menu on list view right click
+    // Show a menu on list view right click
     imageListView->setContextMenuPolicy(Qt::CustomContextMenu);
     dock->setWidget(imageListView);
     addDockWidget(Qt::LeftDockWidgetArea, dock);
     viewMenu->addAction(dock->toggleViewAction());
 
-    // create tab dock widget with tools
+    // Create tab dock widget with tools
     dock = new QDockWidget(tr("Tools"), this);
     dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     toolsTabWidget = new QTabWidget(dock);
@@ -56,7 +56,11 @@ void QtMainWindow::createDockWindows() {
     addDockWidget(Qt::LeftDockWidgetArea, dock);
     viewMenu->addAction(dock->toggleViewAction());
 
-    // set up visualisation tool
+    // Set up info tool
+    infoWidget = new QtInfoWidget;
+    toolsTabWidget->addTab(infoWidget, tr("Info"));
+
+    // Set up visualisation tool
     irtkQtLookupTable::SetColorModeList();
     visualToolWidget = new QtToolWidget;
     visualToolWidget->setEnabled(false);
@@ -608,7 +612,7 @@ void QtMainWindow::updateOrigin(double x, double y, double z) {
     QFuture<void> threads[viewers.size()];
     int t_index = 0;
 
-    // calculate the new output images
+    // Calculate the new output images
     for (int i = 0; i < viewers.size(); i++) {
         viewer = viewers[i];
         viewerWidget = viewerWidgets[i];
@@ -625,7 +629,7 @@ void QtMainWindow::updateOrigin(double x, double y, double z) {
         threads[i].waitForFinished();
     }
 
-    // update the viewers with the new output images
+    // Update the viewers with the new output images
     for (int i = 0; i < viewers.size(); i++) {
         viewer = viewers[i];
         viewerWidget = viewerWidgets[i];
@@ -743,6 +747,9 @@ void QtMainWindow::listViewClicked(QModelIndex index) {
     else {
         visualToolWidget->setEnabled(false);
     }
+
+    infoWidget->setImage(imageObject->GetImage());
+    infoWidget->update();
 }
 
 void QtMainWindow::listViewShowContextMenu(const QPoint &pos) {
