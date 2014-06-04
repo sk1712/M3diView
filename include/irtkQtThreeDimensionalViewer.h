@@ -10,9 +10,6 @@ class irtkQtThreeDimensionalViewer : public irtkQtBaseViewer
 {
     Q_OBJECT
 
-    /// store previous slice info
-    int previousSlice[3];
-
     /// image output map
     map<int, irtkGreyImage **> _imageOutput;
 

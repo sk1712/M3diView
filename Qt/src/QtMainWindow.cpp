@@ -775,7 +775,7 @@ void QtMainWindow::moveImageUp() {
             viewers[i]->MoveImage(index, index-1);
         }
 
-        updateDrawables();
+        setUpViewerWidgets();
     }
 }
 
@@ -796,6 +796,6 @@ void QtMainWindow::moveImageDown() {
             viewers[i]->MoveImage(index, index+1);
         }
 
-        updateDrawables();
+        setUpViewerWidgets();
     }
 }

@@ -17,10 +17,16 @@ void irtkQtBaseViewer::AddToDisplayedImages(irtkQtImageObject *imageObject, int 
     if (_image.size() == 0) {
         SetTarget(newImage);
         InitializeOrigin();
+        InitializeDimensions();
         InitializeOrientation();
     }
     else if (index < _image.begin()->first) {
         SetTarget(newImage);
+        UpdateCurrentSlice();
+
+        InitializeDimensions();
+        InitializeOrientation();
+        CalculateOutputImages();
         /// check whether image dimensions agree
 //        if (!(_targetImage->GetImageAttributes() == newImage->GetImageAttributes())) {
 //            delete newImage;
@@ -37,14 +43,22 @@ void irtkQtBaseViewer::DeleteSingleImage(int index) {
     // when an image is deleted update the target image
     if (index < _image.begin()->first) {
         SetTarget(_image.begin()->second);
+        UpdateCurrentSlice();
+
+        InitializeDimensions();
         InitializeOrientation();
+        CalculateOutputImages();
     }
 }
 
 void irtkQtBaseViewer::MoveImage(int, int) {
     // always make first image in the map the target image
     SetTarget(_image.begin()->second);
-    InitializeOrientation();
+    UpdateCurrentSlice();
+
+    InitializeDimensions();
+    InitializeOrientation();    
+    CalculateOutputImages();
 }
 
 irtkImageAttributes irtkQtBaseViewer::InitializeAttributes() {
@@ -83,6 +97,10 @@ void irtkQtBaseViewer::InitializeOrigin() {
     // get original image origin
     _targetImage->GetOrigin(_originX, _originY, _originZ);
 
+    UpdateCurrentSlice();
+}
+
+void irtkQtBaseViewer::InitializeDimensions() {
     switch (_viewMode) {
     case VIEW_AXIAL :
         *sliceNum = _targetImage->GetZ();
@@ -103,8 +121,6 @@ void irtkQtBaseViewer::InitializeOrigin() {
         exit(1);
         break;
     }
-
-    UpdateCurrentSlice();
 }
 
 void irtkQtBaseViewer::InitializeOrientation() {

@@ -6,9 +6,6 @@ irtkQtThreeDimensionalViewer::irtkQtThreeDimensionalViewer() {
     _viewMode = VIEW_3D;
     currentSlice = new int[3];
     sliceNum = new int[3];
-
-    // initialize all previous slices to 0
-    for (int i = 0; i < 3; i++) previousSlice[i] = 0;
 }
 
 irtkQtThreeDimensionalViewer::~irtkQtThreeDimensionalViewer() {
@@ -91,23 +88,19 @@ void irtkQtThreeDimensionalViewer::CalculateOutputImages() {
     int width[3] = {sliceNum[0], sliceNum[1], sliceNum[0]};
     // height of output image
     int height[3] = {sliceNum[1], sliceNum[2], sliceNum[2]};
-    // index of corresponding slice for each view
-    int index[3] = {2, 0, 1};
 
     // store a backup of current origin
     double originX_backup = _originX, originY_backup = _originY, originZ_backup = _originZ;
 
     for (int i = 0; i < 3; i++) {
-        if (previousSlice[index[i]] != currentSlice[index[i]]) {
-            _width = width[i]; _height = height[i];
-            SetOrientation(i);
-            ChangeViewSlice(i);
-            attr[i] = InitializeAttributes();
+        _width = width[i]; _height = height[i];
+        SetOrientation(i);
+        ChangeViewSlice(i);
+        attr[i] = InitializeAttributes();
 
-            map<int, irtkGreyImage **>::iterator image_it;
-            for (image_it = _imageOutput.begin(); image_it != _imageOutput.end(); image_it++) {
-                image_it->second[i]->Initialize(attr[i]);
-            }
+        map<int, irtkGreyImage **>::iterator image_it;
+        for (image_it = _imageOutput.begin(); image_it != _imageOutput.end(); image_it++) {
+            image_it->second[i]->Initialize(attr[i]);
         }
     }
 
@@ -239,8 +232,6 @@ void irtkQtThreeDimensionalViewer::UpdateCurrentSlice() {
 
     _targetImage->WorldToImage(x, y, z);
 
-    for (int i = 0; i < 3; i++) previousSlice[i] = currentSlice[i];
-
     currentSlice[0] = (int) round(x);
     currentSlice[1] = (int) round(y);
     currentSlice[2] = (int) round(z);
@@ -266,8 +257,6 @@ void irtkQtThreeDimensionalViewer::AddToMaps(irtkImage* newImage, int index) {
         transformation->PutSourcePaddingValue(0);
         _transformFilter[index][dim] = transformation;
     }
-
-    //for (int i = 0; i < 3; i++) previousSlice[i] = 0;
 }
 
 void irtkQtThreeDimensionalViewer::SetOrientation(int view) {

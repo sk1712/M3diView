@@ -135,8 +135,11 @@ protected:
     /// initialize the parameters of the output image
     irtkImageAttributes InitializeAttributes();
 
-    /// initialize image origin and orientation
+    /// initialize image origin
     void InitializeOrigin();
+
+    /// initialize image dimensions
+    void InitializeDimensions();
 
     /// initialize image orientation
     void InitializeOrientation();
@@ -169,7 +172,6 @@ signals:
 
     /// signal emitted when image origin changes
     void OriginChanged(double originX, double originY, double originZ);
-
 };
 
 
