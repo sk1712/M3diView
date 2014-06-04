@@ -605,7 +605,7 @@ void QtMainWindow::updateOrigin(double x, double y, double z) {
         index++;
     bool isSenderLinked = viewerWidgets[index]->isLinked();
 
-    QFuture<void> threads[viewers.size()];
+    QFuture<void> *threads = new QFuture<void>[viewers.size()];
     int t_index = 0;
 
     // calculate the new output images
@@ -639,6 +639,8 @@ void QtMainWindow::updateOrigin(double x, double y, double z) {
     }
 
     connectViewerSignals();
+
+    delete [] threads;
 }
 
 void QtMainWindow::minDisplayValueChanged(double value) {
