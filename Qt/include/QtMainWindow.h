@@ -7,6 +7,7 @@
 #include <Qt2dViewerWidget.h>
 #include <Qt3dViewerWidget.h>
 #include <QtToolWidget.h>
+#include <QtInfoWidget.h>
 
 #include <QMainWindow>
 #include <QListView>
@@ -53,6 +54,9 @@ class QtMainWindow : public QMainWindow
 
     /// visualisation tool widget
     QtToolWidget *visualToolWidget;
+
+    /// Image info widget
+    QtInfoWidget *infoWidget;
 
     /// list of viewer widgets
     QList<QtViewerWidget*> viewerWidgets;
