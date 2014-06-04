@@ -5,6 +5,7 @@
 
 #include <QLineEdit>
 #include <QTextEdit>
+#include <QTableWidget>
 
 
 class QtInfoWidget : public QWidget
@@ -17,9 +18,9 @@ class QtInfoWidget : public QWidget
 
     QLineEdit *xAxisEdit, *yAxisEdit, *zAxisEdit;
 
-    QTextEdit *imageToWorldMatrix;
+    QTableWidget *imageToWorldMatrix;
 
-    QTextEdit *worldToImageMatrix;
+    QTableWidget *worldToImageMatrix;
 
 public:
 

@@ -1,5 +1,6 @@
 #include <QtInfoWidget.h>
 
+#include <QHeaderView>
 #include <QFormLayout>
 #include <QVBoxLayout>
 #include <QLabel>
@@ -15,6 +16,7 @@ QtInfoWidget::QtInfoWidget(QWidget *parent) : QWidget(parent) {
 
     QVBoxLayout *verticalLayout = new QVBoxLayout;
     QFormLayout *formLayout = new QFormLayout;
+    formLayout->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
 
     imageSizeEdit = new QLineEdit;
     imageSizeEdit->setReadOnly(true);
@@ -58,16 +60,18 @@ QtInfoWidget::QtInfoWidget(QWidget *parent) : QWidget(parent) {
 
     QLabel *imagetoWorldLabel = new QLabel("Image to world matrix");
     verticalLayout->addWidget(imagetoWorldLabel);
-    imageToWorldMatrix = new QTextEdit;
-    imageToWorldMatrix->setReadOnly(true);
+    imageToWorldMatrix = new QTableWidget;
     imageToWorldMatrix->setFont(font);
+    imageToWorldMatrix->verticalHeader()->hide();
+    imageToWorldMatrix->horizontalHeader()->hide();
     verticalLayout->addWidget(imageToWorldMatrix);
 
     QLabel *worldToImageLabel = new QLabel("World to image matrix");
     verticalLayout->addWidget(worldToImageLabel);
-    worldToImageMatrix = new QTextEdit;
-    worldToImageMatrix->setReadOnly(true);
+    worldToImageMatrix = new QTableWidget;
     worldToImageMatrix->setFont(font);
+    worldToImageMatrix->verticalHeader()->hide();
+    worldToImageMatrix->horizontalHeader()->hide();
     verticalLayout->addWidget(worldToImageMatrix);
 
     setLayout(verticalLayout);
@@ -92,8 +96,8 @@ void QtInfoWidget::update() {
         yAxisEdit->setText("");
         zAxisEdit->setText("");
 
-        imageToWorldMatrix->setText("");
-        worldToImageMatrix->setText("");
+        imageToWorldMatrix->clear();
+        worldToImageMatrix->clear();
     }
 }
 
@@ -164,45 +168,43 @@ void QtInfoWidget::updateImageInfo() {
 }
 
 void QtInfoWidget::updateImageToWorldMatrix() {
-    QString output;
-    QTextStream textStream(&output);
-
-    textStream.setIntegerBase(10);
-    textStream.setRealNumberNotation(QTextStream::FixedNotation);
-    textStream.setRealNumberPrecision(4);
-    textStream.setFieldAlignment(QTextStream::AlignRight);
-    textStream.setFieldWidth(12);
-
     irtkMatrix matrix = _image->GetImageToWorldMatrix();
+
+    imageToWorldMatrix->setRowCount(matrix.Rows());
+    imageToWorldMatrix->setColumnCount(matrix.Cols());
 
     for (int i = 0; i < matrix.Rows(); i++) {
         for (int j = 0; j < matrix.Cols(); j++) {
-            textStream << matrix.Get(i, j);
+            QTableWidgetItem *newItem =
+                    new QTableWidgetItem(tr("%1").arg(
+                                             QString::number(matrix.Get(i, j), 'f', 4)));
+            newItem->setTextAlignment(Qt::AlignHCenter);
+            newItem->setFlags(newItem->flags() & ~Qt::ItemIsEditable);
+            imageToWorldMatrix->setItem(i, j, newItem);
         }
-        textStream << endl;
     }
 
-    imageToWorldMatrix->setText(output);
+    imageToWorldMatrix->resizeColumnsToContents();
+    imageToWorldMatrix->resizeRowsToContents();
 }
 
 void QtInfoWidget::updateWorldToImageMatrix() {
-    QString output;
-    QTextStream textStream(&output);
-
-    textStream.setIntegerBase(10);
-    textStream.setRealNumberNotation(QTextStream::FixedNotation);
-    textStream.setRealNumberPrecision(4);
-    textStream.setFieldAlignment(QTextStream::AlignRight);
-    textStream.setFieldWidth(12);
-
     irtkMatrix matrix = _image->GetWorldToImageMatrix();
+
+    worldToImageMatrix->setRowCount(matrix.Rows());
+    worldToImageMatrix->setColumnCount(matrix.Cols());
 
     for (int i = 0; i < matrix.Rows(); i++) {
         for (int j = 0; j < matrix.Cols(); j++) {
-            textStream << matrix.Get(i, j);
+            QTableWidgetItem *newItem =
+                    new QTableWidgetItem(tr("%1").arg(
+                                             QString::number(matrix.Get(i, j), 'f', 4)));
+            newItem->setTextAlignment(Qt::AlignHCenter);
+            newItem->setFlags(newItem->flags() & ~Qt::ItemIsEditable);
+            worldToImageMatrix->setItem(i, j, newItem);
         }
-        textStream << endl;
     }
 
-    worldToImageMatrix->setText(output);
+    worldToImageMatrix->resizeColumnsToContents();
+    worldToImageMatrix->resizeRowsToContents();
 }
