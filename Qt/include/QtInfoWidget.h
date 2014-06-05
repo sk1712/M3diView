@@ -27,6 +27,8 @@ public:
     /// Class constructor
     QtInfoWidget(QWidget * parent = 0);
 
+    QSize sizeHint() const;
+
     void setImage(irtkImage *image);
 
     void update();

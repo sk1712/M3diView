@@ -74,7 +74,15 @@ QtInfoWidget::QtInfoWidget(QWidget *parent) : QWidget(parent) {
     worldToImageMatrix->horizontalHeader()->hide();
     verticalLayout->addWidget(worldToImageMatrix);
 
+    QSpacerItem* spacer = new QSpacerItem( 20, 20, QSizePolicy::Minimum,
+    QSizePolicy::Expanding );
+    verticalLayout->addItem( spacer );
+
     setLayout(verticalLayout);
+}
+
+QSize QtInfoWidget::sizeHint() const {
+    return QSize(350, 500);
 }
 
 void QtInfoWidget::setImage(irtkImage *image) {
@@ -113,27 +121,26 @@ void QtInfoWidget::updateImageInfo() {
     textStream.setIntegerBase(10);
     textStream.setFieldAlignment(QTextStream::AlignRight);
     textStream.setFieldWidth(4);
-    textStream << attr._x << attr._y << attr._z << attr._t;
+    textStream << attr._x << " " << attr._y << " " << attr._z;// << " " << attr._t;
     imageSizeEdit->setText(imageSize);
 
     // Print voxel dimensions
     textStream.setString(&voxelSize);
     textStream.setIntegerBase(10);
     textStream.setRealNumberNotation(QTextStream::FixedNotation);
-    textStream.setRealNumberPrecision(2);
+    textStream.setRealNumberPrecision(4);
     textStream.setFieldAlignment(QTextStream::AlignRight);
-    textStream.setFieldWidth(5);
-    textStream << attr._dx <<attr._dy << attr._dz << attr._dt;
+    textStream << attr._dx << " " << attr._dy << " " << attr._dz;// << " " << attr._dt;
     voxelSizeEdit->setText(voxelSize);
 
     // Print origin
     textStream.setString(&imageOrigin);
     textStream.setIntegerBase(10);
     textStream.setRealNumberNotation(QTextStream::FixedNotation);
-    textStream.setRealNumberPrecision(2);
+    textStream.setRealNumberPrecision(4);
     textStream.setFieldAlignment(QTextStream::AlignRight);
-    textStream.setFieldWidth(8);
-    textStream << attr._xorigin << attr._yorigin << attr._zorigin <<attr._torigin;
+    textStream << attr._xorigin << " " << attr._yorigin << " "
+               << attr._zorigin;// << " " << attr._torigin;
     imageOriginEdit->setText(imageOrigin);
 
     // Print x-axis
@@ -142,8 +149,7 @@ void QtInfoWidget::updateImageInfo() {
     textStream.setRealNumberNotation(QTextStream::FixedNotation);
     textStream.setRealNumberPrecision(2);
     textStream.setFieldAlignment(QTextStream::AlignRight);
-    textStream.setFieldWidth(6);
-    textStream << attr._xaxis[0] << attr._xaxis[1] << attr._xaxis[2];
+    textStream << attr._xaxis[0] << " " << attr._xaxis[1] << " " << attr._xaxis[2];
     xAxisEdit->setText(xAxis);
 
     // Print y-axis
@@ -152,8 +158,7 @@ void QtInfoWidget::updateImageInfo() {
     textStream.setRealNumberNotation(QTextStream::FixedNotation);
     textStream.setRealNumberPrecision(2);
     textStream.setFieldAlignment(QTextStream::AlignRight);
-    textStream.setFieldWidth(6);
-    textStream << attr._yaxis[0] << attr._yaxis[1] << attr._yaxis[2];
+    textStream << attr._yaxis[0] << " " << attr._yaxis[1] << " " << attr._yaxis[2];
     yAxisEdit->setText(yAxis);
 
     // Print z-axis
@@ -162,8 +167,7 @@ void QtInfoWidget::updateImageInfo() {
     textStream.setRealNumberNotation(QTextStream::FixedNotation);
     textStream.setRealNumberPrecision(2);
     textStream.setFieldAlignment(QTextStream::AlignRight);
-    textStream.setFieldWidth(6);
-    textStream << attr._zaxis[0] << attr._zaxis[1] << attr._zaxis[2];
+    textStream << attr._zaxis[0] << " " << attr._zaxis[1] << " " << attr._zaxis[2];
     zAxisEdit->setText(zAxis);
 }
 

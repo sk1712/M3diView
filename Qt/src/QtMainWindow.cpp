@@ -379,7 +379,7 @@ void QtMainWindow::displaySingleImage(int index) {
 
     QList<irtkQtImageObject*> & imageList = irtkQtViewer::Instance()->GetImageList();
 
-    // disconnect the viewers' signals
+    // Disconnect the viewers' signals
     disconnectViewerSignals();
 
     for (int i = 0; i < viewerWidgets.size(); i++) {
@@ -395,7 +395,7 @@ void QtMainWindow::displaySingleImage(int index) {
         viewer->CalculateCurrentOutput();
     }
 
-    // re-register the viewers' signals
+    // Re-register the viewers' signals
     connectViewerSignals();
 }
 
@@ -410,14 +410,18 @@ void QtMainWindow::deleteSingleImage(int index) {
 
     // re-register the viewers' signals
     connectViewerSignals();
+
+    infoWidget->setImage(NULL);
+    infoWidget->update();
+    visualToolWidget->setEnabled(false);
 }
 
 void QtMainWindow::setUpViewerWidgets() {
-    // update the viewers
+    // Update the viewers
     QtViewerWidget *viewerWidget;
     irtkQtBaseViewer *viewer;
 
-    // disconnect the viewers' signals
+    // Disconnect the viewers' signals
     disconnectViewerSignals();
 
     for (int i = 0; i < viewers.size(); i++) {
@@ -430,7 +434,7 @@ void QtMainWindow::setUpViewerWidgets() {
                     QVector<QRgb**>::fromStdVector(viewer->GetDrawable()));
     }
 
-    // re-register the viewers' signals
+    // Re-register the viewers' signals
     connectViewerSignals();
 }
 

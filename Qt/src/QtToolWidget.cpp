@@ -8,12 +8,15 @@
 
 QtToolWidget::QtToolWidget(QWidget * parent) : QWidget(parent) {
     minImageSlider = new QSlider(Qt::Horizontal);
+    minImageSlider->setTracking(false);
     minImageLabel = new QLabel;
 
     maxImageSlider = new QSlider(Qt::Horizontal);
+    maxImageSlider->setTracking(false);
     maxImageLabel = new QLabel;
 
     opacitySlider = new QSlider(Qt::Horizontal);
+    opacitySlider->setTracking(false);
     opacityLabel = new QLabel;
 
     colormapCombo = new QComboBox;
