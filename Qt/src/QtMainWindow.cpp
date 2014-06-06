@@ -497,9 +497,16 @@ void QtMainWindow::deleteThisImage() {
     imageListView->setModel(imageModel);
 }
 
+void CalculateOutputImage(irtkQtBaseViewer* viewer) {
+    viewer->CalculateOutputImages();
+}
+
 void QtMainWindow::zoomIn() {
     Qt2dViewerWidget *viewerWidget;
     irtkQtBaseViewer *viewer;
+
+    QFuture<void> *threads = new QFuture<void>[viewers.size()];
+    int t_index = 0;
 
     for (int i = 0; i < viewers.size(); i++) {
         viewerWidget = dynamic_cast<Qt2dViewerWidget*>(viewerWidgets[i]);
@@ -508,17 +515,37 @@ void QtMainWindow::zoomIn() {
         if (viewerWidget != 0) {
             if (viewerWidget->getGlWidget()->isEnabled()) {
                 viewer->IncreaseResolution();
-                viewer->CalculateOutputImages();
+                threads[t_index] = QtConcurrent::run(CalculateOutputImage, viewer);
+                t_index++;
+            }
+        }
+    }
+
+    for (int i = 0; i < t_index; i++) {
+        threads[i].waitForFinished();
+    }
+
+    for (int i = 0; i < viewers.size(); i++) {
+        viewerWidget = dynamic_cast<Qt2dViewerWidget*>(viewerWidgets[i]);
+        viewer = viewers[i];
+
+        if (viewerWidget != 0) {
+            if (viewerWidget->getGlWidget()->isEnabled()) {
                 viewerWidget->getGlWidget()->updateDrawable(
                             QVector<QRgb**>::fromStdVector(viewer->GetDrawable()));
             }
         }
     }
+
+    delete [] threads;
 }
 
 void QtMainWindow::zoomOut() {
     Qt2dViewerWidget *viewerWidget;
     irtkQtBaseViewer *viewer;
+
+    QFuture<void> *threads = new QFuture<void>[viewers.size()];
+    int t_index = 0;
 
     for (int i = 0; i < viewers.size(); i++) {
         viewerWidget = dynamic_cast<Qt2dViewerWidget*>(viewerWidgets[i]);
@@ -527,12 +554,29 @@ void QtMainWindow::zoomOut() {
         if (viewerWidget != 0) {
             if (viewerWidget->getGlWidget()->isEnabled()) {
                 viewer->DecreaseResolution();
-                viewer->CalculateOutputImages();
+                threads[t_index] = QtConcurrent::run(CalculateOutputImage, viewer);
+                t_index++;
+            }
+        }
+    }
+
+    for (int i = 0; i < t_index; i++) {
+        threads[i].waitForFinished();
+    }
+
+    for (int i = 0; i < viewers.size(); i++) {
+        viewerWidget = dynamic_cast<Qt2dViewerWidget*>(viewerWidgets[i]);
+        viewer = viewers[i];
+
+        if (viewerWidget != 0) {
+            if (viewerWidget->getGlWidget()->isEnabled()) {
                 viewerWidget->getGlWidget()->updateDrawable(
                             QVector<QRgb**>::fromStdVector(viewer->GetDrawable()));
             }
         }
     }
+
+    delete [] threads;
 }
 
 void QtMainWindow::showOnlyThisWidget() {
@@ -595,10 +639,6 @@ void QtMainWindow::create3dView() {
 void QtMainWindow::clearViews() {
     clearLists();
     singleViewerInScreen = false;
-}
-
-void CalculateOutputImage(irtkQtBaseViewer* viewer) {
-    viewer->CalculateOutputImages();
 }
 
 void QtMainWindow::updateOrigin(double x, double y, double z) {
