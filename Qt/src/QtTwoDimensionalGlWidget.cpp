@@ -1,5 +1,5 @@
 #include <QtTwoDimensionalGlWidget.h>
-
+#include <QDebug>
 
 QtTwoDimensionalGlWidget::QtTwoDimensionalGlWidget(QWidget *parent)
     :QtGlWidget(parent) {
@@ -11,7 +11,9 @@ QtTwoDimensionalGlWidget::~QtTwoDimensionalGlWidget() {
 }
 
 void QtTwoDimensionalGlWidget::updateDrawable(QVector<QRgb**> drawable) {
-    QtGlWidget::updateDrawable(drawable);
+    //QtGlWidget::updateDrawable(drawable);
+    deleteDrawable();
+    _drawable = drawable;
     updateGL();
 }
 
@@ -90,8 +92,11 @@ void QtTwoDimensionalGlWidget::drawLabels() {
 void QtTwoDimensionalGlWidget::deleteDrawable() {
     QVector<QRgb**>::iterator it;
 
-    for (it = _drawable.begin(); it != _drawable.end(); it++)
-        delete [] (it[0]);
+    for (it = _drawable.begin(); it != _drawable.end(); it++) {
+        delete [] (*it[0]);
+        delete it[0];
+    }
+
 
     _drawable.clear();
 }
