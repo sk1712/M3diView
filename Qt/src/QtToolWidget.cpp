@@ -8,11 +8,11 @@
 
 QtToolWidget::QtToolWidget(QWidget * parent) : QWidget(parent) {
     minImageSlider = new QSlider(Qt::Horizontal);
-    minImageSlider->setTracking(false);
+    //minImageSlider->setTracking(false);
     minImageLabel = new QLabel;
 
     maxImageSlider = new QSlider(Qt::Horizontal);
-    maxImageSlider->setTracking(false);
+    //maxImageSlider->setTracking(false);
     maxImageLabel = new QLabel;
 
     opacitySlider = new QSlider(Qt::Horizontal);
@@ -43,10 +43,12 @@ void QtToolWidget::setMinimumImageValue(double minImage) {
 
 void QtToolWidget::setDisplayMin(double min) {
     minImageSlider->setValue(min * 10);
+    minDisplay = min * 10;
 }
 
 void QtToolWidget::setDisplayMax(double max) {
     maxImageSlider->setValue(max * 10);
+    maxDisplay = max * 10;
 }
 
 void QtToolWidget::setOpacity(int opacity) {
@@ -107,12 +109,16 @@ void QtToolWidget::connectSignals() {
     connect(opacitySlider, SIGNAL(valueChanged(int)), this, SLOT(opacityValueChanged(int)));
 }
 
+void QtToolWidget::disconnectSignals() {
+    disconnect(minImageSlider, SIGNAL(valueChanged(int)), this, SLOT(minValueChanged(int)));
+    disconnect(maxImageSlider, SIGNAL(valueChanged(int)), this, SLOT(maxValueChanged(int)));
+    disconnect(colormapCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(colormapIndexChanged(int)));
+    disconnect(opacitySlider, SIGNAL(valueChanged(int)), this, SLOT(opacityValueChanged(int)));
+}
+
 void QtToolWidget::fixWidgetSizes() {
-    minImageSlider->setFixedWidth(120);
     minImageLabel->setFixedWidth(60);
-    maxImageSlider->setFixedWidth(120);
     maxImageLabel->setFixedWidth(60);
-    opacitySlider->setFixedWidth(120);
     opacityLabel->setFixedWidth(60);
 }
 
@@ -124,15 +130,40 @@ void QtToolWidget::initializeValues() {
 }
 
 void QtToolWidget::minValueChanged(int value) {
-    minImageLabel->setText(QString::number(value/10.0));
-    maxImageSlider->setMinimum(value);
-    emit minChanged(value/10.0);
+    int minValue = value;
+
+    disconnectSignals();
+
+    if (value > maxDisplay) {
+        minValue = maxDisplay;
+        minImageSlider->setSliderPosition(maxDisplay);
+    }
+
+    minDisplay = minValue;
+    minImageLabel->setText(QString::number(minValue/10.0));
+
+    connectSignals();
+
+    emit minChanged(minValue/10.0);
+
 }
 
 void QtToolWidget::maxValueChanged(int value) {
-    maxImageLabel->setText(QString::number(value/10.0));
-    minImageSlider->setMaximum(value);
-    emit maxChanged(value/10.0);
+    int maxValue = value;
+
+    disconnectSignals();
+
+    if (value < minDisplay) {
+        maxValue = minDisplay;
+        maxImageSlider->setSliderPosition(minDisplay);
+    }
+
+    maxDisplay = maxValue;
+    maxImageLabel->setText(QString::number(maxValue/10.0));
+
+    connectSignals();
+
+    emit maxChanged(maxValue/10.0);
 }
 
 void QtToolWidget::colormapIndexChanged(int index) {

@@ -25,6 +25,9 @@ class QtToolWidget : public QWidget
     /// slider for opacity value
     QSlider* opacitySlider;
 
+    /// minimum, maximum display values
+    int minDisplay, maxDisplay;
+
 public:
 
     /// class constructor
@@ -58,6 +61,9 @@ private:
 
     /// register observers
     void connectSignals();
+
+    /// unregister observers
+    void disconnectSignals();
 
     /// set widgets' size
     void fixWidgetSizes();
