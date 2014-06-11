@@ -135,6 +135,9 @@ protected:
     /// initialize the parameters of the output image
     irtkImageAttributes InitializeAttributes();
 
+    /// convert image to the desired coordinate system
+    void ConvertImageToTarget(irtkImage *originalImage);
+
     /// initialize image origin
     void InitializeOrigin();
 
