@@ -478,6 +478,11 @@ void QtMainWindow::deleteThisImage() {
 
     if (visible) {
         numDisplayedImages--;
+
+        if (numDisplayedImages == 0) {
+            disableViewerWidgets();
+        }
+
         deleteSingleImage(currentImageIndex);
         setUpViewerWidgets();
     }
