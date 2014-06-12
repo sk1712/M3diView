@@ -2,6 +2,7 @@
 #define IRTKQTIMAGEOBJECT_H
 
 #include <irtkImage.h>
+#include <irtkTransformation.h>
 
 #include <irtkQtLookupTable.h>
 
@@ -87,6 +88,9 @@ public:
 
     /// get colormap for the corresponding image
     int GetColormap() const;
+
+    /// convert image to the desired coordinate system
+    void ConvertImageToTarget();
 };
 
 

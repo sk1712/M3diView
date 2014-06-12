@@ -1,7 +1,6 @@
 #ifndef IRTKQTBASEVIEWER_H
 #define IRTKQTBASEVIEWER_H
 
-#include <irtkTransformation.h>
 #include <irtkQtImageObject.h>
 
 #include <qtconcurrentrun.h>
@@ -134,9 +133,6 @@ protected:
 
     /// initialize the parameters of the output image
     irtkImageAttributes InitializeAttributes();
-
-    /// convert image to the desired coordinate system
-    void ConvertImageToTarget(irtkImage *originalImage);
 
     /// initialize image origin
     void InitializeOrigin();
