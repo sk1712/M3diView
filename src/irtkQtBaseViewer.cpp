@@ -13,7 +13,7 @@ void irtkQtBaseViewer::AddToDisplayedImages(irtkQtImageObject *imageObject, int 
     irtkImage* newImage = imageObject->GetImage();
 
     currentIndex = index;
-    // if first image to be displayed make it target
+    // If first image to be displayed make it target
     if (_image.size() == 0) {
         SetTarget(newImage);
         InitializeOrigin();
@@ -34,13 +34,13 @@ void irtkQtBaseViewer::AddToDisplayedImages(irtkQtImageObject *imageObject, int 
 //        }
     }
 
-    // if everything is fine add to maps
+    // If everything is fine add to maps
     AddToMaps(newImage, index);
     _lookupTable.insert(pair<int, irtkQtLookupTable*> ( index, imageObject->GetLookupTable() ));
 }
 
 void irtkQtBaseViewer::DeleteSingleImage(int index) {
-    // when an image is deleted update the target image
+    // When an image is deleted update the target image
     if (index < _image.begin()->first) {
         SetTarget(_image.begin()->second);
         UpdateCurrentSlice();
@@ -52,7 +52,7 @@ void irtkQtBaseViewer::DeleteSingleImage(int index) {
 }
 
 void irtkQtBaseViewer::MoveImage(int, int) {
-    // always make first image in the map the target image
+    // Always make first image in the map the target image
     if (_targetImage != _image.begin()->second) {
 
         SetTarget(_image.begin()->second);
@@ -67,17 +67,17 @@ void irtkQtBaseViewer::MoveImage(int, int) {
 irtkImageAttributes irtkQtBaseViewer::InitializeAttributes() {
     irtkImageAttributes attr;
 
-    // image size
+    // Image size
     attr._x = _width;
     attr._y = _height;
     attr._z = 1;
 
-    // image origin in world coordinates
+    // Image origin in world coordinates
     attr._xorigin = _originX;
     attr._yorigin = _originY;
     attr._zorigin = _originZ;
 
-    // voxel size
+    // Voxel size
     attr._dx = _dx;
     attr._dy = _dy;
     attr._dz = _dz;
@@ -97,7 +97,7 @@ irtkImageAttributes irtkQtBaseViewer::InitializeAttributes() {
 }
 
 void irtkQtBaseViewer::InitializeOrigin() {
-    // get original image origin
+    // Get original image origin
     _targetImage->GetOrigin(_originX, _originY, _originZ);
 
     UpdateCurrentSlice();
@@ -129,7 +129,7 @@ void irtkQtBaseViewer::InitializeDimensions() {
 void irtkQtBaseViewer::InitializeOrientation() {
     double x[3], y[3], z[3];
 
-    // get original image orientation
+    // Get original image orientation
     _targetImage->GetOrientation(x, y, z);
 
     switch (_viewMode) {

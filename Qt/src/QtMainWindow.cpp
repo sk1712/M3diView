@@ -30,6 +30,10 @@ QtMainWindow::QtMainWindow() {
     numDisplayedImages = 0;
     currentImageIndex = -1;
     imageModel = NULL;
+
+    // By default add orthogonal and 3D view
+    createOrthogonalView();
+    create3dView();
 }
 
 QtMainWindow::~QtMainWindow() {
@@ -140,7 +144,7 @@ void QtMainWindow::createImageMenuActions() {
 }
 
 void QtMainWindow::connectWindowSignals() {
-    // list view signals
+    // List view signals
     connect(imageListView, SIGNAL(doubleClicked(QModelIndex)),
             this, SLOT(listViewDoubleClicked(QModelIndex)));
     connect(imageListView, SIGNAL(clicked(QModelIndex)),
@@ -148,16 +152,16 @@ void QtMainWindow::connectWindowSignals() {
     connect(imageListView, SIGNAL(customContextMenuRequested(QPoint)),
             this, SLOT(listViewShowContextMenu(QPoint)));
 
-    // image menu signals
+    // Image menu signals
     connect(deleteImageAction, SIGNAL(triggered()), this, SLOT(deleteThisImage()));
 
-    // toolbar signals
+    // Toolbar signals
     connect(zoomInAction, SIGNAL(triggered()), this, SLOT(zoomIn()));
     connect(zoomOutAction, SIGNAL(triggered()), this, SLOT(zoomOut()));
     connect(moveUpAction, SIGNAL(triggered()), this, SLOT(moveImageUp()));
     connect(moveDownAction, SIGNAL(triggered()), this, SLOT(moveImageDown()));
 
-    // menu signals
+    // Menu signals
     connect(openTargetAction, SIGNAL(triggered()), this, SLOT(openImage()));
     connect(viewAxialAction, SIGNAL(triggered()), this, SLOT(createAxialView()));
     connect(viewCoronalAction, SIGNAL(triggered()), this, SLOT(createCoronalView()));
@@ -187,7 +191,7 @@ void QtMainWindow::disconnectViewerSignals() {
         disconnect(viewer, SIGNAL(OriginChanged(double, double, double)),
                    this, SLOT(updateOrigin(double, double, double)));
 
-        // the following do smth only for the 2D viewer
+        // The following do smth only for the 2D viewer
         disconnect(viewerWidget->getGlWidget(), SIGNAL(resized(int, int)),
                    viewer, SLOT(ResizeImage(int, int)));
         disconnect(viewer, SIGNAL(ImageResized(QVector<QRgb**>)),
@@ -203,7 +207,7 @@ void QtMainWindow::connectViewerSignals() {
     irtkQtBaseViewer *viewer;
 
     for (int i = 0; i < viewers.size(); i++) {
-        // update drawable when origin is changed
+        // Update drawable when origin is changed
         viewerWidget = viewerWidgets[i];
         viewer = viewers[i];
 
@@ -212,7 +216,7 @@ void QtMainWindow::connectViewerSignals() {
         connect(viewer, SIGNAL(OriginChanged(double, double, double)),
                    this, SLOT(updateOrigin(double, double, double)));
 
-        // the following do smth only for the 2D viewer
+        // The following do smth only for the 2D viewer
         connect(viewerWidget->getGlWidget(), SIGNAL(resized(int, int)),
                    viewer, SLOT(ResizeImage(int, int)));
         connect(viewer, SIGNAL(ImageResized(QVector<QRgb**>)),
@@ -239,13 +243,13 @@ Qt2dViewerWidget* QtMainWindow::createTwoDimensionalView(irtkQtBaseViewer::irtkV
     qtViewer = new Qt2dViewerWidget();
     viewerWidgets.push_back(qtViewer);
 
-    // define the labels that appear on the viewer widget for orientation information
+    // Define the labels that appear on the viewer widget for orientation information
     char top, bottom, left, right;
     viewer->GetLabels(top, bottom, left, right);
     qtViewer->setLabels(top, bottom, left, right);
     qtViewer->setObjectName(QString::fromStdString(viewer->GetObjectName()));
 
-    // register signals to expand or delete the viewer
+    // Register signals to expand or delete the viewer
     connect(qtViewer, SIGNAL(windowExpanded()), this, SLOT(showOnlyThisWidget()));
     connect(qtViewer, SIGNAL(windowDeleted()), this, SLOT(deleteThisWidget()));
 
@@ -263,7 +267,7 @@ Qt3dViewerWidget* QtMainWindow::createThreeDimensionalView() {
     qtViewer = new Qt3dViewerWidget();
     viewerWidgets.push_back(qtViewer);
 
-    // register signals to expand or delete the viewer
+    // Register signals to expand or delete the viewer
     connect(qtViewer, SIGNAL(windowExpanded()), this, SLOT(showOnlyThisWidget()));
     connect(qtViewer, SIGNAL(windowDeleted()), this, SLOT(deleteThisWidget()));
 
@@ -273,7 +277,7 @@ Qt3dViewerWidget* QtMainWindow::createThreeDimensionalView() {
 }
 
 void QtMainWindow::clearLists() {
-    // use qDeleteAll macro to delete all elements of the lists
+    // Use qDeleteAll macro to delete all elements of the lists
     qDeleteAll(viewers);
     viewers.clear();
 
@@ -286,7 +290,7 @@ bool QtMainWindow::imageInList(const QString fileName) const {
     QList<irtkQtImageObject*>::const_iterator it;
     for (it = list.constBegin(); it != list.constEnd(); it++) {
         if ((*it)->GetPath() == fileName)
-            // image has already been loaded
+            // Image has already been loaded
             return true;
     }
     return false;
@@ -295,7 +299,7 @@ bool QtMainWindow::imageInList(const QString fileName) const {
 void QtMainWindow::addToViewWidget(QWidget *widget) {
     QGridLayout *layout = dynamic_cast<QGridLayout*>(mainViewWidget->layout());
 
-    // add a new widget to the grid layout (every row fits 2 widgets)
+    // Add a new widget to the grid layout (every row fits 2 widgets)
     if ( viewerWidgets.size() % 2 == 0 )
         layout->addWidget(widget, layout->rowCount()-1, 1);
     else
@@ -308,7 +312,7 @@ void QtMainWindow::addToViewWidget(QWidget *widget) {
 void QtMainWindow::addToViewWidget(QWidget *widget, int index) {
     QGridLayout *layout = dynamic_cast<QGridLayout*>(mainViewWidget->layout());
 
-    // add widget with specific index to the grid layout
+    // Add widget with specific index to the grid layout
     if ( index % 2 == 0 )
         layout->addWidget(widget, layout->rowCount(), 0);
     else
@@ -337,7 +341,7 @@ void QtMainWindow::openImage() {
 
     irtkQtViewer* instance = irtkQtViewer::Instance();
 
-    // create an irtkImageObject for each new image
+    // Create an irtkImageObject for each new image
     QStringList::const_iterator it;
     for (it = fileNames.constBegin(); it != fileNames.constEnd(); it++) {
         if ( !imageInList(*it) ) {
@@ -345,7 +349,7 @@ void QtMainWindow::openImage() {
         }
     }
 
-    // update the image model
+    // Update the image model
     delete imageModel;
     imageModel = new irtkImageListModel(instance->GetImageList());
     imageListView->setModel(imageModel);
@@ -400,7 +404,7 @@ void QtMainWindow::displaySingleImage(int index) {
 }
 
 void QtMainWindow::deleteSingleImage(int index) {
-    // re-register the viewers' signals
+    // Unregister the viewers' signals
     disconnectViewerSignals();
 
     QList<irtkQtBaseViewer*>::iterator it;
@@ -408,7 +412,7 @@ void QtMainWindow::deleteSingleImage(int index) {
         (*it)->DeleteSingleImage(index);
     }
 
-    // re-register the viewers' signals
+    // Re-register the viewers' signals
     connectViewerSignals();
 
     infoWidget->setImage(NULL);
@@ -449,26 +453,26 @@ void QtMainWindow::viewImage() {
     QtViewerWidget *viewerWidget = viewerWidgets[viewerWidgets.size()-1];
     irtkQtBaseViewer *viewer = viewers[viewers.size()-1];
 
-    // disconnect the viewers' signals
+    // Disconnect the viewers' signals
     disconnectViewerSignals();
 
-    // load the images to be displayed and add them to the viewers
+    // Load the images to be displayed and add them to the viewers
     if ( !setDisplayedImages() ) {
         return;
     }
 
-    // initialize the transformations and calculate output images
+    // Initialize the transformations and calculate output images
     viewer->InitializeTransformation();
     viewer->CalculateOutputImages();
 
-    // set up the viewer widgets
+    // Set up the viewer widgets
     viewerWidget->setEnabled(true);
     viewerWidget->setMaximumSlice(viewer->GetSliceNumber());
     viewerWidget->setCurrentSlice(viewer->GetCurrentSlice());
     viewerWidget->getGlWidget()->updateDrawable(
                 QVector<QRgb**>::fromStdVector(viewer->GetDrawable()));
 
-    // re-register the viewers' signals
+    // Re-register the viewers' signals
     connectViewerSignals();
 }
 
@@ -487,21 +491,23 @@ void QtMainWindow::deleteThisImage() {
         setUpViewerWidgets();
     }
 
-    // delete item from the list
+    // Delete item from the list
     delete list.takeAt(currentImageIndex);
 
-    // update the map keys of the images currently displayed
+    // Update the map keys of the images currently displayed
     QList<irtkQtBaseViewer*>::iterator it;
     for (it = viewers.begin(); it != viewers.end(); it++) {
         (*it)->UpdateKeysAfterIndexDeleted(currentImageIndex);
     }
 
-    // update the model
+    // Update the model
     delete imageModel;
     imageModel = new irtkImageListModel(list);
     imageListView->setModel(imageModel);
 }
 
+/// free function used to calculate the output images
+/// in parallel for the different viewers
 void CalculateOutputImage(irtkQtBaseViewer* viewer) {
     viewer->CalculateOutputImages();
 }
@@ -513,6 +519,7 @@ void QtMainWindow::zoomIn() {
     QFuture<void> *threads = new QFuture<void>[viewers.size()];
     int t_index = 0;
 
+    // Increase pixel size in parallel for the different viewers
     for (int i = 0; i < viewers.size(); i++) {
         viewerWidget = dynamic_cast<Qt2dViewerWidget*>(viewerWidgets[i]);
         viewer = viewers[i];
@@ -526,10 +533,12 @@ void QtMainWindow::zoomIn() {
         }
     }
 
+    // Wait until all threads are finished
     for (int i = 0; i < t_index; i++) {
         threads[i].waitForFinished();
     }
 
+    // Update the viewers
     for (int i = 0; i < viewers.size(); i++) {
         viewerWidget = dynamic_cast<Qt2dViewerWidget*>(viewerWidgets[i]);
         viewer = viewers[i];
@@ -552,6 +561,7 @@ void QtMainWindow::zoomOut() {
     QFuture<void> *threads = new QFuture<void>[viewers.size()];
     int t_index = 0;
 
+    // Decrease pixel size in parallel for the different viewers
     for (int i = 0; i < viewers.size(); i++) {
         viewerWidget = dynamic_cast<Qt2dViewerWidget*>(viewerWidgets[i]);
         viewer = viewers.at(i);
@@ -565,10 +575,12 @@ void QtMainWindow::zoomOut() {
         }
     }
 
+    // Wait until all threads are finished
     for (int i = 0; i < t_index; i++) {
         threads[i].waitForFinished();
     }
 
+    // Update the viewers
     for (int i = 0; i < viewers.size(); i++) {
         viewerWidget = dynamic_cast<Qt2dViewerWidget*>(viewerWidgets[i]);
         viewer = viewers[i];
@@ -746,7 +758,7 @@ void QtMainWindow::listViewDoubleClicked(QModelIndex index) {
     bool visible = !list[i]->IsVisible();
     list[i]->SetVisible(visible);
 
-    // if image becomes visible display it
+    // If image becomes visible display it
     if (visible) {
         try {
             list[i]->CreateImage();
@@ -763,7 +775,7 @@ void QtMainWindow::listViewDoubleClicked(QModelIndex index) {
             }
         }
     }
-    // otherwise delete it and decrease the number of visible images
+    // Otherwise delete it and decrease the number of visible images
     else {
         numDisplayedImages--;
 
@@ -810,7 +822,7 @@ void QtMainWindow::listViewShowContextMenu(const QPoint &pos) {
     QPoint globalPos = imageListView->mapToGlobal(pos);
     currentImageIndex = imageListView->indexAt(pos).row();
 
-    // show the menu only if the current image index is valid
+    // Show the menu only if the current image index is valid
     if (currentImageIndex >= 0 && currentImageIndex < imageModel->rowCount()) {
         imageMenu.exec( globalPos );
     }
@@ -828,7 +840,6 @@ void QtMainWindow::moveImageUp() {
 
         imageListView->setCurrentIndex(imageModel->index(index-1, 0));
 
-        // TO DO : move only the current image
         for (int i = 0; i < viewers.size(); i++) {
             viewers[i]->MoveImage(index, index-1);
         }
@@ -849,7 +860,6 @@ void QtMainWindow::moveImageDown() {
 
         imageListView->setCurrentIndex(imageModel->index(index+1, 0));
 
-        // TO DO : move only the current image
         for (int i = 0; i < viewers.size(); i++) {
             viewers[i]->MoveImage(index, index+1);
         }

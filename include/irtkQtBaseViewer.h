@@ -15,161 +15,161 @@ class irtkQtBaseViewer : public QObject
 
 public:
 
-    /// view modes
+    /// View modes
     enum irtkViewMode {VIEW_AXIAL = 0, VIEW_SAGITTAL, VIEW_CORONAL, VIEW_3D};
 
 protected:
 
-    /// image origin
+    /// Image origin
     double _originX, _originY, _originZ;
 
-    /// orientation
+    /// Orientation
     double _axisX[3], _axisY[3], _axisZ[3];
 
-    /// resolution
+    /// Resolution
     double _dx, _dy, _dz;
 
-    /// dimensions
+    /// Dimensions
     int _width, _height;
 
-    /// view mode (axial, sagittal, coronal, 3D)
+    /// View mode (axial, sagittal, coronal, 3D)
     irtkViewMode _viewMode;
 
-    /// number of slices in current view
+    /// Number of slices in current view
     int* sliceNum;
 
-    /// slices currently visible
+    /// Slices currently visible
     int* currentSlice;
 
-    /// current index added to the images displayed
+    /// Current index added to the images displayed
     int currentIndex;
 
-    /// image against which all other images are transformed
+    /// Image against which all other images are transformed
     irtkImage* _targetImage;
 
-    /// original image map
+    /// Original image map
     map<int, irtkImage*> _image;
 
-    /// image lookup table map
+    /// Image lookup table map
     map<int, irtkQtLookupTable *> _lookupTable;
 
 public:
 
-    /// class constructor
+    /// Class constructor
     irtkQtBaseViewer();
 
-    /// class destructor
+    /// Class destructor
     virtual ~irtkQtBaseViewer();
 
-    /// set target image
+    /// Set target image
     void SetTarget(irtkImage* image);
 
-    /// set image origin
+    /// Set image origin
     void SetOrigin(double x, double y, double z);
 
-    /// set image resolution
+    /// Set image resolution
     void SetResolution(double dx, double dy, double dz);
 
-    /// increase image resolution
+    /// Increase image resolution
     void IncreaseResolution();
 
-    /// decrease image resolution
+    /// Decrease image resolution
     void DecreaseResolution();
 
-    /// set image dimensions
+    /// Set image dimensions
     void SetDimensions(int width, int height);
 
-    /// get view mode (axial, sagittal, coronal)
+    /// Get view mode (axial, sagittal, coronal)
     irtkViewMode GetViewMode();
 
-    /// get total number of slices
+    /// Get total number of slices
     int* GetSliceNumber();
 
-    /// get current slice in image coordinates
+    /// Get current slice in image coordinates
     int* GetCurrentSlice();
 
-    /// get the array of RGB values to be drawn on the screen
+    /// Get the array of RGB values to be drawn on the screen
     virtual vector<QRgb**> GetDrawable() = 0;
 
-    /// calculate the output image from the transformation
+    /// Calculate the output image from the transformation
     virtual void CalculateOutputImages() = 0;
 
-    /// calculate single output image from the transformation
+    /// Calculate single output image from the transformation
     virtual void CalculateCurrentOutput() = 0;
 
-    /// initialize the transformation from the input to the output image
+    /// Initialize the transformation from the input to the output image
     virtual void InitializeTransformation() = 0;
 
-    /// initialize single transformation from the input to the output image
+    /// Initialize single transformation from the input to the output image
     virtual void InitializeCurrentTransformation() = 0;
 
-    /// delete all map elements and clear maps
+    /// Delete all map elements and clear maps
     virtual void ClearDisplayedImages() = 0;
 
-    /// add image object to the maps of images to be displayed
+    /// Add image object to the maps of images to be displayed
     virtual void AddToDisplayedImages(irtkQtImageObject *imageObject, int index);
 
-    /// delete single image
+    /// Delete single image
     virtual void DeleteSingleImage(int index);
 
-    /// move image with key previousKey to newKey
+    /// Move image with key previousKey to newKey
     virtual void MoveImage(int previousKey, int newKey);
 
-    /// update keys of maps after invalid image is deleted
+    /// Update keys of maps after invalid image is deleted
     virtual void UpdateKeysAfterIndexDeleted(int index) = 0;
 
 public slots:
 
-    /// callback function when image is resized to (width, height)
+    /// Callback function when image is resized to (width, height)
     virtual void ResizeImage(int width, int height) = 0;
 
-    /// callback function when slice is changed
+    /// Callback function when slice is changed
     virtual void ChangeSlice(int* slice) = 0;
 
-    /// callback function when origin is changed
+    /// Callback function when origin is changed
     virtual void ChangeOrigin(int x, int y) = 0;
 
 protected:
 
-    /// initialize the parameters of the output image
+    /// Initialize the parameters of the output image
     irtkImageAttributes InitializeAttributes();
 
-    /// initialize image origin
+    /// Initialize image origin
     void InitializeOrigin();
 
-    /// initialize image dimensions
+    /// Initialize image dimensions
     void InitializeDimensions();
 
-    /// initialize image orientation
+    /// Initialize image orientation
     void InitializeOrientation();
 
-    /// update the current slice (in image coordinates) corresponding to the world coordinates
+    /// Update the current slice (in image coordinates) corresponding to the world coordinates
     virtual void UpdateCurrentSlice() = 0;
 
-    /// add new image and corresponding tools to maps
+    /// Add new image and corresponding tools to maps
     virtual void AddToMaps(irtkImage* newImage, int index) = 0;
 
-    /// set image orientation
+    /// Set image orientation
     void SetOrientation(const double * xaxis, const double * yaxis, const double * zaxis);
 
-    /// move one of the displayed images higher in hierarchy
+    /// Move one of the displayed images higher in hierarchy
     template<class T>
     void MoveImageUp(map<int, T> & mymap, int previousKey, int newKey);
 
-    /// move one of the displayed images lower in hierarchy
+    /// Move one of the displayed images lower in hierarchy
     template<class T>
     void MoveImageDown(map<int, T> & mymap, int previousKey, int newKey);
 
-    /// update key values of maps after deleting invalid image
+    /// Update key values of maps after deleting invalid image
     template<class T>
     void UpdateKeysAfterIndexDeleted(map<int, T> & mymap, int index);
 
 signals:
 
-    /// signal emitted when image is resized
+    /// Signal emitted when image is resized
     void ImageResized(QVector<QRgb**>);
 
-    /// signal emitted when image origin changes
+    /// Signal emitted when image origin changes
     void OriginChanged(double originX, double originY, double originZ);
 };
 

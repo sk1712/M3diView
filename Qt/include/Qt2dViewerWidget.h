@@ -14,65 +14,65 @@ class Qt2dViewerWidget : public QtViewerWidget
     /// OpenGL widget
     QtTwoDimensionalGlWidget *glWidget;
 
-    /// slider for going through the slices
+    /// Slider for going through the slices
     QSlider *sliceSlider;
 
-    /// label showing number of slice
+    /// Label showing number of slice
     QLabel *sliceLabel;
 
-    /// slice currently shown
+    /// Slice currently shown
     int currentSlice;
 
-    /// maximum number of slices
+    /// Maximum number of slices
     int maximumSlice;
 
 public:
 
-    /// class constructor
+    /// Class constructor
     Qt2dViewerWidget(QWidget *parent = 0);
 
-    /// class destructor
+    /// Class destructor
     QtGlWidget* getGlWidget() const;
 
-    /// update currentSlice
+    /// Update currentSlice
     void setCurrentSlice(int* current);
 
-    /// update maximumSlice
+    /// Update maximumSlice
     void setMaximumSlice(int* maximum);
 
-    /// set whether viewer is enabled
+    /// Set whether viewer is enabled
     void setEnabled(bool enabled);
 
-    /// set viewer labels
+    /// Set viewer labels
     void setLabels(const char t, const char b, const char l, const char r);
 
-    /// set object name (used for styling the widgets
+    /// Set object name (used for styling the widgets
     void setObjectName(QString objectName);
 
 protected:
 
-    /// update slice label
+    /// Update slice label
     void updateLabel();
 
 private:
 
-    /// initialize current and maximum slice
+    /// Initialize current and maximum slice
     void initializeParameters();
 
-    /// connect signals
+    /// Connect signals
     void connectSignals();
 
 private slots:
 
-    /// callback function for mouse wheel over OpenGL widget
+    /// Callback function for mouse wheel over OpenGL widget
     void changeSlider(int slice);
 
-    /// callback function for slice slider change
+    /// Callback function for slice slider change
     void updateSlice(int slice);
 
 signals:
 
-    /// signal emitted when slider value changes
+    /// Signal emitted when slider value changes
     void sliderValueChanged(int* value);
 
 };

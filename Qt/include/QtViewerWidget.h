@@ -13,63 +13,63 @@ class QtViewerWidget : public QWidget
 
 protected:
 
-    /// toolbutton to expand/collapse viewer
+    /// Toolbutton to expand/collapse viewer
     QToolButton *expandToolButton;
 
-    /// toolbutton to delete viewer
+    /// Toolbutton to delete viewer
     QToolButton *deleteToolButton;
 
-    /// toolbutton to link to other viewers
+    /// Toolbutton to link to other viewers
     QToolButton *linkToolButton;
 
-    /// flag for viewer linked to other viewers
+    /// Flag for viewer linked to other viewers
     bool linked;
 
 public:
 
-    /// class constructor
+    /// Class constructor
     QtViewerWidget(QWidget *parent = 0);
 
-    /// check if viewer is linked to the other viewers
+    /// Check if viewer is linked to the other viewers
     bool isLinked() const;
 
-    /// get OpenGL widget of viewer
+    /// Get OpenGL widget of viewer
     virtual QtGlWidget* getGlWidget() const = 0;
 
-    /// set viewer's current slices
+    /// Set viewer's current slices
     virtual void setCurrentSlice(int* current) = 0;
 
-    /// set viewer's maximum slices
+    /// Set viewer's maximum slices
     virtual void setMaximumSlice(int* maxSlice) = 0;
 
-    /// set viewer enabled
+    /// Set viewer enabled
     virtual void setEnabled(bool enabled) = 0;
 
 protected:
 
-    /// create tool buttons
+    /// Create tool buttons
     virtual void createToolButtons();
 
-    /// connect signals to slots
+    /// Connect signals to slots
     virtual void connectSignals();
 
 protected slots:
 
-    /// callback function for expandToolButton
+    /// Callback function for expandToolButton
     void expandWindow();
 
-    /// callback function for deleteToolButton
+    /// Callback function for deleteToolButton
     void deleteWindow();
 
-    /// callback function for linkToolButton
+    /// Callback function for linkToolButton
     void changeLinked(bool checked);
 
 signals:
 
-    /// signal emitted when viewer is to be full screen
+    /// Signal emitted when viewer is to be full screen
     void windowExpanded();
 
-    /// signal emitted when viewer is to be deleted
+    /// Signal emitted when viewer is to be deleted
     void windowDeleted();
 };
 

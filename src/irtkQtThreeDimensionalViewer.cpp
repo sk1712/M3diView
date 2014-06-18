@@ -84,12 +84,12 @@ void CalculateSingleTransform(irtkImageTransformation** transform) {
 
 void irtkQtThreeDimensionalViewer::CalculateOutputImages() {
     irtkImageAttributes attr[3];
-    // width of output image
+    // Width of output image
     int width[3] = {sliceNum[0], sliceNum[1], sliceNum[0]};
-    // height of output image
+    // Height of output image
     int height[3] = {sliceNum[1], sliceNum[2], sliceNum[2]};
 
-    // store a backup of current origin
+    // Store a backup of current origin
     double originX_backup = _originX, originY_backup = _originY, originZ_backup = _originZ;
 
     for (int i = 0; i < 3; i++) {
@@ -104,7 +104,7 @@ void irtkQtThreeDimensionalViewer::CalculateOutputImages() {
         }
     }
 
-    // run the transformation for the different images in parallel
+    // Run the transformation for the different images in parallel
     QFuture<void> *threads = new QFuture<void>[_transformFilter.size()];
     int t_index = 0;
 
@@ -122,7 +122,7 @@ void irtkQtThreeDimensionalViewer::CalculateOutputImages() {
 
     delete [] threads;
 
-    // restore current origin
+    // Restore current origin
     _originX = originX_backup;
     _originY = originY_backup;
     _originZ = originZ_backup;
@@ -130,12 +130,12 @@ void irtkQtThreeDimensionalViewer::CalculateOutputImages() {
 
 void irtkQtThreeDimensionalViewer::CalculateCurrentOutput() {
     irtkImageAttributes attr[3];
-    // width of output image
+    // Width of output image
     int width[3] = {sliceNum[0], sliceNum[1], sliceNum[0]};
-    // height of output image
+    // Height of output image
     int height[3] = {sliceNum[1], sliceNum[2], sliceNum[2]};
 
-    // store a backup of current origin
+    // Store a backup of current origin
     double originX_backup = _originX, originY_backup = _originY, originZ_backup = _originZ;
 
     for (int i = 0; i < 3; i++) {

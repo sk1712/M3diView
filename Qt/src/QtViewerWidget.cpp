@@ -21,7 +21,7 @@ QtViewerWidget::QtViewerWidget(QWidget *parent) : QWidget(parent) {
 
     setLayout(layout);
 
-    // by default link viewer to the rest of the viewers
+    // By default link viewer to the rest of the viewers
     linked = true;
 }
 

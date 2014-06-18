@@ -19,22 +19,22 @@ class QtMainWindow : public QMainWindow
 {
     Q_OBJECT
 
-    /// main window widgets
+    /// Main window widgets
     QListView *imageListView;
     QTabWidget *toolsTabWidget;
     QWidget *mainViewWidget;
 
-    /// window menus
+    /// Window menus
     QMenu *fileMenu;
     QMenu *viewMenu;
 
-    /// window toolbar
+    /// Window toolbar
     QToolBar *toolbar;
 
-    /// file actions
+    /// File actions
     QAction *openTargetAction;
 
-    /// view actions
+    /// View actions
     QAction *viewAxialAction;
     QAction *viewCoronalAction;
     QAction *viewSagittalAction;
@@ -42,188 +42,188 @@ class QtMainWindow : public QMainWindow
     QAction *view3DAction;
     QAction *clearViewsAction;
 
-    /// toolbar actions
+    /// Toolbar actions
     QAction *viewSelectedImageAction;
     QAction *zoomInAction;
     QAction *zoomOutAction;
     QAction *moveUpAction;
     QAction *moveDownAction;
 
-    /// image actions
+    /// Image actions
     QAction *deleteImageAction;
 
-    /// visualisation tool widget
+    /// Visualisation tool widget
     QtToolWidget *visualToolWidget;
 
     /// Image info widget
     QtInfoWidget *infoWidget;
 
-    /// list of viewer widgets
+    /// List of viewer widgets
     QList<QtViewerWidget*> viewerWidgets;
 
-    /// list of irtk viewers
+    /// List of irtk viewers
     QList<irtkQtBaseViewer*> viewers;
 
-    /// model for list view
+    /// Model for list view
     irtkImageListModel *imageModel;
 
-    /// flag for only one viewer visible
+    /// Flag for only one viewer visible
     bool singleViewerInScreen;
 
-    /// number of currently displayed images
+    /// Number of currently displayed images
     int numDisplayedImages;
 
-    /// image index currently clicked
+    /// Image index currently clicked
     int currentImageIndex;
 
 public:
 
-    /// class constructor
+    /// Class constructor
     QtMainWindow();
 
-    /// class destructor
+    /// Class destructor
     ~QtMainWindow();
 
 private:
 
-    /// create dock windows
+    /// Create dock windows
     void createDockWindows();
 
-    /// create window toolbar
+    /// Create window toolbar
     void createToolBar();
 
-    /// create window menu
+    /// Create window menu
     void createMenu();
 
-    /// create toolbar actions
+    /// Create toolbar actions
     void createToolBarActions();
 
-    /// create menu actions
+    /// Create menu actions
     void createMenuActions();
 
-    /// create image menu actions
+    /// Create image menu actions
     void createImageMenuActions();
 
-    /// connect window signals that won't be disconnected
+    /// Connect window signals that won't be disconnected
     void connectWindowSignals();
 
-    /// connect visualisation tools signals to slots
+    /// Connect visualisation tools signals to slots
     void connectToolSignals();
 
-    /// disconnect signals between viewers and viewerWidgets
+    /// Disconnect signals between viewers and viewerWidgets
     void disconnectViewerSignals();
 
-    /// connect signals between viewers and viewerWidgets
+    /// Connect signals between viewers and viewerWidgets
     void connectViewerSignals();
 
-    /// disable viewer widgets when no image is visible
+    /// Disable viewer widgets when no image is visible
     void disableViewerWidgets();
 
-    /// create new 2D viewer
+    /// Create new 2D viewer
     Qt2dViewerWidget* createTwoDimensionalView(irtkQtBaseViewer::irtkViewMode viewMode);
 
-    /// create new 3D viewer
+    /// Create new 3D viewer
     Qt3dViewerWidget* createThreeDimensionalView();
 
-    /// clear viewers and viewerWidgets
+    /// Clear viewers and viewerWidgets
     void clearLists();
 
-    /// check if image is already loaded
+    /// Check if image is already loaded
     bool imageInList(const QString fileName) const;
 
-    /// add widget to mainViewWidget
+    /// Add widget to mainViewWidget
     void addToViewWidget(QWidget *widget);
 
     void addToViewWidget(QWidget *widget, int index);
 
-    /// show message box with message and icon
+    /// Show message box with message and icon
     void createMessageBox(QString message,
                           QMessageBox::Icon icon = QMessageBox::NoIcon);
 
-    /// set up viewers with images to be displayed
+    /// Set up viewers with images to be displayed
     bool setDisplayedImages();
 
-    /// add single image to displayed images
+    /// Add single image to displayed images
     void displaySingleImage(int index);
 
-    /// delete signle image from displayed images
+    /// Delete signle image from displayed images
     void deleteSingleImage(int index);
 
-    /// set up viewer widgets
+    /// Set up viewer widgets
     void setUpViewerWidgets();
 
-    /// update all drawables
+    /// Update all drawables
     void updateDrawables();
 
 private slots:
 
-    /// callback function for openTargetAction
+    /// Callback function for openTargetAction
     void openImage();
 
-    /// callback function for viewSelectedImageAction
+    /// Callback function for viewSelectedImageAction
     void viewImage();
 
-    /// callback function for deleteImageAction
+    /// Callback function for deleteImageAction
     void deleteThisImage();
 
-    /// callback function for zoomInAction
+    /// Callback function for zoomInAction
     void zoomIn();
 
-    /// callback function for zoomOutAction
+    /// Callback function for zoomOutAction
     void zoomOut();
 
-    /// callback function for expanding viewer widget
+    /// Callback function for expanding viewer widget
     void showOnlyThisWidget();
 
-    /// callback function for deleting viewer widget
+    /// Callback function for deleting viewer widget
     void deleteThisWidget();
 
-    /// callback function for adding axial view
+    /// Callback function for adding axial view
     void createAxialView();
 
-    /// callback function for adding coronal view
+    /// Callback function for adding coronal view
     void createCoronalView();
 
-    /// callback functon for adding sagittal view
+    /// Callback functon for adding sagittal view
     void createSagittalView();
 
-    /// callback functon for adding orthogonal view
+    /// Callback functon for adding orthogonal view
     void createOrthogonalView();
 
-    /// callback function for adding 3D view
+    /// Callback function for adding 3D view
     void create3dView();
 
-    /// callback function for clearing views
+    /// Callback function for clearing views
     void clearViews();
 
-    /// callback function for updating origin
+    /// Callback function for updating origin
     void updateOrigin(double x, double y, double z);
 
-    /// callback function for min display image value changed
+    /// Callback function for min display image value changed
     void minDisplayValueChanged(double value);
 
-    /// callback function for max display image value changed
+    /// Callback function for max display image value changed
     void maxDisplayValueChanged(double value);
 
-    /// callback function for colormap change
+    /// Callback function for colormap change
     void colormapIndexChanged(int mode);
 
-    /// callback function for opacity slider changing value
+    /// Callback function for opacity slider changing value
     void opacityValueChanged(int value);
 
-    /// callback function for list view double clicked
+    /// Callback function for list view double clicked
     void listViewDoubleClicked(QModelIndex index);
 
-    /// callback function for list view cliked
+    /// Callback function for list view cliked
     void listViewClicked(QModelIndex index);
 
-    /// callback function for list view right click
+    /// Callback function for list view right click
     void listViewShowContextMenu(const QPoint& pos);
 
-    /// callback function for moving image up in the list
+    /// Callback function for moving image up in the list
     void moveImageUp();
 
-    /// callback function for moving image down in the list
+    /// Callback function for moving image down in the list
     void moveImageDown();
 };
 

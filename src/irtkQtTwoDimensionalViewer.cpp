@@ -16,7 +16,7 @@ irtkQtTwoDimensionalViewer::~irtkQtTwoDimensionalViewer() {
 
 vector<QRgb**> irtkQtTwoDimensionalViewer::GetDrawable() {
     vector<QRgb**> allDrawables;
-    // set background color to transparent black
+    // Set background color to transparent black
     QRgb _backgroundColor = qRgba(0, 0, 0, 0);
 
     map<int, irtkGreyImage *>::iterator it;
@@ -184,7 +184,7 @@ string irtkQtTwoDimensionalViewer::GetObjectName() {
 
 void irtkQtTwoDimensionalViewer::AddToDisplayedImages(irtkQtImageObject *imageObject, int index) {
     irtkQtBaseViewer::AddToDisplayedImages(imageObject, index);
-    // set pixel size to 1x1mm
+    // Set pixel size to 1x1mm
     if (_image.size() == 1) {
         SetResolution(1, 1, _targetImage->GetZSize());
     }
@@ -240,7 +240,7 @@ void irtkQtTwoDimensionalViewer::ChangeOrigin(int x, int y) {
 
     irtkGreyImage *_targetImageOutput = _imageOutput.begin()->second;
 
-    // changes the origin on image click (x, y widget coordinates)
+    // Changes the origin on image click (x, y widget coordinates)
     originX = x;
     originY = _height - y;
     originZ = 0;

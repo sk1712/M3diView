@@ -21,13 +21,13 @@ QtToolWidget::QtToolWidget(QWidget * parent) : QWidget(parent) {
 
     colormapCombo = new QComboBox;
 
-    // add the widgets to the layout
+    // Add the widgets to the layout
     addWidgetsToLayout();
-    // connect signals to slots
+    // Connect signals to slots
     connectSignals();
-    // fix size of specific widgets
+    // Fix size of specific widgets
     fixWidgetSizes();
-    // initialize the values
+    // Initialize the values
     initializeValues();
 }
 

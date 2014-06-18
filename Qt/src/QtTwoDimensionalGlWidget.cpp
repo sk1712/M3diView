@@ -11,7 +11,7 @@ QtTwoDimensionalGlWidget::~QtTwoDimensionalGlWidget() {
 }
 
 void QtTwoDimensionalGlWidget::updateDrawable(QVector<QRgb**> drawable) {
-    //QtGlWidget::updateDrawable(drawable);
+    // QtGlWidget::updateDrawable(drawable);
     deleteDrawable();
     _drawable = drawable;
     updateGL();
@@ -21,7 +21,7 @@ void QtTwoDimensionalGlWidget::initializeGL() {
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_COLOR_MATERIAL);
-    // enable alpha blending
+    // Enable alpha blending
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
     qglClearColor(Qt::black);
@@ -31,7 +31,7 @@ void QtTwoDimensionalGlWidget::resizeGL(int w, int h) {
     glViewport(0, 0, w, h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    // set origin to bottom left corner
+    // Set origin to bottom left corner
     glOrtho(0.0, (double) w, 0.0, (double) h, -1.0, 1.0);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -56,7 +56,7 @@ void QtTwoDimensionalGlWidget::drawImage() const {
     QVector<QRgb**>::const_iterator rit;
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    // draw last image in the list first and the others on top of it
+    // Draw last image in the list first and the others on top of it
     for (rit = _drawable.constEnd()-1; rit >= _drawable.constBegin(); rit--) {
         // Set raster position
         glRasterPos2f(0, 0);

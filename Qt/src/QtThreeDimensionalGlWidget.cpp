@@ -5,12 +5,12 @@
 
 QtThreeDimensionalGlWidget::QtThreeDimensionalGlWidget(QWidget *parent)
     :QtGlWidget(parent) {
-    // rotate model when first displaying to show that it is 3D
+    // Rotate model when first displaying to show that it is 3D
     horizontalRotation = 5.0f;
     verticalRotation = 5.0f;
     cameraFOV = 45.0f;
 
-    // initialize rotation and zoom flags to false
+    // Initialize rotation and zoom flags to false
     doRotation = false;
     moveCamera = false;
 
@@ -63,11 +63,11 @@ void QtThreeDimensionalGlWidget::paintGL() {
         glMatrixMode(GL_MODELVIEW);
         GLfloat currentModelViewMatrix[16];
         glGetFloatv(GL_MODELVIEW_MATRIX, currentModelViewMatrix);
-        // x axis rotation
+        // X axis rotation
         glRotatef(horizontalRotation, currentModelViewMatrix[1],
         currentModelViewMatrix[5], currentModelViewMatrix[9]);
         glGetFloatv(GL_MODELVIEW_MATRIX, currentModelViewMatrix);
-        // y axis rotation
+        // Y axis rotation
         glRotatef(verticalRotation, currentModelViewMatrix[0],
         currentModelViewMatrix[4], currentModelViewMatrix[8]);
         glGetFloatv(GL_MODELVIEW_MATRIX, currentModelViewMatrix);
@@ -75,7 +75,7 @@ void QtThreeDimensionalGlWidget::paintGL() {
     }
 
     if (moveCamera) {
-        // move camera towards/away from the screen
+        // Move camera towards/away from the screen
         glMatrixMode(GL_PROJECTION);
         GLfloat aspect = (GLfloat) width / (GLfloat) height;
         glLoadIdentity();
@@ -144,7 +144,7 @@ void QtThreeDimensionalGlWidget::drawImage() const {
 
     float width, height, slice;
 
-    // axial view
+    // Axial view
     width = (float) dimensions[0]/2;
     height = (float) dimensions[1]/2;
     slice = currentSlice[2] - dimensions[2]/2.0;
@@ -157,7 +157,7 @@ void QtThreeDimensionalGlWidget::drawImage() const {
     glTexCoord2f(1.0, 0.0); glVertex3f(-height, slice,  width);
     glEnd();
 
-    // sagittal view
+    // Sagittal view
     width = (float) dimensions[1]/2;
     height = (float) dimensions[2]/2;
     slice = currentSlice[0] - dimensions[0]/2.0;
@@ -169,7 +169,7 @@ void QtThreeDimensionalGlWidget::drawImage() const {
     glTexCoord2f(1.0, 0.0); glVertex3f( width, -height, slice);
     glEnd();
 
-    // coronal view
+    // Coronal view
     width = (float) dimensions[0]/2;
     height = (float) dimensions[2]/2;
     slice = currentSlice[1] - dimensions[1]/2.0;
@@ -187,7 +187,7 @@ void QtThreeDimensionalGlWidget::drawImage() const {
 void QtThreeDimensionalGlWidget::drawBorders() {
     float width, height, slice;
 
-    // surround axial view with yellow lines
+    // Surround axial view with yellow lines
     width = (float) dimensions[0]/2;
     height = (float) dimensions[1]/2;
     slice = currentSlice[2] - dimensions[2]/2.0;
@@ -209,7 +209,7 @@ void QtThreeDimensionalGlWidget::drawBorders() {
     glVertex3f(-height, slice, -width);
     glEnd();
 
-    // surround sagittal view with red lines
+    // Surround sagittal view with red lines
     width = (float) dimensions[1]/2;
     height = (float) dimensions[2]/2;
     slice = currentSlice[0] - dimensions[0]/2.0;
@@ -231,7 +231,7 @@ void QtThreeDimensionalGlWidget::drawBorders() {
     glVertex3f(-width, -height, slice);
     glEnd();
 
-    // surround coronal view with green lines
+    // Surround coronal view with green lines
     width = (float) dimensions[0]/2;
     height = (float) dimensions[2]/2;
     slice = currentSlice[1] - dimensions[1]/2.0;;
@@ -259,7 +259,7 @@ void QtThreeDimensionalGlWidget::createTextures() {
     glDeleteTextures(3, textures);
     glGenTextures(3, textures);
 
-    // create texture for axial view
+    // Create texture for axial view
     glEnable(GL_TEXTURE_2D);
 
     glBindTexture(GL_TEXTURE_2D, textures[0]);
@@ -271,7 +271,7 @@ void QtThreeDimensionalGlWidget::createTextures() {
             dimensions[1], 0, GL_BGRA, GL_UNSIGNED_BYTE,
             _drawable[0][0]);
 
-    // create texture for sagittal view
+    // Create texture for sagittal view
     glBindTexture(GL_TEXTURE_2D, textures[1]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
                     GL_NEAREST);
@@ -281,7 +281,7 @@ void QtThreeDimensionalGlWidget::createTextures() {
             dimensions[2], 0, GL_BGRA, GL_UNSIGNED_BYTE,
             _drawable[0][1]);
 
-    // create texture for coronal view
+    // Create texture for coronal view
     glBindTexture(GL_TEXTURE_2D, textures[2]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
                     GL_NEAREST);
@@ -295,12 +295,12 @@ void QtThreeDimensionalGlWidget::createTextures() {
 }
 
 void QtThreeDimensionalGlWidget::connectSignals() {
-    // signals for rotation
+    // Signals for rotation
     connect(this, SIGNAL(leftKeyPressed()), this, SLOT(rotateLeft()));
     connect(this, SIGNAL(rightKeyPressed()), this, SLOT(rotateRight()));
     connect(this, SIGNAL(upKeyPressed()), this, SLOT(rotateUp()));
     connect(this, SIGNAL(downKeyPressed()), this, SLOT(rotateDown()));
-    // signals for zoom in/out
+    // Signals for zoom in/out
     connect(this, SIGNAL(wheelMoved(int)), this, SLOT(changeZoom(int)));
 }
 

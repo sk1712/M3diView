@@ -21,18 +21,18 @@ irtkQtImageObject::~irtkQtImageObject() {
 }
 
 void irtkQtImageObject::CreateImage() {
-    // check if image object can be constructed from the file
+    // Check if image object can be constructed from the file
     try {
         _image = irtkImage::New(_path.toStdString().c_str());
         ConvertImageToTarget();
     }
-    // if not, throw an exception and return
+    // If not, throw an exception and return
     catch (irtkException e) {
         throw e;
         return;
     }
 
-    // set up the look up table
+    // Set up the look up table
     _lookupTable = new irtkQtLookupTable;
 
     double imageMin, imageMax;
