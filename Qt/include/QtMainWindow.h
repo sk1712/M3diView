@@ -50,6 +50,7 @@ class QtMainWindow : public QMainWindow
     QAction *moveDownAction;
 
     /// Image actions
+    QAction *toggleVisibleAction;
     QAction *deleteImageAction;
 
     /// Visualisation tool widget
@@ -165,6 +166,9 @@ private slots:
 
     /// Callback function for deleteImageAction
     void deleteThisImage();
+
+    /// Callback function for toggleVisibleAction
+    void toggleImageVisible();
 
     /// Callback function for zoomInAction
     void zoomIn();

@@ -46,6 +46,7 @@ void QtMainWindow::createDockWindows() {
     QDockWidget *dock = new QDockWidget(tr("Image list"), this);
     dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     imageListView = new QListView(dock);
+    imageListView->setSelectionMode(QAbstractItemView::ExtendedSelection);
     // Show a menu on list view right click
     imageListView->setContextMenuPolicy(Qt::CustomContextMenu);
     dock->setWidget(imageListView);
@@ -116,8 +117,10 @@ void QtMainWindow::createToolBarActions() {
 }
 
 void QtMainWindow::createMenuActions() {
-    openTargetAction = new QAction(tr("&Open image file(s)..."), this);
+    openTargetAction = new QAction(tr("Open image file(s)..."), this);
     openTargetAction->setStatusTip(tr("Load new image file(s)"));
+    openTargetAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_O));
+    openTargetAction->setShortcutContext(Qt::ApplicationShortcut);
 
     viewAxialAction = new QAction(tr("Axial"), this);
     viewAxialAction->setStatusTip(tr("Add axial view"));
@@ -139,6 +142,9 @@ void QtMainWindow::createMenuActions() {
 }
 
 void QtMainWindow::createImageMenuActions() {
+    toggleVisibleAction = new QAction(tr("Visible"), this);
+    toggleVisibleAction->setCheckable(true);
+
     deleteImageAction = new QAction(tr("Delete"), this);
     deleteImageAction->setIcon(QIcon(":/icons/erase.png"));
 }
@@ -153,6 +159,7 @@ void QtMainWindow::connectWindowSignals() {
             this, SLOT(listViewShowContextMenu(QPoint)));
 
     // Image menu signals
+    connect(toggleVisibleAction, SIGNAL(triggered()), this, SLOT(toggleImageVisible()));
     connect(deleteImageAction, SIGNAL(triggered()), this, SLOT(deleteThisImage()));
 
     // Toolbar signals
@@ -326,35 +333,6 @@ void QtMainWindow::createMessageBox(QString message, QMessageBox::Icon icon) {
     msgBox.exec();
 }
 
-void QtMainWindow::openImage() {
-#ifdef Q_OS_MAC
-    QString selfilter = tr("IMG (*.gipl *.z *.hdr *.gz *.nii)");
-    QStringList fileNames = QFileDialog::getOpenFileNames(this, tr("Open File"), QDir::homePath(),
-                                                          tr("All files (*.*);;IMG (*.gipl *.z *.hdr *.gz *.nii)" ),
-                                                          &selfilter);
-#else
-    QString selfilter = tr("IMG (*.gipl *.gipl.z *.hdr *.hdr.gz *.nii *.nii.gz)");
-    QStringList fileNames = QFileDialog::getOpenFileNames(this, tr("Open File"), QDir::homePath(),
-                                                          tr("All files (*.*);;IMG (*.gipl *.gipl.z *.hdr *.hdr.gz *.nii *.nii.gz)" ),
-                                                          &selfilter);
-#endif
-
-    irtkQtViewer* instance = irtkQtViewer::Instance();
-
-    // Create an irtkImageObject for each new image
-    QStringList::const_iterator it;
-    for (it = fileNames.constBegin(); it != fileNames.constEnd(); it++) {
-        if ( !imageInList(*it) ) {
-            instance->CreateImage((*it));
-        }
-    }
-
-    // Update the image model
-    delete imageModel;
-    imageModel = new irtkImageListModel(instance->GetImageList());
-    imageListView->setModel(imageModel);
-}
-
 bool QtMainWindow::setDisplayedImages() {
     QtViewerWidget *viewerWidget = viewerWidgets[viewerWidgets.size()-1];
     irtkQtBaseViewer *viewer = viewers[viewers.size()-1];
@@ -449,6 +427,35 @@ void QtMainWindow::updateDrawables() {
     }
 }
 
+void QtMainWindow::openImage() {
+#ifdef Q_OS_MAC
+    QString selfilter = tr("IMG (*.gipl *.z *.hdr *.gz *.nii)");
+    QStringList fileNames = QFileDialog::getOpenFileNames(this, tr("Open File"), QDir::homePath(),
+                                                          tr("All files (*.*);;IMG (*.gipl *.z *.hdr *.gz *.nii)" ),
+                                                          &selfilter);
+#else
+    QString selfilter = tr("IMG (*.gipl *.gipl.z *.hdr *.hdr.gz *.nii *.nii.gz)");
+    QStringList fileNames = QFileDialog::getOpenFileNames(this, tr("Open File"), QDir::homePath(),
+                                                          tr("All files (*.*);;IMG (*.gipl *.gipl.z *.hdr *.hdr.gz *.nii *.nii.gz)" ),
+                                                          &selfilter);
+#endif
+
+    irtkQtViewer* instance = irtkQtViewer::Instance();
+
+    // Create an irtkImageObject for each new image
+    QStringList::const_iterator it;
+    for (it = fileNames.constBegin(); it != fileNames.constEnd(); it++) {
+        if ( !imageInList(*it) ) {
+            instance->CreateImage((*it));
+        }
+    }
+
+    // Update the image model
+    delete imageModel;
+    imageModel = new irtkImageListModel(instance->GetImageList());
+    imageListView->setModel(imageModel);
+}
+
 void QtMainWindow::viewImage() {
     QtViewerWidget *viewerWidget = viewerWidgets[viewerWidgets.size()-1];
     irtkQtBaseViewer *viewer = viewers[viewers.size()-1];
@@ -478,29 +485,84 @@ void QtMainWindow::viewImage() {
 
 void QtMainWindow::deleteThisImage() {
     QList<irtkQtImageObject*> & list = irtkQtViewer::Instance()->GetImageList();
-    bool visible = list[currentImageIndex]->IsVisible();
+    QModelIndexList indexList = imageListView->selectionModel()->selectedIndexes();
+    QList<int> rowList;
 
+    // Create list with rows to be deleted
+    for (int i = 0; i < indexList.size(); i++) {
+        rowList.push_back(indexList[i].row());
+    }
+
+    // Sort the rows in descending order
+    qSort(rowList.begin(), rowList.end(), qGreater<int>());
+
+    // Start deleting images from bottom to top
+    for (int i = 0; i < rowList.size(); i++) {
+        currentImageIndex = rowList[i];
+        bool visible = list[currentImageIndex]->IsVisible();
+
+        if (visible) {
+            numDisplayedImages--;
+
+            if (numDisplayedImages == 0) {
+                disableViewerWidgets();
+            }
+
+            deleteSingleImage(currentImageIndex);
+            setUpViewerWidgets();
+        }
+
+        // Delete item from the list
+        delete list.takeAt(currentImageIndex);
+
+        // Update the map keys of the images currently displayed
+        QList<irtkQtBaseViewer*>::iterator it;
+        for (it = viewers.begin(); it != viewers.end(); it++) {
+            (*it)->UpdateKeysAfterIndexDeleted(currentImageIndex);
+        }
+    }
+
+    // Update the model
+    delete imageModel;
+    imageModel = new irtkImageListModel(list);
+    imageListView->setModel(imageModel);
+}
+
+void QtMainWindow::toggleImageVisible() {
+    QList<irtkQtImageObject*> & list = irtkQtViewer::Instance()->GetImageList();
+    bool visible = !list[currentImageIndex]->IsVisible();
+    list[currentImageIndex]->SetVisible(visible);
+
+    // If image becomes visible display it
     if (visible) {
+        try {
+            list[currentImageIndex]->CreateImage();
+            displaySingleImage(currentImageIndex);
+            numDisplayedImages++;
+            setUpViewerWidgets();
+        }
+        catch (irtkException) {
+            createMessageBox("Invalid image file " + list[currentImageIndex]->GetPath(), QMessageBox::Critical);
+            list.removeAt(currentImageIndex);
+            QList<irtkQtBaseViewer*>::iterator it;
+            for (it = viewers.begin(); it != viewers.end(); it++) {
+                (*it)->UpdateKeysAfterIndexDeleted(currentImageIndex);
+            }
+        }
+    }
+    // Otherwise delete it and decrease the number of visible images
+    else {
         numDisplayedImages--;
 
         if (numDisplayedImages == 0) {
             disableViewerWidgets();
         }
 
+        list[currentImageIndex]->DeleteImage();
         deleteSingleImage(currentImageIndex);
         setUpViewerWidgets();
     }
 
-    // Delete item from the list
-    delete list.takeAt(currentImageIndex);
-
-    // Update the map keys of the images currently displayed
-    QList<irtkQtBaseViewer*>::iterator it;
-    for (it = viewers.begin(); it != viewers.end(); it++) {
-        (*it)->UpdateKeysAfterIndexDeleted(currentImageIndex);
-    }
-
-    // Update the model
     delete imageModel;
     imageModel = new irtkImageListModel(list);
     imageListView->setModel(imageModel);
@@ -753,44 +815,8 @@ void QtMainWindow::opacityValueChanged(int value) {
 }
 
 void QtMainWindow::listViewDoubleClicked(QModelIndex index) {
-    int i = index.row();
-    QList<irtkQtImageObject*> & list = irtkQtViewer::Instance()->GetImageList();
-    bool visible = !list[i]->IsVisible();
-    list[i]->SetVisible(visible);
-
-    // If image becomes visible display it
-    if (visible) {
-        try {
-            list[i]->CreateImage();
-            displaySingleImage(i);
-            numDisplayedImages++;
-            setUpViewerWidgets();
-        }
-        catch (irtkException) {
-            createMessageBox("Invalid image file " + list[i]->GetPath(), QMessageBox::Critical);
-            list.removeAt(i);
-            QList<irtkQtBaseViewer*>::iterator it;
-            for (it = viewers.begin(); it != viewers.end(); it++) {
-                (*it)->UpdateKeysAfterIndexDeleted(i);
-            }
-        }
-    }
-    // Otherwise delete it and decrease the number of visible images
-    else {
-        numDisplayedImages--;
-
-        if (numDisplayedImages == 0) {
-            disableViewerWidgets();
-        }
-
-        list[i]->DeleteImage();
-        deleteSingleImage(i);
-        setUpViewerWidgets();
-    }
-
-    delete imageModel;
-    imageModel = new irtkImageListModel(list);
-    imageListView->setModel(imageModel);
+    currentImageIndex = index.row();
+    toggleImageVisible();
 }
 
 void QtMainWindow::listViewClicked(QModelIndex index) {
@@ -817,13 +843,26 @@ void QtMainWindow::listViewClicked(QModelIndex index) {
 
 void QtMainWindow::listViewShowContextMenu(const QPoint &pos) {
     QMenu imageMenu;
-    imageMenu.addAction(deleteImageAction);
-
     QPoint globalPos = imageListView->mapToGlobal(pos);
-    currentImageIndex = imageListView->indexAt(pos).row();
 
-    // Show the menu only if the current image index is valid
-    if (currentImageIndex >= 0 && currentImageIndex < imageModel->rowCount()) {
+    int selectedCount = imageListView->selectionModel()->selectedIndexes().size();
+
+    if ( selectedCount < 1 ) {
+        return;
+    }
+    if ( selectedCount == 1) {
+        currentImageIndex = imageListView->indexAt(pos).row();
+        imageMenu.addAction(toggleVisibleAction);
+        if (irtkQtViewer::Instance()->GetImageList().at(currentImageIndex)->IsVisible()) {
+            toggleVisibleAction->setChecked(true);
+        }
+        else {
+            toggleVisibleAction->setChecked(false);
+        }
+    }
+    if ( selectedCount > 0 ) {
+        imageMenu.addAction(deleteImageAction);
+        // Show the menu only if the current image index is valid
         imageMenu.exec( globalPos );
     }
 }
