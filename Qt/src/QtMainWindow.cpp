@@ -105,9 +105,11 @@ void QtMainWindow::createMenu() {
 void QtMainWindow::createToolBarActions() {
     zoomInAction = new QAction(tr("Zoom in"), this);
     zoomInAction->setIcon(QIcon(":/icons/zoom_in.png"));
+    zoomInAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Equal));
 
     zoomOutAction = new QAction(tr("Zoom out"), this);
     zoomOutAction->setIcon(QIcon(":/icons/zoom_out.png"));
+    zoomOutAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Minus));
 
     moveUpAction = new QAction(tr("Move image up"), this);
     moveUpAction->setIcon(QIcon(":/icons/arrow_up.png"));
