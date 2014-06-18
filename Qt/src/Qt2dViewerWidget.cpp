@@ -18,7 +18,7 @@ Qt2dViewerWidget::Qt2dViewerWidget(QWidget *parent)
     layout->addWidget(sliceSlider, 0, 1);
 
     sliceLabel = new QLabel();
-    layout->addWidget(sliceLabel, 1, 0, Qt::AlignRight);
+    layout->addWidget(sliceLabel, 1, 0, 1, 2, Qt::AlignRight);
 
     connectSignals();
     setEnabled(false);

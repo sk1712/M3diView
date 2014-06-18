@@ -11,6 +11,8 @@ class QtViewerWidget : public QWidget
 {
     Q_OBJECT
 
+    QWidget *toolWidget;
+
 protected:
 
     /// Toolbutton to expand/collapse viewer
@@ -46,6 +48,9 @@ public:
     virtual void setEnabled(bool enabled) = 0;
 
 protected:
+
+    /// Subclassing repaint event
+    void paintEvent(QPaintEvent *);
 
     /// Create tool buttons
     virtual void createToolButtons();

@@ -7,7 +7,7 @@
 QtViewerWidget::QtViewerWidget(QWidget *parent) : QWidget(parent) {
     QGridLayout *layout = new QGridLayout();
 
-    QWidget *toolWidget = new QWidget();
+    toolWidget = new QWidget();
     createToolButtons();
     connectSignals();
 
@@ -17,12 +17,16 @@ QtViewerWidget::QtViewerWidget(QWidget *parent) : QWidget(parent) {
     toolLayout->addWidget(deleteToolButton);
 
     toolWidget->setLayout(toolLayout);
-    layout->addWidget(toolWidget, 1, 0, Qt::AlignLeft);
+    layout->addWidget(toolWidget, 1, 0, 1, 2, Qt::AlignLeft);
 
     setLayout(layout);
 
     // By default link viewer to the rest of the viewers
     linked = true;
+}
+
+void QtViewerWidget::paintEvent(QPaintEvent *) {
+    toolWidget->raise();
 }
 
 void QtViewerWidget::createToolButtons() {
