@@ -4,7 +4,7 @@ IF(APPLE)
   set(CMAKE_PREFIX_PATH $ENV{HOME}/Qt5.1.1/5.1.1/clang_64/lib/cmake)
 ENDIF()
 
-project(newviewer)
+project(m3diview)
 
 # Find includes in corresponding build directories
 SET (CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -57,7 +57,7 @@ SET(VIEWER_RESOURCES ../../resources.qrc)
 
 qt5_add_resources(ResourceSources ${VIEWER_RESOURCES})
 
-add_executable(newviewer MACOSX_BUNDLE ${VIEWER_SOURCES} ${VIEWER_HEADERS} ${ResourceSources})
+add_executable(m3diview MACOSX_BUNDLE ${VIEWER_SOURCES} ${VIEWER_HEADERS} ${ResourceSources})
 
 # Use the Widgets, Concurrent and OpenGL modules from Qt 5.
-qt5_use_modules(newviewer Widgets Concurrent OpenGL)
+qt5_use_modules(m3diview Widgets Concurrent OpenGL)
