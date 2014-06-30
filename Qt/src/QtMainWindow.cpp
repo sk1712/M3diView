@@ -162,7 +162,7 @@ void QtMainWindow::connectWindowSignals() {
 
     // Image menu signals
     connect(toggleVisibleAction, SIGNAL(triggered()), this, SLOT(toggleImageVisible()));
-    connect(deleteImageAction, SIGNAL(triggered()), this, SLOT(deleteThisImage()));
+    connect(deleteImageAction, SIGNAL(triggered()), this, SLOT(deleteImages()));
 
     // Toolbar signals
     connect(zoomInAction, SIGNAL(triggered()), this, SLOT(zoomIn()));
@@ -485,7 +485,7 @@ void QtMainWindow::viewImage() {
     connectViewerSignals();
 }
 
-void QtMainWindow::deleteThisImage() {
+void QtMainWindow::deleteImages() {
     QList<irtkQtImageObject*> & list = irtkQtViewer::Instance()->GetImageList();
     QModelIndexList indexList = imageListView->selectionModel()->selectedIndexes();
     QList<int> rowList;

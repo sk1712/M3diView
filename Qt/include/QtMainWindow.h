@@ -165,7 +165,7 @@ private slots:
     void viewImage();
 
     /// Callback function for deleteImageAction
-    void deleteThisImage();
+    void deleteImages();
 
     /// Callback function for toggleVisibleAction
     void toggleImageVisible();
