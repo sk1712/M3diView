@@ -1,6 +1,7 @@
 #include <irtkQtImageObject.h>
 
 #include <QFileInfo>
+#include <QDebug>
 
 
 irtkQtImageObject::irtkQtImageObject(const QString &path)
@@ -32,11 +33,18 @@ void irtkQtImageObject::CreateImage() {
         return;
     }
 
-    // Set up the look up table
-    _lookupTable = new irtkQtLookupTable;
-
     double imageMin, imageMax;
     _image->GetMinMaxAsDouble(&imageMin, &imageMax);
+
+    // if
+    if ( (imageMin == 0) && (imageMax == 0) ) {
+        delete _image;
+        throw irtkException("Invalid image file", _path.toStdString());
+        return;
+    }
+
+    // Initialize the lookup table corresponding to the image min, max values
+    _lookupTable = new irtkQtLookupTable;
     _lookupTable->SetMinMaxImageValues(imageMin, imageMax);
     _lookupTable->SetMinMaxDisplayValues(imageMin, imageMax);
     _lookupTable->Initialize();
