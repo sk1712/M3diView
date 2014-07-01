@@ -42,6 +42,24 @@ QtMainWindow::~QtMainWindow() {
     irtkQtViewer::Destroy();
 }
 
+void QtMainWindow::loadImages(const QStringList &fileList) {
+    irtkQtViewer* instance = irtkQtViewer::Instance();
+
+    // Create an irtkImageObject for each new image
+    QStringList::const_iterator it;
+    for (it = fileList.constBegin(); it != fileList.constEnd(); it++) {
+        if ( !imageInList(*it) ) {
+            qDebug("Creating image for file %s", qPrintable((*it)));
+            instance->CreateImage((*it));
+        }
+    }
+
+    // Update the image model
+    delete imageModel;
+    imageModel = new irtkImageListModel(instance->GetImageList());
+    imageListView->setModel(imageModel);
+}
+
 void QtMainWindow::createDockWindows() {
     // Create image list dock widget
     QDockWidget *dock = new QDockWidget(tr("Image list"), this);
@@ -148,7 +166,7 @@ void QtMainWindow::createImageMenuActions() {
     toggleVisibleAction = new QAction(tr("Visible"), this);
     toggleVisibleAction->setCheckable(true);
 
-    deleteImageAction = new QAction(tr("Delete"), this);
+    deleteImageAction = new QAction(tr("Remove from list"), this);
     deleteImageAction->setIcon(QIcon(":/icons/erase.png"));
 }
 
@@ -445,21 +463,7 @@ void QtMainWindow::openImage() {
                                                           &selfilter);
 #endif
 
-    irtkQtViewer* instance = irtkQtViewer::Instance();
-
-    // Create an irtkImageObject for each new image
-    QStringList::const_iterator it;
-    for (it = fileNames.constBegin(); it != fileNames.constEnd(); it++) {
-        if ( !imageInList(*it) ) {
-            qDebug("Creating image for file %s", qPrintable((*it)));
-            instance->CreateImage((*it));
-        }
-    }
-
-    // Update the image model
-    delete imageModel;
-    imageModel = new irtkImageListModel(instance->GetImageList());
-    imageListView->setModel(imageModel);
+    loadImages(fileNames);
 }
 
 void QtMainWindow::viewImage() {
@@ -538,8 +542,11 @@ void QtMainWindow::deleteImages() {
 
 void QtMainWindow::toggleImageVisible() {
     QList<irtkQtImageObject*> & list = irtkQtViewer::Instance()->GetImageList();
+
     bool visible = !list[currentImageIndex]->IsVisible();
     list[currentImageIndex]->SetVisible(visible);
+
+    bool clickImage = false;
 
     // If image becomes visible display it
     if (visible) {
@@ -550,6 +557,7 @@ void QtMainWindow::toggleImageVisible() {
             displaySingleImage(currentImageIndex);
             numDisplayedImages++;
             setUpViewerWidgets();
+            clickImage = true;
         }
         catch (irtkException) {
             createMessageBox("Invalid image file " + list[currentImageIndex]->GetPath(), QMessageBox::Critical);
@@ -558,6 +566,7 @@ void QtMainWindow::toggleImageVisible() {
             for (it = viewers.begin(); it != viewers.end(); it++) {
                 (*it)->UpdateKeysAfterIndexDeleted(currentImageIndex);
             }
+            clickImage = false;
         }
     }
     // Otherwise delete it and decrease the number of visible images
@@ -578,6 +587,13 @@ void QtMainWindow::toggleImageVisible() {
     delete imageModel;
     imageModel = new irtkImageListModel(list);
     imageListView->setModel(imageModel);
+
+    if (clickImage) {
+        QModelIndex idx = imageModel->index(currentImageIndex, 0);
+        imageListView->setCurrentIndex(idx);
+        emit imageListView->clicked(idx);
+    }
+
 }
 
 /// free function used to calculate the output images
