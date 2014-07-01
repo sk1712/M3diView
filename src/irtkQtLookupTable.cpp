@@ -43,7 +43,12 @@ void irtkQtLookupTable::Initialize() {
     case MODE_INVERSE:
         SetColorModeToInverse();
         break;
+    case MODE_HOTMETAL:
+        SetColorModeToHotmetal();
+    default:
+        qCritical("Unknown color mode");
     }
+
 }
 
 void irtkQtLookupTable::SetColorModeList() {
@@ -51,7 +56,8 @@ void irtkQtLookupTable::SetColorModeList() {
                      << "Green"
                      << "Blue"
                      << "Grey"
-                     << "Inverse";
+                     << "Inverse"
+                     << "Hotmetal";
 }
 
 QStringList irtkQtLookupTable::GetColorModeList() {
@@ -66,10 +72,10 @@ void irtkQtLookupTable::SetColorModeToRed() {
     int minD = round((minDisplay - minImage) * 255 / (maxImage - minImage));
     int maxD = round((maxDisplay - minImage) * 255 / (maxImage - minImage));
 
-    for (int i = 0; i <= minD; i++) {
+    for (int i = 0; i < minD; i++) {
         lookupTable[i] = qRgba(0, 0, 0, _alpha);
     }
-    for (int i = minD + 1; i <= maxD; i++) {
+    for (int i = minD; i <= maxD; i++) {
         int value = round((i - minD) * 255 / (maxD - minD));
         lookupTable[i] = qRgba(value, 0, 0, _alpha);
     }
@@ -82,10 +88,10 @@ void irtkQtLookupTable::SetColorModeToGreen() {
     int minD = round((minDisplay - minImage) * 255 / (maxImage - minImage));
     int maxD = round((maxDisplay - minImage) * 255 / (maxImage - minImage));
 
-    for (int i = 0; i <= minD; i++) {
+    for (int i = 0; i < minD; i++) {
         lookupTable[i] = qRgba(0, 0, 0, _alpha);
     }
-    for (int i = minD + 1; i <= maxD; i++) {
+    for (int i = minD; i <= maxD; i++) {
         int value = round((i - minD) * 255 / (maxD - minD));
         lookupTable[i] = qRgba(0, value, 0, _alpha);
     }
@@ -98,10 +104,10 @@ void irtkQtLookupTable::SetColorModeToBlue() {
     int minD = round((minDisplay - minImage) * 255 / (maxImage - minImage));
     int maxD = round((maxDisplay - minImage) * 255 / (maxImage - minImage));
 
-    for (int i = 0; i <= minD; i++) {
+    for (int i = 0; i < minD; i++) {
         lookupTable[i] = qRgba(0, 0, 0, _alpha);
     }
-    for (int i = minD + 1; i <= maxD; i++) {
+    for (int i = minD; i <= maxD; i++) {
         int value = round((i - minD) * 255 / (maxD - minD));
         lookupTable[i] = qRgba(0, 0, value, _alpha);
     }
@@ -114,10 +120,10 @@ void irtkQtLookupTable::SetColorModeToLuminance() {
     int minD = round((minDisplay - minImage) * 255 / (maxImage - minImage));
     int maxD = round((maxDisplay - minImage) * 255 / (maxImage - minImage));
 
-    for (int i = 0; i <= minD; i++) {
+    for (int i = 0; i < minD; i++) {
         lookupTable[i] = qRgba(0, 0, 0, _alpha);
     }
-    for (int i = minD + 1; i <= maxD; i++) {
+    for (int i = minD; i <= maxD; i++) {
         int value = round((i - minD) * 255 / (maxD - minD));
         lookupTable[i] = qRgba(value, value, value, _alpha);
     }
@@ -130,14 +136,30 @@ void irtkQtLookupTable::SetColorModeToInverse() {
     int minD = round((minDisplay - minImage) * 255 / (maxImage - minImage));
     int maxD = round((maxDisplay - minImage) * 255 / (maxImage - minImage));
 
-    for (int i = 0; i <= minD; i++) {
+    for (int i = 0; i < minD; i++) {
         lookupTable[i] = qRgba(255, 255, 255, _alpha);
     }
-    for (int i = minD + 1; i <= maxD; i++) {
+    for (int i = minD; i <= maxD; i++) {
         int value = round((maxD - i) * 255 / (maxD - minD));
         lookupTable[i] = qRgba(value, value, value, _alpha);
     }
     for (int i = maxD + 1; i <= 255; i++) {
         lookupTable[i] = qRgba(0, 0, 0, _alpha);
+    }
+}
+
+void irtkQtLookupTable::SetColorModeToHotmetal() {
+    int minD = round((minDisplay - minImage) * 255 / (maxImage - minImage));
+    int maxD = round((maxDisplay - minImage) * 255 / (maxImage - minImage));
+
+    for (int i = 0; i < minD; i++) {
+        lookupTable[i] = qRgba(0, 0, 0, _alpha);
+    }
+    for (int i = minD; i <= maxD; i++) {
+        int value = round((i - minD) * 255 / (maxD - minD));
+        lookupTable[i] = qRgba(255, value, 0, _alpha);
+    }
+    for (int i = maxD + 1; i <= 255; i++) {
+        lookupTable[i] = qRgba(255, 255, 0, _alpha);
     }
 }

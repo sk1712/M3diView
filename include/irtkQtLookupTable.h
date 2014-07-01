@@ -9,7 +9,8 @@ class irtkQtLookupTable
 public:
 
     /// Color modes
-    enum irtkColorMode {MODE_RED, MODE_GREEN, MODE_BLUE, MODE_LUMINANCE, MODE_INVERSE};
+    enum irtkColorMode {MODE_RED, MODE_GREEN, MODE_BLUE, MODE_LUMINANCE, MODE_INVERSE,
+                        MODE_HOTMETAL};
 
     /// The corresponding lookup table
     QRgb *lookupTable;
@@ -103,6 +104,9 @@ private:
 
     /// Color mode inverse luminance
     void SetColorModeToInverse();
+
+    /// Color mode hot metal
+    void SetColorModeToHotmetal();
 };
 
 
