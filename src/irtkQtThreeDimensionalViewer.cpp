@@ -275,7 +275,7 @@ void irtkQtThreeDimensionalViewer::SetOrientation(int view) {
         irtkQtBaseViewer::SetOrientation(x, z, y);
         break;
     default:
-        cerr << "Not a valid type of two dimensional viewer" << endl;
+        qCritical("Not a valid type of two dimensional view");
         exit(1);
         break;
     }
@@ -307,7 +307,7 @@ void irtkQtThreeDimensionalViewer::ChangeViewSlice(int view) {
         _dz = 1;
         break;
     default:
-        cerr << "Not a valid type of two dimensional viewer" << endl;
+        qCritical("Not a valid type of two dimensional viewer");
         exit(1);
         break;
     }

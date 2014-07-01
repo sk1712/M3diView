@@ -120,7 +120,7 @@ void irtkQtBaseViewer::InitializeDimensions() {
         sliceNum[2] = _targetImage->GetZ();
         break;
     default:
-        cerr << "Not a valid type of viewer" << endl;
+        qCritical("Not a valid type of viewer");
         exit(1);
         break;
     }
@@ -145,7 +145,7 @@ void irtkQtBaseViewer::InitializeOrientation() {
     case VIEW_3D :
         break;
     default:
-        cerr << "Not a valid type of viewer" << endl;
+        qCritical("Not a valid type of viewer");
         exit(1);
         break;
     }

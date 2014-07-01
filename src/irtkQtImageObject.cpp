@@ -29,6 +29,7 @@ void irtkQtImageObject::CreateImage() {
     }
     // If not, throw an exception and return
     catch (irtkException e) {
+        qCritical("Invalid file '%s'", qPrintable(_path));
         throw e;
         return;
     }
@@ -36,9 +37,10 @@ void irtkQtImageObject::CreateImage() {
     double imageMin, imageMax;
     _image->GetMinMaxAsDouble(&imageMin, &imageMax);
 
-    // if
+    // If image is corrupted the throw irtkException
     if ( (imageMin == 0) && (imageMax == 0) ) {
         delete _image;
+        qCritical("Invalid image file '%s'", qPrintable(_path));
         throw irtkException("Invalid image file", _path.toStdString());
         return;
     }
@@ -107,7 +109,7 @@ void irtkQtImageObject::ConvertImageToTarget() {
          attr._dz = _image->GetXSize();
         break;
     default:
-        cerr << "irtkQtImageObject::ConvertImageToTarget: Can't work out x-orientation" << endl;
+        qCritical("Can't work out x-orientation");
         break;
     }
 
@@ -155,7 +157,7 @@ void irtkQtImageObject::ConvertImageToTarget() {
          attr._dz = _image->GetYSize();
         break;
     default:
-        cerr << "irtkQtImageObject::ConvertImageToTarget: Can't work out y-orientation" << endl;
+        qCritical("Can't work out y-orientation");
         break;
     }
 
@@ -203,7 +205,7 @@ void irtkQtImageObject::ConvertImageToTarget() {
          attr._dz = _image->GetZSize();
         break;
     default:
-        cerr << "irtkQtImageObject::ConvertImageToTarget: Can't work out z-orientation" << endl;
+        qCritical("Can't work out z-orientation");
         break;
     }
 

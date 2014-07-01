@@ -50,15 +50,19 @@ void QtGlWidget::wheelEvent(QWheelEvent *event) {
 void QtGlWidget::keyPressEvent(QKeyEvent *event) {
     switch(event->key()) {
     case Qt::Key_Left:
+        qDebug("Left key pressed");
         emit leftKeyPressed();
         break;
     case Qt::Key_Right:
+        qDebug("Right key pressed");
         emit rightKeyPressed();
         break;
     case Qt::Key_Up:
+        qDebug("Up key pressed");
         emit upKeyPressed();
         break;
     case Qt::Key_Down:
+        qDebug("Down key pressed");
         emit downKeyPressed();
         break;
     default:

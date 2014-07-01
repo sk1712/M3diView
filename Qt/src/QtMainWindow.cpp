@@ -5,6 +5,7 @@
 #include <QToolBar>
 #include <QFileDialog>
 #include <QDir>
+#include <QDebug>
 
 #include <QGridLayout>
 #include <QVBoxLayout>
@@ -298,9 +299,11 @@ bool QtMainWindow::imageInList(const QString fileName) const {
     QList<irtkQtImageObject*> list = irtkQtViewer::Instance()->GetImageList();
     QList<irtkQtImageObject*>::const_iterator it;
     for (it = list.constBegin(); it != list.constEnd(); it++) {
-        if ((*it)->GetPath() == fileName)
+        if ((*it)->GetPath() == fileName) {
             // Image has already been loaded
+            qDebug() << "Image " << fileName << " already in the list";
             return true;
+        }
     }
     return false;
 }
@@ -448,6 +451,7 @@ void QtMainWindow::openImage() {
     QStringList::const_iterator it;
     for (it = fileNames.constBegin(); it != fileNames.constEnd(); it++) {
         if ( !imageInList(*it) ) {
+            qDebug("Creating image for file %s", qPrintable((*it)));
             instance->CreateImage((*it));
         }
     }
@@ -486,6 +490,8 @@ void QtMainWindow::viewImage() {
 }
 
 void QtMainWindow::deleteImages() {
+    qDebug("Deleting images");
+
     QList<irtkQtImageObject*> & list = irtkQtViewer::Instance()->GetImageList();
     QModelIndexList indexList = imageListView->selectionModel()->selectedIndexes();
     QList<int> rowList;
@@ -537,6 +543,8 @@ void QtMainWindow::toggleImageVisible() {
 
     // If image becomes visible display it
     if (visible) {
+        qDebug("Making image visible");
+
         try {
             list[currentImageIndex]->CreateImage();
             displaySingleImage(currentImageIndex);
@@ -554,6 +562,8 @@ void QtMainWindow::toggleImageVisible() {
     }
     // Otherwise delete it and decrease the number of visible images
     else {
+        qDebug("Making image invisible");
+
         numDisplayedImages--;
 
         if (numDisplayedImages == 0) {
@@ -577,6 +587,8 @@ void CalculateOutputImage(irtkQtBaseViewer* viewer) {
 }
 
 void QtMainWindow::zoomIn() {
+    qDebug("Zooming in");
+
     Qt2dViewerWidget *viewerWidget;
     irtkQtBaseViewer *viewer;
 
@@ -619,6 +631,8 @@ void QtMainWindow::zoomIn() {
 }
 
 void QtMainWindow::zoomOut() {
+    qDebug("Zooming out");
+
     Qt2dViewerWidget *viewerWidget;
     irtkQtBaseViewer *viewer;
 
@@ -664,11 +678,15 @@ void QtMainWindow::showOnlyThisWidget() {
     singleViewerInScreen = !singleViewerInScreen;
 
     if (!singleViewerInScreen) {
+        qDebug("Exiting single viewer mode");
+
         for (int i = 0; i < viewerWidgets.size(); i++) {
             viewerWidgets[i]->show();
         }
     }
     else {
+        qDebug("Entering single viewer mode");
+
         QWidget *senderWidget = dynamic_cast<QWidget*>(sender());
         for (int i = 0; i < viewerWidgets.size(); i++) {
             if (viewerWidgets[i] != senderWidget)
@@ -678,8 +696,9 @@ void QtMainWindow::showOnlyThisWidget() {
 }
 
 void QtMainWindow::deleteThisWidget() {
-    QWidget *senderWidget = dynamic_cast<QWidget*>(sender());
+    qDebug("Deleting viewer widget");
 
+    QWidget *senderWidget = dynamic_cast<QWidget*>(sender());
     QLayout *layout = mainViewWidget->layout();
 
     for (int i = 0; i < viewerWidgets.size(); i++) {
@@ -696,33 +715,43 @@ void QtMainWindow::deleteThisWidget() {
 }
 
 void QtMainWindow::createAxialView() {
+    qDebug("Creating axial view");
     addToViewWidget(createTwoDimensionalView(irtkQtBaseViewer::VIEW_AXIAL));
 }
 
 void QtMainWindow::createCoronalView() {
+    qDebug("Creating coronal view");
     addToViewWidget(createTwoDimensionalView(irtkQtBaseViewer::VIEW_CORONAL));
 }
 
 void QtMainWindow::createSagittalView() {
+    qDebug("Creating saggital view");
     addToViewWidget(createTwoDimensionalView(irtkQtBaseViewer::VIEW_SAGITTAL));
 }
 
 void QtMainWindow::createOrthogonalView() {
+    qDebug("Creating orthogonal view");
+
     addToViewWidget(createTwoDimensionalView(irtkQtBaseViewer::VIEW_AXIAL));
     addToViewWidget(createTwoDimensionalView(irtkQtBaseViewer::VIEW_CORONAL));
     addToViewWidget(createTwoDimensionalView(irtkQtBaseViewer::VIEW_SAGITTAL));
 }
 
 void QtMainWindow::create3dView() {
+    qDebug("Creating 3D view");
     addToViewWidget(createThreeDimensionalView());
 }
 
 void QtMainWindow::clearViews() {
+    qDebug("Clearing views");
+
     clearLists();
     singleViewerInScreen = false;
 }
 
 void QtMainWindow::updateOrigin(double x, double y, double z) {
+    qDebug("Updating origin");
+
     irtkQtBaseViewer *senderViewer, *viewer;
     QtViewerWidget *viewerWidget;
     senderViewer = dynamic_cast<irtkQtBaseViewer*>(sender());
@@ -773,6 +802,8 @@ void QtMainWindow::updateOrigin(double x, double y, double z) {
 }
 
 void QtMainWindow::minDisplayValueChanged(double value) {
+    qDebug("Minimum display value changed");
+
     QList<irtkQtImageObject*> & list = irtkQtViewer::Instance()->GetImageList();
     int index = imageListView->currentIndex().row();
     if (!list.empty() && index >= 0) {
@@ -784,6 +815,8 @@ void QtMainWindow::minDisplayValueChanged(double value) {
 }
 
 void QtMainWindow::maxDisplayValueChanged(double value) {
+    qDebug("Maximum display value changed");
+
     QList<irtkQtImageObject*> & list = irtkQtViewer::Instance()->GetImageList();
     int index = imageListView->currentIndex().row();
     if (!list.empty() && index >= 0) {
@@ -795,6 +828,8 @@ void QtMainWindow::maxDisplayValueChanged(double value) {
 }
 
 void QtMainWindow::colormapIndexChanged(int mode) {
+    qDebug("Colormap changed");
+
     QList<irtkQtImageObject*> & list = irtkQtViewer::Instance()->GetImageList();
     int index = imageListView->currentIndex().row();
     if (!list.empty() && index >= 0) {
@@ -806,6 +841,8 @@ void QtMainWindow::colormapIndexChanged(int mode) {
 }
 
 void QtMainWindow::opacityValueChanged(int value) {
+    qDebug("Opacity value changed");
+
     QList<irtkQtImageObject*> & list = irtkQtViewer::Instance()->GetImageList();
     int index = imageListView->currentIndex().row();
     if (!list.empty() && index >= 0) {
@@ -817,6 +854,7 @@ void QtMainWindow::opacityValueChanged(int value) {
 }
 
 void QtMainWindow::listViewDoubleClicked(QModelIndex index) {
+    qDebug("List view double clicked");
     currentImageIndex = index.row();
     toggleImageVisible();
 }
@@ -870,6 +908,8 @@ void QtMainWindow::listViewShowContextMenu(const QPoint &pos) {
 }
 
 void QtMainWindow::moveImageUp() {
+    qDebug("Moving image up");
+
     QList<irtkQtImageObject*> & list = irtkQtViewer::Instance()->GetImageList();
     int index = imageListView->currentIndex().row();
     if (!list.empty() && index > 0) {
@@ -890,6 +930,8 @@ void QtMainWindow::moveImageUp() {
 }
 
 void QtMainWindow::moveImageDown() {
+    qDebug("Moving image down");
+
     QList<irtkQtImageObject*> & list = irtkQtViewer::Instance()->GetImageList();
     int index = imageListView->currentIndex().row();
     if (!list.empty() && index >= 0 && (index < list.size() - 1)) {
