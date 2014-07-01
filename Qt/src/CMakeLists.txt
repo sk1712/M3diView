@@ -1,7 +1,13 @@
 cmake_minimum_required(VERSION 2.8.9)
 
 if(APPLE)
-  set(CMAKE_PREFIX_PATH $ENV{HOME}/Qt5.1.1/5.1.1/clang_64/lib/cmake)
+    # Check if environment variable QTDIR is set.
+    # Extra security for windows environment as well.
+    if (DEFINED ENV{QTDIR})
+        set(CMAKE_PREFIX_PATH $ENV{QTDIR} ${CMAKE_PREFIX_PATH})
+    else ()
+        message (FATAL_ERROR "ERROR: Environment variable QTDIR is not set. Please locate your Qt folder MY_QT5_DIR.")
+    endif ()
 endif()
 
 project(m3diview)
