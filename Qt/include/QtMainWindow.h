@@ -85,6 +85,9 @@ public:
     /// Class destructor
     ~QtMainWindow();
 
+    /// Load list of images defined in QStringList
+    void loadImages(const QStringList & fileList);
+
 private:
 
     /// Create dock windows

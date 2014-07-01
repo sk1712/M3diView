@@ -41,7 +41,7 @@ void messageOutput(QtMsgType type, const QMessageLogContext &context, const QStr
     QFile outFile("viewer.log");
     QFileInfo info(outFile);
 
-    // Set limit to log file 200MB
+    // Set limit to log file size of 200MB
     if (info.size() > 200*1024*1024)
         outFile.open(QIODevice::WriteOnly);
     else
@@ -66,6 +66,13 @@ int main(int argc, char *argv[])
     QtMainWindow window;
     window.setWindowState(Qt::WindowMaximized);
     window.show();
+
+    // Load image files from command line
+    QStringList args = app.arguments();
+    if (args.length() > 1) {
+        args.removeAt(0);
+        window.loadImages(args);
+    }
 
 #ifdef Q_OS_MAC
     app.setAttribute(Qt::AA_UseHighDpiPixmaps);
