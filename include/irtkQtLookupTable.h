@@ -10,7 +10,8 @@ public:
 
     /// Color modes
     enum irtkColorMode {MODE_RED, MODE_GREEN, MODE_BLUE, MODE_LUMINANCE, MODE_INVERSE,
-                        MODE_HOTMETAL};
+                        MODE_JACOBIAN, MODE_JACOBIAN_EXPANSION, MODE_JACOBIAN_CONTRACTION,
+                        MODE_HOTMETAL, MODE_RAINBOW};
 
     /// The corresponding lookup table
     QRgb *lookupTable;
@@ -105,8 +106,20 @@ private:
     /// Color mode inverse luminance
     void SetColorModeToInverse();
 
+    /// Color mode Jacobian
+    void SetColorModeToJacobian();
+
+    /// Color mode Jacobian expansion
+    void SetColorModeToJacobianExpansion();
+
+    /// Color mode Jacobian contraction
+    void SetColorModeToJacobianContraction();
+
     /// Color mode hot metal
     void SetColorModeToHotmetal();
+
+    /// Color mode rainbow
+    void SetColorModeToRainbow();
 };
 
 
