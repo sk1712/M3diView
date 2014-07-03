@@ -11,6 +11,14 @@
 
 class irtkQtImageObject
 {
+public:
+
+    /// Interpolation modes
+    enum irtkQtInterpolationMode {INTERPOLATION_NN, INTERPOLATION_LINEAR,
+                                  INTERPOLATION_C_SPLINE, INTERPOLATION_B_SPLINE,
+                                  INTERPOLATION_SINC};
+
+private:
 
     /// Flag showing if image is visible
     bool _visible;
@@ -26,6 +34,9 @@ class irtkQtImageObject
 
     /// Corresponding lookuptable
     irtkQtLookupTable* _lookupTable;
+
+    /// Corresponding interpolation mode
+    irtkQtInterpolationMode _interpolation;
 
 public:
 
@@ -88,6 +99,12 @@ public:
 
     /// Get colormap for the corresponding image
     int GetColormap() const;
+
+    /// Set interpolation function for the corresponding image
+    void SetInterpolation(irtkQtImageObject::irtkQtInterpolationMode mode);
+
+    /// Get interpolation function for the corresponding image
+    int GetInterpolation() const;
 
     /// Convert image to the desired coordinate system
     void ConvertImageToTarget();
@@ -204,6 +221,14 @@ inline int irtkQtImageObject::GetColormap() const {
     }
 
     return colormapIndex;
+}
+
+inline void irtkQtImageObject::SetInterpolation(irtkQtImageObject::irtkQtInterpolationMode mode) {
+    _interpolation = mode;
+}
+
+inline int irtkQtImageObject::GetInterpolation() const {
+    return _interpolation;
 }
 
 #endif // IRTKQTIMAGEOBJECT_H

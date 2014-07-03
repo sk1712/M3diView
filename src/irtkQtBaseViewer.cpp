@@ -1,12 +1,26 @@
 #include <irtkQtBaseViewer.h>
 
 
+QStringList irtkQtBaseViewer::_interpolationStringList;
+
 irtkQtBaseViewer::irtkQtBaseViewer() {
     _targetImage = NULL;
 }
 
 irtkQtBaseViewer::~irtkQtBaseViewer() {
     delete [] sliceNum;
+}
+
+void irtkQtBaseViewer::SetInterpolationModeList() {
+    _interpolationStringList << "Nearest-neighbor"
+                             << "Linear"
+                             << "C-spline"
+                             << "B-spline"
+                             << "Sinc";
+}
+
+QStringList irtkQtBaseViewer::GetInterpolationModeList() {
+    return _interpolationStringList;
 }
 
 void irtkQtBaseViewer::AddToDisplayedImages(irtkQtImageObject *imageObject, int index) {

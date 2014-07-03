@@ -19,6 +19,9 @@ class QtToolWidget : public QWidget
     /// Combobox for colormap choice
     QComboBox* colormapCombo;
 
+    /// Combobox for interpolation options
+    QComboBox* interpolationCombo;
+
     /// Label for opacity value
     QLabel* opacityLabel;
 
@@ -51,8 +54,14 @@ public:
     /// Set colormap
     void setColormap(int index);
 
+    /// Set interpolation
+    void setInterpolation(int index);
+
     /// Fill values of colormap combobox
     void fillColorCombo(const QStringList &values);
+
+    /// Fill values of interpolaton combobox
+    void fillInterpolationCombo(const QStringList &values);
 
 private:
 
@@ -85,6 +94,9 @@ private slots:
     /// Callback function for colormap index changed
     void colormapIndexChanged(int index);
 
+    /// Callback function for interpolation index changed
+    void interpolationIndexChanged(int index);
+
     /// Callback function for opacity value changed
     void opacityValueChanged(int value);
 
@@ -98,6 +110,9 @@ signals:
 
     /// Signal emitted when colormap index changes
     void colormapChanged(int index);
+
+    /// Signal emitted when interpolation index changes
+    void interpolationChanged(int index);
 
     /// Signal emitted when opacity value changes
     void opacityChanged(int value);

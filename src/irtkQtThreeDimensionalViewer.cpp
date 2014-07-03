@@ -82,6 +82,49 @@ void CalculateSingleTransform(irtkImageTransformation** transform) {
     }
 }
 
+void irtkQtThreeDimensionalViewer::SetInterpolationMethod(int index,
+                                                          irtkQtImageObject::irtkQtInterpolationMode mode) {
+    for (int dim = 0; dim < 3; dim++)
+        delete _interpolator[index][dim];
+
+    switch (mode) {
+    case irtkQtImageObject::INTERPOLATION_NN:
+        for (int dim = 0; dim < 3; dim++)
+            _interpolator[index][dim] =
+                    irtkInterpolateImageFunction::New(Interpolation_NN, _image[index]);
+        break;
+    case irtkQtImageObject::INTERPOLATION_LINEAR:
+        for (int dim = 0; dim < 3; dim++)
+            _interpolator[index][dim] =
+                    irtkInterpolateImageFunction::New(Interpolation_Linear, _image[index]);
+        break;
+    case irtkQtImageObject::INTERPOLATION_B_SPLINE:
+        for (int dim = 0; dim < 3; dim++)
+            _interpolator[index][dim] =
+                    irtkInterpolateImageFunction::New(Interpolation_BSpline, _image[index]);
+        break;
+    case irtkQtImageObject::INTERPOLATION_C_SPLINE:
+        for (int dim = 0; dim < 3; dim++)
+            _interpolator[index][dim] =
+                    irtkInterpolateImageFunction::New(Interpolation_CSpline, _image[index]);
+        break;
+    case irtkQtImageObject::INTERPOLATION_SINC:
+        for (int dim = 0; dim < 3; dim++)
+            _interpolator[index][dim] =
+                    irtkInterpolateImageFunction::New(Interpolation_Sinc, _image[index]);
+        break;
+    default:
+        qCritical("Unknown interpolation option");
+    }
+
+    for (int dim = 0; dim < 3; dim++)
+        _transformFilter[index][dim]->PutInterpolator(_interpolator[index][dim]);
+
+    // Calculate the new output image
+    currentIndex = index;
+    CalculateCurrentOutput();
+}
+
 void irtkQtThreeDimensionalViewer::CalculateOutputImages() {
     irtkImageAttributes attr[3];
     // Width of output image

@@ -33,6 +33,9 @@ public:
     /// Get the array of RGB values to be drawn on the screen
     vector<QRgb**> GetDrawable();
 
+    /// Set interpolation method
+    void SetInterpolationMethod(int index, irtkQtImageObject::irtkQtInterpolationMode mode);
+
     /// Calculate the output image from the transformation
     void CalculateOutputImages();
 

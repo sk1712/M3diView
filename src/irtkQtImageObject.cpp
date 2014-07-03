@@ -50,6 +50,8 @@ void irtkQtImageObject::CreateImage() {
     _lookupTable->SetMinMaxImageValues(imageMin, imageMax);
     _lookupTable->SetMinMaxDisplayValues(imageMin, imageMax);
     _lookupTable->Initialize();
+
+    _interpolation = INTERPOLATION_NN;
 }
 
 void irtkQtImageObject::ConvertImageToTarget() {

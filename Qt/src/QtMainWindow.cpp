@@ -85,10 +85,14 @@ void QtMainWindow::createDockWindows() {
     toolsTabWidget->addTab(infoWidget, tr("Info"));
 
     // Set up visualisation tool
-    irtkQtLookupTable::SetColorModeList();
     visualToolWidget = new QtToolWidget;
     visualToolWidget->setEnabled(false);
+
+    irtkQtLookupTable::SetColorModeList();
     visualToolWidget->fillColorCombo(irtkQtLookupTable::GetColorModeList());
+    irtkQtBaseViewer::SetInterpolationModeList();
+    visualToolWidget->fillInterpolationCombo(irtkQtBaseViewer::GetInterpolationModeList());
+
     toolsTabWidget->addTab(visualToolWidget, tr("Visualisation"));
 }
 
@@ -201,6 +205,7 @@ void QtMainWindow::connectWindowSignals() {
 
 void QtMainWindow::connectToolSignals() {
     connect(visualToolWidget, SIGNAL(colormapChanged(int)), this, SLOT(colormapIndexChanged(int)));
+    connect(visualToolWidget, SIGNAL(interpolationChanged(int)), this, SLOT(interpolationIndexChanged(int)));
     connect(visualToolWidget, SIGNAL(opacityChanged(int)), this, SLOT(opacityValueChanged(int)));
     connect(visualToolWidget, SIGNAL(minChanged(double)), this, SLOT(minDisplayValueChanged(double)));
     connect(visualToolWidget, SIGNAL(maxChanged(double)), this, SLOT(maxDisplayValueChanged(double)));
@@ -856,6 +861,30 @@ void QtMainWindow::colormapIndexChanged(int mode) {
     }
 }
 
+void QtMainWindow::interpolationIndexChanged(int mode) {
+    qDebug("Interpolation changed");
+
+    QList<irtkQtImageObject*> & list = irtkQtViewer::Instance()->GetImageList();
+    irtkQtImageObject::irtkQtInterpolationMode md =
+            static_cast<irtkQtImageObject::irtkQtInterpolationMode>(mode);
+
+    int index = imageListView->currentIndex().row();
+    if (!list.empty() && index >= 0) {
+        if (list[index]->IsVisible()) {
+            // Update interpolation info in irtkQtImageObject
+            list[index]->SetInterpolation(md);
+
+            // Update the interpolation method in the viewers
+            QList<irtkQtBaseViewer*>::iterator it;
+            for (it = viewers.begin(); it != viewers.end(); it++) {
+                (*it)->SetInterpolationMethod(index, md);
+            }
+
+            updateDrawables();
+        }
+    }
+}
+
 void QtMainWindow::opacityValueChanged(int value) {
     qDebug("Opacity value changed");
 
@@ -883,6 +912,7 @@ void QtMainWindow::listViewClicked(QModelIndex index) {
     if (imageObject->IsVisible()) {
         visualToolWidget->setEnabled(true);
         visualToolWidget->setColormap(imageObject->GetColormap());
+        visualToolWidget->setInterpolation(imageObject->GetInterpolation());
         visualToolWidget->setOpacity(imageObject->GetOpacity());
         visualToolWidget->setMinimumImageValue(imageObject->GetMinImageValue());
         visualToolWidget->setMaximumImageValue(imageObject->GetMaxImageValue());

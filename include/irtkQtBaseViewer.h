@@ -53,6 +53,9 @@ protected:
     /// Image lookup table map
     map<int, irtkQtLookupTable *> _lookupTable;
 
+    /// String list with names of color modes
+    static QStringList _interpolationStringList;
+
 public:
 
     /// Class constructor
@@ -60,6 +63,12 @@ public:
 
     /// Class destructor
     virtual ~irtkQtBaseViewer();
+
+    /// Fill the values of _interpolationStringList
+    static void SetInterpolationModeList();
+
+    /// Get the values of _interpolationStringList
+    static QStringList GetInterpolationModeList();
 
     /// Set target image
     void SetTarget(irtkImage* image);
@@ -90,6 +99,10 @@ public:
 
     /// Get the array of RGB values to be drawn on the screen
     virtual vector<QRgb**> GetDrawable() = 0;
+
+    /// Set interpolation method
+    virtual void SetInterpolationMethod(int index,
+                                        irtkQtImageObject::irtkQtInterpolationMode mode) = 0;
 
     /// Calculate the output image from the transformation
     virtual void CalculateOutputImages() = 0;

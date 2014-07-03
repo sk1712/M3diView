@@ -20,6 +20,7 @@ QtToolWidget::QtToolWidget(QWidget * parent) : QWidget(parent) {
     opacityLabel = new QLabel;
 
     colormapCombo = new QComboBox;
+    interpolationCombo = new QComboBox;
 
     // Add the widgets to the layout
     addWidgetsToLayout();
@@ -61,8 +62,18 @@ void QtToolWidget::setColormap(int index) {
     }
 }
 
+void QtToolWidget::setInterpolation(int index) {
+    if (index >= 0) {
+        interpolationCombo->setCurrentIndex(index);
+    }
+}
+
 void QtToolWidget::fillColorCombo(const QStringList &values) {
     colormapCombo->addItems(values);
+}
+
+void QtToolWidget::fillInterpolationCombo(const QStringList &values) {
+    interpolationCombo->addItems(values);
 }
 
 void QtToolWidget::addWidgetsToLayout() {
@@ -95,6 +106,9 @@ void QtToolWidget::addWidgetsToLayout() {
     verticalLayout->addWidget(new QLabel("Colormap"));
     verticalLayout->addWidget(colormapCombo);
 
+    verticalLayout->addWidget(new QLabel("Interpolation"));
+    verticalLayout->addWidget(interpolationCombo);
+
     QSpacerItem* spacer = new QSpacerItem( 20, 20, QSizePolicy::Minimum,
     QSizePolicy::Expanding );
     verticalLayout->addItem( spacer );
@@ -106,6 +120,7 @@ void QtToolWidget::connectSignals() {
     connect(minImageSlider, SIGNAL(valueChanged(int)), this, SLOT(minValueChanged(int)));
     connect(maxImageSlider, SIGNAL(valueChanged(int)), this, SLOT(maxValueChanged(int)));
     connect(colormapCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(colormapIndexChanged(int)));
+    connect(interpolationCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(interpolationIndexChanged(int)));
     connect(opacitySlider, SIGNAL(valueChanged(int)), this, SLOT(opacityValueChanged(int)));
 }
 
@@ -113,6 +128,7 @@ void QtToolWidget::disconnectSignals() {
     disconnect(minImageSlider, SIGNAL(valueChanged(int)), this, SLOT(minValueChanged(int)));
     disconnect(maxImageSlider, SIGNAL(valueChanged(int)), this, SLOT(maxValueChanged(int)));
     disconnect(colormapCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(colormapIndexChanged(int)));
+    disconnect(interpolationCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(interpolationIndexChanged(int)));
     disconnect(opacitySlider, SIGNAL(valueChanged(int)), this, SLOT(opacityValueChanged(int)));
 }
 
@@ -168,6 +184,10 @@ void QtToolWidget::maxValueChanged(int value) {
 
 void QtToolWidget::colormapIndexChanged(int index) {
     emit colormapChanged(index);
+}
+
+void QtToolWidget::interpolationIndexChanged(int index) {
+    emit interpolationChanged(index);
 }
 
 void QtToolWidget::opacityValueChanged(int value) {

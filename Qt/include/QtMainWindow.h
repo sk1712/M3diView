@@ -215,6 +215,9 @@ private slots:
     /// Callback function for colormap change
     void colormapIndexChanged(int mode);
 
+    /// Callback function for interpolation change
+    void interpolationIndexChanged(int mode);
+
     /// Callback function for opacity slider changing value
     void opacityValueChanged(int value);
 

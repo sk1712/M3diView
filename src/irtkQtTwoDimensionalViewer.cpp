@@ -48,6 +48,41 @@ vector<QRgb**> irtkQtTwoDimensionalViewer::GetDrawable() {
     return allDrawables;
 }
 
+void irtkQtTwoDimensionalViewer::SetInterpolationMethod(int index, irtkQtImageObject::irtkQtInterpolationMode mode) {
+    delete _interpolator[index];
+
+    switch (mode) {
+    case irtkQtImageObject::INTERPOLATION_NN:
+        _interpolator[index] = irtkInterpolateImageFunction::New(Interpolation_NN, _image[index]);
+        qDebug("Change to interpolation NN");
+        break;
+    case irtkQtImageObject::INTERPOLATION_LINEAR:
+        _interpolator[index] = irtkInterpolateImageFunction::New(Interpolation_Linear, _image[index]);
+        qDebug("Change to interpolation linear");
+        break;
+    case irtkQtImageObject::INTERPOLATION_B_SPLINE:
+        _interpolator[index] = irtkInterpolateImageFunction::New(Interpolation_BSpline, _image[index]);
+        qDebug("Change to interpolation b-spline");
+        break;
+    case irtkQtImageObject::INTERPOLATION_C_SPLINE:
+        _interpolator[index] = irtkInterpolateImageFunction::New(Interpolation_CSpline, _image[index]);
+        qDebug("Change to interpolation c-spline");
+        break;
+    case irtkQtImageObject::INTERPOLATION_SINC:
+        qDebug("Change to interpolation sinc");
+        _interpolator[index] = irtkInterpolateImageFunction::New(Interpolation_Sinc, _image[index]);
+        break;
+    default:
+        qCritical("Unknown interpolation option");
+    }
+
+    _transformFilter[index]->PutInterpolator(_interpolator[index]);
+
+    // Calculate the new output image
+    currentIndex = index;
+    CalculateCurrentOutput();
+}
+
 ///// free function used to parallelize the transformations of images
 void CalculateSingleTransform(irtkImageTransformation* transform) {
     transform->PutSourcePaddingValue(-1);
@@ -295,9 +330,3 @@ void irtkQtTwoDimensionalViewer::AddToMaps(irtkImage* newImage, int index) {
     transformation->PutSourcePaddingValue(0);
     _transformFilter.insert(pair<int, irtkImageTransformation *> (index, transformation));
 }
-
-
-
-
-
-

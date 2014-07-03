@@ -39,6 +39,9 @@ public:
     /// Initialize single transformation from the input to the output image
     void InitializeCurrentTransformation();
 
+    /// Set interpolation method
+    void SetInterpolationMethod(int index, irtkQtImageObject::irtkQtInterpolationMode mode);
+
     /// Calculate the output image from the transformation
     void CalculateOutputImages();
 
