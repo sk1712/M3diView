@@ -7,6 +7,7 @@
 
 QtGlWidget::QtGlWidget(QWidget *parent)
     : QGLWidget(parent) {
+    setAttribute(Qt::WA_AcceptTouchEvents);
     pixelRatio = windowHandle()->devicePixelRatio();
 }
 
@@ -39,12 +40,19 @@ void QtGlWidget::mousePressEvent(QMouseEvent *event) {
 }
 
 void QtGlWidget::wheelEvent(QWheelEvent *event) {
-    // delta = the distance that the wheel is rotated, in eighths of a degree
-    int numDegrees = event->delta() /8;
-    // Most mouse types work in steps of 15 degrees
-    int numSteps = numDegrees / 15;
+//    // delta = the distance that the wheel is rotated, in eighths of a degree
+//    // Most mouse types work in steps of 15 degrees
+    QPoint numPixels = event->pixelDelta();
+    QPoint numDegrees = event->angleDelta() / 8;
 
-    emit wheelMoved(numSteps);
+    if (!numPixels.isNull()) {
+        emit wheelMoved(numPixels.y());
+    } else if (!numDegrees.isNull()) {
+        QPoint numSteps = numDegrees / 15;
+        emit wheelMoved(numSteps.y());
+    }
+
+    event->accept();
 }
 
 void QtGlWidget::keyPressEvent(QKeyEvent *event) {
