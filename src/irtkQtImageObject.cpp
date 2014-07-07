@@ -33,12 +33,6 @@ void irtkQtImageObject::CreateImage() {
         return;
     }
 
-<<<<<<< HEAD
-    // set up the look up table
-    _lookupTable = new irtkQtLookupTable;
-
-=======
->>>>>>> 60b7432... Fixed application crash when opening corrupted image file
     double imageMin, imageMax;
     _image->GetMinMaxAsDouble(&imageMin, &imageMax);
 
