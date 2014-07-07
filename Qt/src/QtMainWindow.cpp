@@ -1055,6 +1055,10 @@ void QtMainWindow::updateOrigin(double x, double y, double z) {
             viewerWidget->setCurrentSlice(viewer->GetCurrentSlice());
             viewerWidget->getGlWidget()->updateDrawable(
                         QVector<QRgb**>::fromStdVector(viewer->GetDrawable()));
+
+            double originX, originY, originZ;
+            viewer->GetOrigin(originX, originY, originZ);
+            viewerWidget->setWorldOrigin(originX, originY, originZ);
         }
     }
 

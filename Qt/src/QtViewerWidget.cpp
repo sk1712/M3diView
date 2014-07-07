@@ -12,6 +12,7 @@ QtViewerWidget::QtViewerWidget(QWidget *parent) : QWidget(parent) {
 
     QGridLayout *layout = new QGridLayout();
     layout->addWidget(toolWidget, 1, 0, 1, 2, Qt::AlignLeft);
+    //layout->setContentsMargins(0, 0, 0, 0);
     setLayout(layout);
 
     // By default link viewer to the rest of the viewers
@@ -40,6 +41,12 @@ void QtViewerWidget::expandWindow() {
     }
 
     emit windowExpanded();
+}
+
+void QtViewerWidget::setWorldOrigin(double x, double y, double z) {
+    originLabel->setText("World : " + QString::number(x) +
+                         ", " + QString::number(y) +
+                         ", " + QString::number(z));
 }
 
 void QtViewerWidget::paintEvent(QPaintEvent *) {

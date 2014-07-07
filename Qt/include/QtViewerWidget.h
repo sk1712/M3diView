@@ -69,6 +69,9 @@ public:
     /// Set viewer's flags for inverted axes
     virtual void setInvertedAxes(bool* inverted);
 
+    /// Set world origin to display
+    void setWorldOrigin(double x, double y, double z);
+
     /// Set viewer enabled
     virtual void setEnabled(bool enabled) = 0;
 
