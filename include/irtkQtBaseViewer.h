@@ -89,13 +89,13 @@ public:
     void SetDimensions(int width, int height);
 
     /// Get view mode (axial, sagittal, coronal)
-    irtkViewMode GetViewMode();
+    irtkViewMode GetViewMode() const;
 
     /// Get total number of slices
-    int* GetSliceNumber();
+    int* GetSliceNumber() const;
 
     /// Get current slice in image coordinates
-    int* GetCurrentSlice();
+    int* GetCurrentSlice() const;
 
     /// Get the array of RGB values to be drawn on the screen
     virtual vector<QRgb**> GetDrawable() = 0;
@@ -224,15 +224,15 @@ inline void irtkQtBaseViewer::SetDimensions(int width, int height) {
     _height = height;
 }
 
-inline irtkQtBaseViewer::irtkViewMode irtkQtBaseViewer::GetViewMode() {
+inline irtkQtBaseViewer::irtkViewMode irtkQtBaseViewer::GetViewMode() const {
     return _viewMode;
 }
 
-inline int* irtkQtBaseViewer::GetSliceNumber() {
+inline int* irtkQtBaseViewer::GetSliceNumber() const {
     return sliceNum;
 }
 
-inline int* irtkQtBaseViewer::GetCurrentSlice() {
+inline int* irtkQtBaseViewer::GetCurrentSlice() const {
     return currentSlice;
 }
 

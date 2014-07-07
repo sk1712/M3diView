@@ -25,7 +25,7 @@ void irtkQtImageObject::CreateImage() {
     // Check if image object can be constructed from the file
     try {
         _image = irtkImage::New(_path.toStdString().c_str());
-        ConvertImageToTarget();
+        //ConvertImageToTarget();
     }
     // If not, throw an exception and return
     catch (irtkException e) {
