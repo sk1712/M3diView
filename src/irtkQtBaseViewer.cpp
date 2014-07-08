@@ -9,6 +9,7 @@ irtkQtBaseViewer::irtkQtBaseViewer() {
 
 irtkQtBaseViewer::~irtkQtBaseViewer() {
     delete [] sliceNum;
+    delete [] inverted;
 }
 
 void irtkQtBaseViewer::SetInterpolationModeList() {
@@ -118,20 +119,201 @@ void irtkQtBaseViewer::InitializeOrigin() {
 }
 
 void irtkQtBaseViewer::InitializeDimensions() {
+    int iaxis, jaxis, kaxis;
+
+    _targetImage->Orientation(iaxis, jaxis, kaxis);
+
     switch (_viewMode) {
     case VIEW_AXIAL :
-        *sliceNum = _targetImage->GetZ();
+        switch (iaxis) {
+        case IRTK_S2I:
+            *inverted = true;
+            *sliceNum = _targetImage->GetX();
+            break;
+        case IRTK_I2S:
+            *inverted = false;
+            *sliceNum = _targetImage->GetX();
+        default:
+            break;
+        }
+        switch (jaxis) {
+        case IRTK_S2I:
+            *inverted = true;
+            *sliceNum = _targetImage->GetY();
+            break;
+        case IRTK_I2S:
+            *inverted = false;
+            *sliceNum = _targetImage->GetY();
+        default:
+            break;
+        }
+        switch (kaxis) {
+        case IRTK_S2I:
+            *inverted = true;
+            *sliceNum = _targetImage->GetZ();
+            break;
+        case IRTK_I2S:
+            *inverted = false;
+            *sliceNum = _targetImage->GetZ();
+        default:
+            break;
+        }
         break;
     case VIEW_SAGITTAL :
-        *sliceNum = _targetImage->GetX();
+        switch (iaxis) {
+        case IRTK_L2R:
+            *inverted = true;
+            *sliceNum = _targetImage->GetX();
+            break;
+        case IRTK_R2L:
+            *inverted = false;
+            *sliceNum = _targetImage->GetX();
+        default:
+            break;
+        }
+        switch (jaxis) {
+        case IRTK_L2R:
+            *inverted = true;
+            *sliceNum = _targetImage->GetY();
+            break;
+        case IRTK_R2L:
+            *inverted = true;
+            *sliceNum = _targetImage->GetY();
+        default:
+            break;
+        }
+        switch (kaxis) {
+        case IRTK_L2R:
+            *inverted = true;
+            *sliceNum = _targetImage->GetZ();
+            break;
+        case IRTK_R2L:
+            *inverted = false;
+            *sliceNum = _targetImage->GetZ();
+        default:
+            break;
+        }
         break;
     case VIEW_CORONAL :
-        *sliceNum = _targetImage->GetY();
+        switch (iaxis) {
+        case IRTK_A2P:
+            *inverted = true;
+            *sliceNum = _targetImage->GetX();
+            break;
+        case IRTK_P2A:
+            *inverted = false;
+            *sliceNum = _targetImage->GetX();
+        default:
+            break;
+        }
+        switch (jaxis) {
+        case IRTK_A2P:
+            *inverted = true;
+            *sliceNum = _targetImage->GetY();
+            break;
+        case IRTK_P2A:
+            *inverted = false;
+            *sliceNum = _targetImage->GetY();
+        default:
+            break;
+        }
+        switch (kaxis) {
+        case IRTK_A2P:
+            *inverted = true;
+            *sliceNum = _targetImage->GetZ();
+            break;
+        case IRTK_P2A:
+            *inverted = false;
+            *sliceNum = _targetImage->GetZ();
+        default:
+            break;
+        }
         break;
     case VIEW_3D:
-        sliceNum[0] = _targetImage->GetX();
-        sliceNum[1] = _targetImage->GetY();
-        sliceNum[2] = _targetImage->GetZ();
+        switch (iaxis) {
+        case IRTK_L2R:
+            inverted[0] = true;
+            sliceNum[0] = _targetImage->GetX();
+            break;
+        case IRTK_R2L:
+            inverted[0] = false;
+            sliceNum[0] = _targetImage->GetX();
+            break;
+        case IRTK_A2P:
+            inverted[1] = true;
+            sliceNum[1] = _targetImage->GetX();
+            break;
+        case IRTK_P2A:
+            inverted[1] = false;
+            sliceNum[1] = _targetImage->GetX();
+            break;
+        case IRTK_S2I:
+            inverted[2] = true;
+            sliceNum[2] = _targetImage->GetX();
+            break;
+        case IRTK_I2S:
+            inverted[2] = false;
+            sliceNum[2] = _targetImage->GetX();
+            break;
+        default:
+            break;
+        }
+        switch (jaxis) {
+        case IRTK_L2R:
+            inverted[0] = true;
+            sliceNum[0] = _targetImage->GetY();
+            break;
+        case IRTK_R2L:
+            inverted[0] = false;
+            sliceNum[0] = _targetImage->GetY();
+            break;
+        case IRTK_A2P:
+            inverted[1] = true;
+            sliceNum[1] = _targetImage->GetY();
+            break;
+        case IRTK_P2A:
+            inverted[1] = false;
+            sliceNum[1] = _targetImage->GetY();
+            break;
+        case IRTK_S2I:
+            inverted[2] = true;
+            sliceNum[2] = _targetImage->GetY();
+            break;
+        case IRTK_I2S:
+            inverted[2] = false;
+            sliceNum[2] = _targetImage->GetY();
+            break;
+        default:
+            break;
+        }
+        switch (kaxis) {
+        case IRTK_L2R:
+            inverted[0] = true;
+            sliceNum[0] = _targetImage->GetZ();
+            break;
+        case IRTK_R2L:
+            inverted[0] = false;
+            sliceNum[0] = _targetImage->GetZ();
+            break;
+        case IRTK_A2P:
+            inverted[1] = true;
+            sliceNum[1] = _targetImage->GetZ();
+            break;
+        case IRTK_P2A:
+            inverted[1] = false;
+            sliceNum[1] = _targetImage->GetZ();
+            break;
+        case IRTK_S2I:
+            inverted[2] = true;
+            sliceNum[2] = _targetImage->GetZ();
+            break;
+        case IRTK_I2S:
+            inverted[2] = false;
+            sliceNum[2] = _targetImage->GetZ();
+            break;
+        default:
+            break;
+        }
         break;
     default:
         qCritical("Not a valid type of viewer");
@@ -144,7 +326,7 @@ void irtkQtBaseViewer::InitializeOrientation() {
     double x[3], y[3], z[3];
 
     // Get original image orientation
-    _targetImage->GetOrientation(x, y, z);
+    GetNeurologicalOrientation(x, y, z);
 
     switch (_viewMode) {
     case VIEW_AXIAL :
@@ -161,6 +343,121 @@ void irtkQtBaseViewer::InitializeOrientation() {
     default:
         qCritical("Not a valid type of viewer");
         exit(1);
+        break;
+    }
+}
+
+void irtkQtBaseViewer::GetNeurologicalOrientation(double *x, double *y, double *z) {
+    int iaxis, jaxis, kaxis;
+    double xaxis[3], yaxis[3], zaxis[3];
+
+    // get original image orientation
+    _targetImage->GetOrientation(xaxis, yaxis, zaxis);
+    _targetImage->Orientation(iaxis, jaxis, kaxis);
+
+    switch (iaxis) {
+    case IRTK_L2R:
+        x[0] = -xaxis[0];
+        x[1] = -xaxis[1];
+        x[2] = -xaxis[2];
+        break;
+    case IRTK_R2L:
+        x[0] = xaxis[0];
+        x[1] = xaxis[1];
+        x[2] = xaxis[2];
+        break;
+    case IRTK_P2A:
+        y[0] = xaxis[0];
+        y[1] = xaxis[1];
+        y[2] = xaxis[2];
+        break;
+    case IRTK_A2P:
+        y[0] = -xaxis[0];
+        y[1] = -xaxis[1];
+        y[2] = -xaxis[2];
+        break;
+    case IRTK_I2S:
+        z[0] = xaxis[0];
+        z[1] = xaxis[1];
+        z[2] = xaxis[2];
+        break;
+    case IRTK_S2I:
+        z[0] = -xaxis[0];
+        z[1] = -xaxis[1];
+        z[2] = -xaxis[2];
+        break;
+    default:
+        qCritical("Cannot work out x-orientation");
+        break;
+    }
+    switch (jaxis) {
+    case IRTK_L2R:
+        x[0] = -yaxis[0];
+        x[1] = -yaxis[1];
+        x[2] = -yaxis[2];
+        break;
+    case IRTK_R2L:
+        x[0] = yaxis[0];
+        x[1] = yaxis[1];
+        x[2] = yaxis[2];
+        break;
+    case IRTK_P2A:
+        y[0] = yaxis[0];
+        y[1] = yaxis[1];
+        y[2] = yaxis[2];
+        break;
+    case IRTK_A2P:
+        y[0] = -yaxis[0];
+        y[1] = -yaxis[1];
+        y[2] = -yaxis[2];
+        break;
+    case IRTK_I2S:
+        z[0] = yaxis[0];
+        z[1] = yaxis[1];
+        z[2] = yaxis[2];
+        break;
+    case IRTK_S2I:
+        z[0] = -yaxis[0];
+        z[1] = -yaxis[1];
+        z[2] = -yaxis[2];
+        break;
+    default:
+        qCritical("Cannot work out y-orientation");
+        break;
+    }
+    switch (kaxis) {
+    case IRTK_L2R:
+        x[0] = -zaxis[0];
+        x[1] = -zaxis[1];
+        x[2] = -zaxis[2];
+        break;
+    case IRTK_R2L:
+        x[0] = zaxis[0];
+        x[1] = zaxis[1];
+        x[2] = zaxis[2];
+        break;
+    case IRTK_P2A:
+        y[0] = zaxis[0];
+        y[1] = zaxis[1];
+        y[2] = zaxis[2];
+        break;
+    case IRTK_A2P:
+        y[0] = -zaxis[0];
+        y[1] = -zaxis[1];
+        y[2] = -zaxis[2];
+        break;
+    case IRTK_I2S:
+        z[0] = zaxis[0];
+        z[1] = zaxis[1];
+        z[2] = zaxis[2];
+        break;
+    case IRTK_S2I:
+        z[0] = -zaxis[0];
+        z[1] = -zaxis[1];
+        z[2] = -zaxis[2];
+        break;
+    default:
+        qCritical("Cannot work out z-orientation");
         break;
     }
 }

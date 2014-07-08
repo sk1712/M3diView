@@ -40,6 +40,10 @@ Qt3dViewerWidget::Qt3dViewerWidget(QWidget *parent)
     setEnabled(false);
 }
 
+void Qt3dViewerWidget::setInvertedAxes(bool *inverted) {
+    glWidget->setInvertedAxis(inverted);
+}
+
 void Qt3dViewerWidget::connectSignals() {
     connect(axialSlider, SIGNAL(valueChanged(int)), this, SLOT(axialSliceChanged(int)));
     connect(sagittalSlider, SIGNAL(valueChanged(int)), this, SLOT(sagittalSliceChanged(int)));

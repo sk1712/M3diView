@@ -41,6 +41,9 @@ protected:
     /// Slices currently visible
     int* currentSlice;
 
+    /// Flag true if corresponding axis is reversed
+    bool* inverted;
+
     /// Current index added to the images displayed
     int currentIndex;
 
@@ -96,6 +99,9 @@ public:
 
     /// Get current slice in image coordinates
     int* GetCurrentSlice() const;
+
+    /// Get flags for reverted axes
+    bool* GetAxisInverted() const;
 
     /// Get the array of RGB values to be drawn on the screen
     virtual vector<QRgb**> GetDrawable() = 0;
@@ -155,6 +161,9 @@ protected:
 
     /// Initialize image orientation
     void InitializeOrientation();
+
+    /// Get neurological orientation
+    void GetNeurologicalOrientation(double *x, double *y, double *z);
 
     /// Update the current slice (in image coordinates) corresponding to the world coordinates
     virtual void UpdateCurrentSlice() = 0;
@@ -234,6 +243,10 @@ inline int* irtkQtBaseViewer::GetSliceNumber() const {
 
 inline int* irtkQtBaseViewer::GetCurrentSlice() const {
     return currentSlice;
+}
+
+inline bool* irtkQtBaseViewer::GetAxisInverted() const {
+    return inverted;
 }
 
 template<class T>

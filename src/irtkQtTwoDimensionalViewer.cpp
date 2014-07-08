@@ -3,8 +3,11 @@
 
 irtkQtTwoDimensionalViewer::irtkQtTwoDimensionalViewer(irtkViewMode viewMode) {
     _viewMode = viewMode;
+
     currentSlice = new int[1];
     sliceNum = new int[1];
+
+    inverted = new bool[1];
 
     ClearDisplayedImages();
 }
@@ -221,7 +224,7 @@ void irtkQtTwoDimensionalViewer::AddToDisplayedImages(irtkQtImageObject *imageOb
     irtkQtBaseViewer::AddToDisplayedImages(imageObject, index);
     // Set pixel size to 1x1mm
     if (_image.size() == 1) {
-        SetResolution(1, 1, _targetImage->GetZSize());
+        SetResolution(1, 1, 1);
     }
 }
 
@@ -258,7 +261,10 @@ void irtkQtTwoDimensionalViewer::ChangeSlice(int* slice) {
 
     _targetImageOutput->GetOrigin(originX, originY, originZ);
     _targetImageOutput->WorldToImage(originX, originY, originZ);
-    originZ += slice[0] - *GetCurrentSlice();
+    double diff = slice[0] - *GetCurrentSlice();
+    if (*inverted)
+        diff *= -1;
+    originZ += diff;
     _targetImageOutput->ImageToWorld(originX, originY, originZ);
 
     _targetImage->WorldToImage(originX, originY, originZ);
@@ -293,22 +299,83 @@ void irtkQtTwoDimensionalViewer::ChangeOrigin(int x, int y) {
 
 void irtkQtTwoDimensionalViewer::UpdateCurrentSlice() {
     double x, y, z;
-
     x = _originX;
     y = _originY;
     z = _originZ;
-
     _targetImage->WorldToImage(x, y, z);
+
+    int iaxis, jaxis, kaxis;
+    _targetImage->Orientation(iaxis, jaxis, kaxis);
 
     switch (_viewMode) {
     case VIEW_AXIAL :
-        *currentSlice = (int) round(z);
+        switch (iaxis) {
+        case IRTK_I2S:
+        case IRTK_S2I:
+            *currentSlice = round2(x);
+        default:
+            break;
+        }
+        switch (jaxis) {
+        case IRTK_I2S:
+        case IRTK_S2I:
+            *currentSlice = round2(y);
+        default:
+            break;
+        }
+        switch (kaxis) {
+        case IRTK_I2S:
+        case IRTK_S2I:
+            *currentSlice = round2(z);
+        default:
+            break;
+        }
         break;
     case VIEW_SAGITTAL :
-        *currentSlice = (int) round(x);
+        switch (iaxis) {
+        case IRTK_L2R:
+        case IRTK_R2L:
+            *currentSlice = round2(x);
+        default:
+            break;
+        }
+        switch (jaxis) {
+        case IRTK_L2R:
+        case IRTK_R2L:
+            *currentSlice = round2(y);
+        default:
+            break;
+        }
+        switch (kaxis) {
+        case IRTK_L2R:
+        case IRTK_R2L:
+            *currentSlice = round2(z);
+        default:
+            break;
+        }
         break;
     case VIEW_CORONAL :
-        *currentSlice = (int) round(y);
+        switch (iaxis) {
+        case IRTK_P2A:
+        case IRTK_A2P:
+            *currentSlice = round2(x);
+        default:
+            break;
+        }
+        switch (jaxis) {
+        case IRTK_P2A:
+        case IRTK_A2P:
+            *currentSlice = round2(y);
+        default:
+            break;
+        }
+        switch (kaxis) {
+        case IRTK_P2A:
+        case IRTK_A2P:
+            *currentSlice = round2(z);
+        default:
+            break;
+        }
         break;
     default:
         currentSlice = 0;

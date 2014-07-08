@@ -148,6 +148,8 @@ void QtThreeDimensionalGlWidget::drawImage() const {
     width = (float) dimensions[0]/2;
     height = (float) dimensions[1]/2;
     slice = currentSlice[2] - dimensions[2]/2.0;
+    if (invertedAxis[2])
+        slice *= -1;
     glBindTexture(GL_TEXTURE_2D, textures[0]);
     glBegin(GL_QUADS);
     glColor3f(0.0f, 0.0f, 0.0f);
@@ -161,6 +163,8 @@ void QtThreeDimensionalGlWidget::drawImage() const {
     width = (float) dimensions[1]/2;
     height = (float) dimensions[2]/2;
     slice = currentSlice[0] - dimensions[0]/2.0;
+    if (invertedAxis[0])
+        slice *= -1;
     glBindTexture(GL_TEXTURE_2D, textures[1]);
     glBegin(GL_QUADS);
     glTexCoord2f(0.0, 0.0); glVertex3f(-width, -height, slice);
@@ -173,6 +177,8 @@ void QtThreeDimensionalGlWidget::drawImage() const {
     width = (float) dimensions[0]/2;
     height = (float) dimensions[2]/2;
     slice = currentSlice[1] - dimensions[1]/2.0;
+    if (invertedAxis[1])
+        slice *= -1;
     glBindTexture(GL_TEXTURE_2D, textures[2]);
     glBegin(GL_QUADS);
     glTexCoord2f(0.0, 0.0); glVertex3f(slice, -height, -width);
@@ -191,6 +197,8 @@ void QtThreeDimensionalGlWidget::drawBorders() {
     width = (float) dimensions[0]/2;
     height = (float) dimensions[1]/2;
     slice = currentSlice[2] - dimensions[2]/2.0;
+    if (invertedAxis[2])
+        slice *= -1;
     qglColor(Qt::yellow);
     glBegin(GL_LINES);
     glVertex3f(-height, slice, -width);
@@ -213,6 +221,8 @@ void QtThreeDimensionalGlWidget::drawBorders() {
     width = (float) dimensions[1]/2;
     height = (float) dimensions[2]/2;
     slice = currentSlice[0] - dimensions[0]/2.0;
+    if (invertedAxis[0])
+        slice *= -1;
     qglColor(Qt::red);
     glBegin(GL_LINES);
     glVertex3f(-width, -height, slice);
@@ -234,7 +244,9 @@ void QtThreeDimensionalGlWidget::drawBorders() {
     // Surround coronal view with green lines
     width = (float) dimensions[0]/2;
     height = (float) dimensions[2]/2;
-    slice = currentSlice[1] - dimensions[1]/2.0;;
+    slice = currentSlice[1] - dimensions[1]/2.0;
+    if (invertedAxis[1])
+        slice *= -1;
     qglColor(Qt::green);
     glBegin(GL_LINES);
     glVertex3f(slice, -height, -width);
@@ -256,7 +268,8 @@ void QtThreeDimensionalGlWidget::drawBorders() {
 
 void QtThreeDimensionalGlWidget::createTextures() {
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    glDeleteTextures(3, textures);
+    // the following line might be causing error on MacOS X
+    // glDeleteTextures(3, textures);
     glGenTextures(3, textures);
 
     // Create texture for axial view

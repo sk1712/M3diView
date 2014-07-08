@@ -32,6 +32,9 @@ public:
     /// Set image dimensions in image coordinates
     void setMaximumSlice(int *dim);
 
+    /// Set inverted axes attribute
+    void setInvertedAxes(bool *inverted);
+
     /// Set viewer enabled
     void setEnabled(bool enabled);
 
