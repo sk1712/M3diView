@@ -44,6 +44,9 @@ public:
     /// Set viewer's maximum slices
     virtual void setMaximumSlice(int* maxSlice) = 0;
 
+    /// Set viewer's flags for inverted axes
+    virtual void setInvertedAxes(bool* inverted);
+
     /// Set viewer enabled
     virtual void setEnabled(bool enabled) = 0;
 

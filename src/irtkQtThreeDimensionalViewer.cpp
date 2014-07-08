@@ -1,11 +1,15 @@
 #include <irtkQtThreeDimensionalViewer.h>
 
+
 irtkQtThreeDimensionalViewer::irtkQtThreeDimensionalViewer() {
     ClearDisplayedImages();
 
     _viewMode = VIEW_3D;
+
     currentSlice = new int[3];
     sliceNum = new int[3];
+
+    inverted = new bool[3];
 }
 
 irtkQtThreeDimensionalViewer::~irtkQtThreeDimensionalViewer() {
@@ -257,6 +261,58 @@ void irtkQtThreeDimensionalViewer::ChangeSlice(int* slice) {
     originY = slice[1];
     originZ = slice[2];
 
+    int iaxis, jaxis, kaxis;
+    _targetImage->Orientation(iaxis, jaxis, kaxis);
+
+    switch (iaxis) {
+    case IRTK_L2R:
+    case IRTK_R2L:
+        originX = slice[0];
+        break;
+    case IRTK_A2P:
+    case IRTK_P2A:
+        originX = slice[1];
+        break;
+    case IRTK_S2I:
+    case IRTK_I2S:
+        originX = slice[2];
+        break;
+    default:
+        break;
+    }
+    switch (jaxis) {
+    case IRTK_L2R:
+    case IRTK_R2L:
+        originY = slice[0];
+        break;
+    case IRTK_A2P:
+    case IRTK_P2A:
+        originY = slice[1];
+        break;
+    case IRTK_S2I:
+    case IRTK_I2S:
+        originY = slice[2];
+        break;
+    default:
+        break;
+    }
+    switch (kaxis) {
+    case IRTK_L2R:
+    case IRTK_R2L:
+        originZ = slice[0];
+        break;
+    case IRTK_A2P:
+    case IRTK_P2A:
+        originZ = slice[1];
+        break;
+    case IRTK_S2I:
+    case IRTK_I2S:
+        originZ = slice[2];
+        break;
+    default:
+        break;
+    }
+
     _targetImage->ImageToWorld(originX, originY, originZ);
 
     emit OriginChanged(originX, originY, originZ);
@@ -272,12 +328,59 @@ void irtkQtThreeDimensionalViewer::UpdateCurrentSlice() {
     x = _originX;
     y = _originY;
     z = _originZ;
-
     _targetImage->WorldToImage(x, y, z);
 
-    currentSlice[0] = (int) round(x);
-    currentSlice[1] = (int) round(y);
-    currentSlice[2] = (int) round(z);
+    int iaxis, jaxis, kaxis;
+    _targetImage->Orientation(iaxis, jaxis, kaxis);
+
+    switch (iaxis) {
+    case IRTK_L2R:
+    case IRTK_R2L:
+        currentSlice[0] = round2(x);
+        break;
+    case IRTK_P2A:
+    case IRTK_A2P:
+        currentSlice[1] = round2(x);
+        break;
+    case IRTK_I2S:
+    case IRTK_S2I:
+        currentSlice[2] = round2(x);
+        break;
+    default:
+        break;
+    }
+    switch (jaxis) {
+    case IRTK_L2R:
+    case IRTK_R2L:
+        currentSlice[0] = round2(y);
+        break;
+    case IRTK_P2A:
+    case IRTK_A2P:
+        currentSlice[1] = round2(y);
+        break;
+    case IRTK_I2S:
+    case IRTK_S2I:
+        currentSlice[2] = round2(y);
+        break;
+    default:
+        break;
+    }
+    switch (kaxis) {
+    case IRTK_L2R:
+    case IRTK_R2L:
+        currentSlice[0] = round2(z);
+        break;
+    case IRTK_P2A:
+    case IRTK_A2P:
+        currentSlice[1] = round2(z);
+        break;
+    case IRTK_I2S:
+    case IRTK_S2I:
+        currentSlice[2] = round2(z);
+        break;
+    default:
+        break;
+    }
 }
 
 void irtkQtThreeDimensionalViewer::AddToMaps(irtkImage* newImage, int index) {
@@ -305,7 +408,7 @@ void irtkQtThreeDimensionalViewer::AddToMaps(irtkImage* newImage, int index) {
 void irtkQtThreeDimensionalViewer::SetOrientation(int view) {
     double x[3], y[3], z[3];
 
-    _targetImage->GetOrientation(x, y, z);
+    GetNeurologicalOrientation(x, y, z);
 
     switch (view) {
     case VIEW_AXIAL :
@@ -330,23 +433,158 @@ void irtkQtThreeDimensionalViewer::ChangeViewSlice(int view) {
     _targetImage->GetOrigin(originX, originY, originZ);
     _targetImage->WorldToImage(originX, originY, originZ);
 
+    int iaxis, jaxis, kaxis;
+    _targetImage->Orientation(iaxis, jaxis, kaxis);
+
     switch (view) {
     case VIEW_AXIAL :
-        originZ = currentSlice[2];
-        _dx = _targetImage->GetXSize();
-        _dy = _targetImage->GetYSize();
+        switch (iaxis) {
+        case IRTK_L2R:
+        case IRTK_R2L:
+            _dx = _targetImage->GetXSize();
+            break;
+        case IRTK_P2A:
+        case IRTK_A2P:
+            _dy = _targetImage->GetXSize();
+            break;
+        case IRTK_I2S:
+        case IRTK_S2I:
+            originX = currentSlice[2];
+            break;
+        default:
+            break;
+        }
+        switch (jaxis) {
+        case IRTK_L2R:
+        case IRTK_R2L:
+            _dx = _targetImage->GetYSize();
+            break;
+        case IRTK_P2A:
+        case IRTK_A2P:
+            _dy = _targetImage->GetYSize();
+            break;
+        case IRTK_I2S:
+        case IRTK_S2I:
+            originY = currentSlice[2];
+            break;
+        default:
+            break;
+        }
+        switch (kaxis) {
+        case IRTK_L2R:
+        case IRTK_R2L:
+            _dx = _targetImage->GetZSize();
+            break;
+        case IRTK_P2A:
+        case IRTK_A2P:
+            _dy = _targetImage->GetZSize();
+            break;
+        case IRTK_I2S:
+        case IRTK_S2I:
+            originZ = currentSlice[2];
+        default:
+            break;
+        }
         _dz = 1;
         break;
     case VIEW_SAGITTAL :
-        originX = currentSlice[0];
-        _dx = _targetImage->GetYSize();
-        _dy = _targetImage->GetZSize();
+        switch (iaxis) {
+        case IRTK_L2R:
+        case IRTK_R2L:
+            originX = currentSlice[0];
+            break;
+        case IRTK_P2A:
+        case IRTK_A2P:
+            _dx = _targetImage->GetXSize();
+            break;
+        case IRTK_I2S:
+        case IRTK_S2I:
+            _dy = _targetImage->GetXSize();
+            break;
+        default:
+            break;
+        }
+        switch (jaxis) {
+        case IRTK_L2R:
+        case IRTK_R2L:
+            originY = currentSlice[0];
+            break;
+        case IRTK_P2A:
+        case IRTK_A2P:
+            _dx = _targetImage->GetYSize();
+            break;
+        case IRTK_I2S:
+        case IRTK_S2I:
+            _dy = _targetImage->GetYSize();
+            break;
+        default:
+            break;
+        }
+        switch (kaxis) {
+        case IRTK_L2R:
+        case IRTK_R2L:
+            originZ = currentSlice[0];
+            break;
+        case IRTK_P2A:
+        case IRTK_A2P:
+            _dx = _targetImage->GetZSize();
+            break;
+        case IRTK_I2S:
+        case IRTK_S2I:
+            _dy = _targetImage->GetZSize();
+        default:
+            break;
+        }
         _dz = 1;
         break;
     case VIEW_CORONAL :
-        originY = currentSlice[1];
-        _dx = _targetImage->GetXSize();
-        _dy = _targetImage->GetZSize();
+        switch (iaxis) {
+        case IRTK_L2R:
+        case IRTK_R2L:
+            _dx = _targetImage->GetXSize();
+            break;
+        case IRTK_P2A:
+        case IRTK_A2P:
+            originX = currentSlice[1];
+            break;
+        case IRTK_I2S:
+        case IRTK_S2I:
+            _dy = _targetImage->GetXSize();
+            break;
+        default:
+            break;
+        }
+        switch (jaxis) {
+        case IRTK_L2R:
+        case IRTK_R2L:
+            _dx = _targetImage->GetYSize();
+            break;
+        case IRTK_P2A:
+        case IRTK_A2P:
+            originY = currentSlice[1];
+            break;
+        case IRTK_I2S:
+        case IRTK_S2I:
+            _dy = _targetImage->GetYSize();
+            break;
+        default:
+            break;
+        }
+        switch (kaxis) {
+        case IRTK_L2R:
+        case IRTK_R2L:
+            _dx = _targetImage->GetZSize();
+            break;
+        case IRTK_P2A:
+        case IRTK_A2P:
+            originZ = currentSlice[1];
+            break;
+        case IRTK_I2S:
+        case IRTK_S2I:
+            _dy = _targetImage->GetZSize();
+        default:
+            break;
+        }
         _dz = 1;
         break;
     default:

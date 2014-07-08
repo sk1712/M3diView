@@ -23,6 +23,9 @@ class QtThreeDimensionalGlWidget : public QtGlWidget
     /// Current slice in each direction
     int currentSlice[3];
 
+    /// Inverted axes
+    bool invertedAxis[3];
+
     /// Texture parameters where images are stored
     GLuint textures[3];
 
@@ -42,6 +45,9 @@ public:
 
     /// Set current slices
     void setCurrentSlice(int *current);
+
+    /// Set inverted axis flag
+    void setInvertedAxis(bool *inverted);
 
     /// Update the images to be drawn
     void updateDrawable(QVector<QRgb**> drawable);
@@ -115,6 +121,12 @@ inline void QtThreeDimensionalGlWidget::setCurrentSlice(int *current) {
     currentSlice[0] = current[0];
     currentSlice[1] = current[1];
     currentSlice[2] = current[2];
+}
+
+inline void QtThreeDimensionalGlWidget::setInvertedAxis(bool *inverted) {
+    invertedAxis[0] = inverted[0];
+    invertedAxis[1] = inverted[1];
+    invertedAxis[2] = inverted[2];
 }
 
 #endif // QTTHREEDIMENSIONALGLWIDGET_H

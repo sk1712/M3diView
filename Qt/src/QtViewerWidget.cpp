@@ -25,6 +25,10 @@ QtViewerWidget::QtViewerWidget(QWidget *parent) : QWidget(parent) {
     linked = true;
 }
 
+void QtViewerWidget::setInvertedAxes(bool *) {
+
+}
+
 void QtViewerWidget::paintEvent(QPaintEvent *) {
     toolWidget->raise();
 }

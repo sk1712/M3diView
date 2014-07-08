@@ -439,6 +439,7 @@ void QtMainWindow::setUpViewerWidgets() {
         viewer = viewers[i];
 
         viewerWidget->setMaximumSlice(viewer->GetSliceNumber());
+        viewerWidget->setInvertedAxes(viewer->GetAxisInverted());
         viewerWidget->setCurrentSlice(viewer->GetCurrentSlice());
         viewerWidget->getGlWidget()->updateDrawable(
                     QVector<QRgb**>::fromStdVector(viewer->GetDrawable()));
@@ -489,6 +490,7 @@ void QtMainWindow::viewImage() {
 
     // Set up the viewer widgets
     viewerWidget->setEnabled(true);
+    viewerWidget->setInvertedAxes(viewer->GetAxisInverted());
     viewerWidget->setMaximumSlice(viewer->GetSliceNumber());
     viewerWidget->setCurrentSlice(viewer->GetCurrentSlice());
     viewerWidget->getGlWidget()->updateDrawable(
