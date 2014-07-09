@@ -106,8 +106,6 @@ public:
     /// Get interpolation function for the corresponding image
     int GetInterpolation() const;
 
-    /// Convert image to the desired coordinate system
-    void ConvertImageToTarget();
 };
 
 
