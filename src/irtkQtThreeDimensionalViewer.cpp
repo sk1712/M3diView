@@ -257,10 +257,6 @@ void irtkQtThreeDimensionalViewer::ResizeImage(int width, int height) {
 void irtkQtThreeDimensionalViewer::ChangeSlice(int* slice) {
     double originX, originY, originZ;
 
-    originX = slice[0];
-    originY = slice[1];
-    originZ = slice[2];
-
     int iaxis, jaxis, kaxis;
     _targetImage->Orientation(iaxis, jaxis, kaxis);
 
