@@ -911,6 +911,8 @@ void QtMainWindow::listViewClicked(QModelIndex index) {
     QList<irtkQtImageObject*> list = irtkQtViewer::Instance()->GetImageList();
     irtkQtImageObject* imageObject = list[i];
 
+    visualToolWidget->blockSignals(true);
+
     if (imageObject->IsVisible()) {
         visualToolWidget->setEnabled(true);
         visualToolWidget->setColormap(imageObject->GetColormap());
@@ -924,6 +926,8 @@ void QtMainWindow::listViewClicked(QModelIndex index) {
     else {
         visualToolWidget->setEnabled(false);
     }
+
+    visualToolWidget->blockSignals(false);
 
     infoWidget->setImage(imageObject->GetImage());
     infoWidget->update();
