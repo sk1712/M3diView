@@ -4,10 +4,22 @@
 QtTwoDimensionalGlWidget::QtTwoDimensionalGlWidget(QWidget *parent)
     :QtGlWidget(parent) {
     _drawable.clear();
+    cursorVisible = true;
+    labelsVisible = true;
 }
 
 QtTwoDimensionalGlWidget::~QtTwoDimensionalGlWidget() {
     deleteDrawable();
+}
+
+void QtTwoDimensionalGlWidget::setLabelsVisible(bool visible) {
+    labelsVisible = visible;
+    update();
+}
+
+void QtTwoDimensionalGlWidget::setCursorVisible(bool visible) {
+    cursorVisible = visible;
+    update();
 }
 
 void QtTwoDimensionalGlWidget::updateDrawable(QVector<QRgb**> drawable) {
@@ -48,8 +60,14 @@ void QtTwoDimensionalGlWidget::paintGL() {
     if (!_drawable.empty()) {
         drawImage();
     }
-    drawCursor();
-    drawLabels();
+
+    if (cursorVisible) {
+        drawCursor();
+    }
+
+    if (labelsVisible) {
+        drawLabels();
+    }
 }
 
 void QtTwoDimensionalGlWidget::drawImage() const {

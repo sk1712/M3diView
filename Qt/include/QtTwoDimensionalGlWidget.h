@@ -13,6 +13,9 @@ class QtTwoDimensionalGlWidget : public QtGlWidget
     /// Viewer labels
     QString top, bottom, left, right;
 
+    /// Cursor, labels visible flags
+    bool cursorVisible, labelsVisible;
+
 public:
 
     /// Class constructor
@@ -23,6 +26,12 @@ public:
 
     /// Set viewer labels
     void setLabels(const char t, const char b, const char l, const char r);
+
+    /// Set labels visible
+    void setLabelsVisible(bool visible);
+
+    /// Set cursor visible
+    void setCursorVisible(bool visible);
 
     /// Update the images to be drawn
     void updateDrawable(QVector<QRgb**> drawable);

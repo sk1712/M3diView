@@ -20,6 +20,7 @@ Qt2dViewerWidget::Qt2dViewerWidget(QWidget *parent)
     sliceLabel = new QLabel();
     layout->addWidget(sliceLabel, 1, 0, 1, 2, Qt::AlignRight);
 
+    createSettingsMenu();
     connectSignals();
     setEnabled(false);
 }
@@ -36,6 +37,25 @@ void Qt2dViewerWidget::initializeParameters() {
 void Qt2dViewerWidget::connectSignals() {
     connect(glWidget, SIGNAL(wheelMoved(int)), this, SLOT(changeSlider(int)));
     connect(sliceSlider, SIGNAL(valueChanged(int)), this, SLOT(updateSlice(int)));
+
+    connect(showLabelsAction, SIGNAL(toggled(bool)), this, SLOT(toggleLabelsVisible(bool)));
+    connect(showCursorAction, SIGNAL(toggled(bool)), this, SLOT(toggleCursorVisible(bool)));
+}
+
+void Qt2dViewerWidget::createSettingsMenu() {
+    settingsMenu = new QMenu();
+    settingsToolButton->setMenu(settingsMenu);
+    settingsToolButton->setPopupMode(QToolButton::InstantPopup);
+
+    showLabelsAction = new QAction(tr("Show labels"), this);
+    showLabelsAction->setCheckable(true);
+    showLabelsAction->setChecked(true);
+    settingsMenu->addAction(showLabelsAction);
+
+    showCursorAction = new QAction(tr("Show cursor"), this);
+    showCursorAction->setCheckable(true);
+    showCursorAction->setChecked(true);
+    settingsMenu->addAction(showCursorAction);
 }
 
 void Qt2dViewerWidget::changeSlider(int steps) {
@@ -55,4 +75,12 @@ void Qt2dViewerWidget::updateSlice(int slice) {
     updateLabel();
 
     emit sliderValueChanged(&currentSlice);
+}
+
+void Qt2dViewerWidget::toggleLabelsVisible(bool checked) {
+    glWidget->setLabelsVisible(checked);
+}
+
+void Qt2dViewerWidget::toggleCursorVisible(bool checked) {
+    glWidget->setCursorVisible(checked);
 }

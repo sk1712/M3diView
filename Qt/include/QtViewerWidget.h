@@ -1,6 +1,7 @@
 #ifndef QTVIEWERWIDGET_H
 #define QTVIEWERWIDGET_H
 
+
 #include <QSlider>
 #include <QToolButton>
 
@@ -23,6 +24,9 @@ protected:
 
     /// Toolbutton to link to other viewers
     QToolButton *linkToolButton;
+
+    /// Toolbutton for viewer settings
+    QToolButton *settingsToolButton;
 
     /// Flag for viewer linked to other viewers
     bool linked;

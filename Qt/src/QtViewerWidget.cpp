@@ -15,6 +15,7 @@ QtViewerWidget::QtViewerWidget(QWidget *parent) : QWidget(parent) {
     toolLayout->addWidget(expandToolButton);
     toolLayout->addWidget(linkToolButton);
     toolLayout->addWidget(deleteToolButton);
+    toolLayout->addWidget(settingsToolButton);
 
     toolWidget->setLayout(toolLayout);
     layout->addWidget(toolWidget, 1, 0, 1, 2, Qt::AlignLeft);
@@ -47,6 +48,10 @@ void QtViewerWidget::createToolButtons() {
     deleteToolButton = new QToolButton();
     deleteToolButton->setIcon(QIcon(":/icons/delete.png"));
     deleteToolButton->setToolTip("Delete view");
+
+    settingsToolButton = new QToolButton();
+    settingsToolButton->setIcon(QIcon(":/icons/settings.png"));
+    settingsToolButton->setToolTip("Settings");
 }
 
 void QtViewerWidget::connectSignals() {

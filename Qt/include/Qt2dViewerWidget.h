@@ -4,6 +4,8 @@
 #include <QtViewerWidget.h>
 #include <QtTwoDimensionalGlWidget.h>
 
+#include <QAction>
+#include <QMenu>
 #include <QLabel>
 
 
@@ -19,6 +21,15 @@ class Qt2dViewerWidget : public QtViewerWidget
 
     /// Label showing number of slice
     QLabel *sliceLabel;
+
+    /// Settings menu
+    QMenu *settingsMenu;
+
+    /// Show viewer labels action
+    QAction *showLabelsAction;
+
+    /// Show cursor action
+    QAction *showCursorAction;
 
     /// Slice currently shown
     int currentSlice;
@@ -62,6 +73,9 @@ private:
     /// Connect signals
     void connectSignals();
 
+    /// Create settings menu
+    void createSettingsMenu();
+
 private slots:
 
     /// Callback function for mouse wheel over OpenGL widget
@@ -69,6 +83,12 @@ private slots:
 
     /// Callback function for slice slider change
     void updateSlice(int slice);
+
+    /// Toggle labels visible
+    void toggleLabelsVisible(bool checked);
+
+    /// Toggle cursor visible
+    void toggleCursorVisible(bool checked);
 
 signals:
 
