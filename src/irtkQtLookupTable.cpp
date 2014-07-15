@@ -169,7 +169,7 @@ void irtkQtLookupTable::SetColorModeToInverse() {
 void irtkQtLookupTable::SetColorModeToJacobian() {
     double minD = round((minDisplay - minImage) * 255 / (maxImage - minImage));
     double maxD = round((maxDisplay - minImage) * 255 / (maxImage - minImage));
-    double hundred = (100.0 - minImage) * 255 / (maxImage - minImage);
+    double hundred = 2.55;
 
     QColor color;
 
@@ -178,11 +178,11 @@ void irtkQtLookupTable::SetColorModeToJacobian() {
         lookupTable[i] = qRgba(color.red(), color.green(), color.blue(), _alpha);
     }
     for (int i = minD; i <= hundred; i++) {
-        color.setHsvF(- (i - hundred) / (double)(minD - hundred) * 60.0 / 360.0 + 240.0 / 360.0, 1, 1);
+        color.setHsvF(- (i - hundred) / (minD - hundred) * 60.0 / 360.0 + 240.0 / 360.0, 1, 1);
         lookupTable[i] = qRgba(color.red(), color.green(), color.blue(), _alpha);
     }
     for (int i = hundred; i <= maxD; i++) {
-        color.setHsvF((i - hundred) / (double)(maxD - hundred) * 60.0 / 360.0, 1, 1);
+        color.setHsvF((i - hundred) / (maxD - hundred) * 60.0 / 360.0, 1, 1);
         lookupTable[i] = qRgba(color.red(), color.green(), color.blue(), _alpha);
     }
     for (int i = ((maxD > hundred) ? maxD : hundred); i <= 255; i++) {
@@ -194,7 +194,7 @@ void irtkQtLookupTable::SetColorModeToJacobian() {
 void irtkQtLookupTable::SetColorModeToJacobianExpansion() {
     double minD = round((minDisplay - minImage) * 255 / (maxImage - minImage));
     double maxD = round((maxDisplay - minImage) * 255 / (maxImage - minImage));
-    double hundred = (100.0 - minImage) * 255 / (maxImage - minImage);
+    double hundred = 2.55;
 
     int i, _min, _max;
     _min = ((minD > hundred) ? minD : hundred);
@@ -206,8 +206,7 @@ void irtkQtLookupTable::SetColorModeToJacobianExpansion() {
         lookupTable[i] = qRgba(0, 0, 0, 0);
     }
     for (i = _min; i <= _max; i++) {
-        color.setHsvF((i - _min) / (double)(_max - _min + 1) * 60.0 / 360.0, 1, 1,
-                      (i - _min) / (double)(_max - _min + 1));
+        color.setHsvF((i - _min) / (double)(_max - _min) * 60.0 / 360.0, 1, 1);
         lookupTable[i] = qRgba(color.red(), color.green(), color.blue(), _alpha);
     }
     for (i = _max+1; i <= 255; i++) {
@@ -219,7 +218,7 @@ void irtkQtLookupTable::SetColorModeToJacobianExpansion() {
 void irtkQtLookupTable::SetColorModeToJacobianContraction() {
     double minD = round((minDisplay - minImage) * 255 / (maxImage - minImage));
     double maxD = round((maxDisplay - minImage) * 255 / (maxImage - minImage));
-    double hundred = (100.0 - minImage) * 255 / (maxImage - minImage);
+    double hundred = 2.55;
 
     int i, _min, _max;
     _min = ((minD < hundred) ? minD : hundred);
@@ -232,8 +231,7 @@ void irtkQtLookupTable::SetColorModeToJacobianContraction() {
         lookupTable[i] = qRgba(color.red(), color.green(), color.blue(), _alpha);
     }
     for (i = _min; i <= _max; i++) {
-        color.setHsvF((i - _max) / (double)(_max - _min + 1) * 60.0 / 360.0 + 240.0 / 360.0, 1, 1,
-                      -(i - _max) / (double)(_max - _min + 1));
+        color.setHsvF((i - _max) / (double)(_max - _min) * 60.0 / 360.0 + 240.0 / 360.0, 1, 1);
         lookupTable[i] = qRgba(color.red(), color.green(), color.blue(), _alpha);
     }
     for (i = _max+1; i <= 255; i++) {
