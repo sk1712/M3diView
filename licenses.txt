@@ -22,7 +22,7 @@ File: icons/arrow_up.png; icons/arrow_down
 License: Public Domain
 Commercial usage: Allowed
 
-File: icons/erase.png
+File: icons/erase.png; icons/save.png
 Designer: Aha-Soft Team
 License: Freeware
 

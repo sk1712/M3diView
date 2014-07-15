@@ -33,6 +33,7 @@ class QtMainWindow : public QMainWindow
 
     /// File actions
     QAction *openTargetAction;
+    QAction *saveScreenshotAction;
 
     /// View actions
     QAction *viewAxialAction;
@@ -163,6 +164,9 @@ private slots:
 
     /// Callback function for openTargetAction
     void openImage();
+
+    /// Callback function for saveScreenshotAction
+    void saveScreenshot();
 
     /// Callback function for viewSelectedImageAction
     void viewImage();

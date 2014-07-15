@@ -1,5 +1,5 @@
 #include <QtTwoDimensionalGlWidget.h>
-#include <QDebug>
+
 
 QtTwoDimensionalGlWidget::QtTwoDimensionalGlWidget(QWidget *parent)
     :QtGlWidget(parent) {
@@ -57,17 +57,9 @@ void QtTwoDimensionalGlWidget::paintGL() {
     _width = customWidth();
     _height = customHeight();
 
-    if (!_drawable.empty()) {
-        drawImage();
-    }
-
-    if (cursorVisible) {
-        drawCursor();
-    }
-
-    if (labelsVisible) {
-        drawLabels();
-    }
+    if (!_drawable.empty()) drawImage();
+    if (cursorVisible) drawCursor();
+    if (labelsVisible) drawLabels();
 }
 
 void QtTwoDimensionalGlWidget::drawImage() const {

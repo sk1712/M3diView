@@ -20,7 +20,7 @@ Qt2dViewerWidget::Qt2dViewerWidget(QWidget *parent)
     sliceLabel = new QLabel();
     layout->addWidget(sliceLabel, 1, 0, 1, 2, Qt::AlignRight);
 
-    createSettingsMenu();
+    createOptionsMenu();
     connectSignals();
     setEnabled(false);
 }
@@ -40,13 +40,10 @@ void Qt2dViewerWidget::connectSignals() {
 
     connect(showLabelsAction, SIGNAL(toggled(bool)), this, SLOT(toggleLabelsVisible(bool)));
     connect(showCursorAction, SIGNAL(toggled(bool)), this, SLOT(toggleCursorVisible(bool)));
+
 }
 
-void Qt2dViewerWidget::createSettingsMenu() {
-    settingsMenu = new QMenu();
-    settingsToolButton->setMenu(settingsMenu);
-    settingsToolButton->setPopupMode(QToolButton::InstantPopup);
-
+void Qt2dViewerWidget::createOptionsMenu() {
     showLabelsAction = new QAction(tr("Show labels"), this);
     showLabelsAction->setCheckable(true);
     showLabelsAction->setChecked(true);

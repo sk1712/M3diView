@@ -23,6 +23,16 @@ int QtGlWidget::customHeight() const {
     return height() * pixelRatio;
 }
 
+bool QtGlWidget::saveScreenshotInFile(QString file) {
+    QImage screenshot = getDisplayedImage();
+    bool status = screenshot.save(file);
+    return status;
+}
+
+QImage QtGlWidget::getDisplayedImage() {
+    return this->grabFrameBuffer();
+}
+
 void QtGlWidget::updateDrawable(QVector<QRgb**> drawable) {
     deleteDrawable();
     _drawable = drawable;

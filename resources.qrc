@@ -13,5 +13,6 @@
         <file>stylesheets/stylesheet.qss</file>
         <file>icons/erase.png</file>
         <file>icons/settings.png</file>
+        <file>icons/save.png</file>
     </qresource>
 </RCC>

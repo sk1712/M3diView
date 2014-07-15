@@ -1,12 +1,12 @@
 #ifndef QTVIEWERWIDGET_H
 #define QTVIEWERWIDGET_H
 
+#include <QtGlWidget.h>
 
 #include <QSlider>
 #include <QToolButton>
+#include <QMenu>
 
-
-class QtGlWidget;
 
 class QtViewerWidget : public QWidget
 {
@@ -27,6 +27,12 @@ protected:
 
     /// Toolbutton for viewer settings
     QToolButton *settingsToolButton;
+
+    /// Settings menu
+    QMenu *settingsMenu;
+
+    /// Save screenshot action
+    QAction *saveScreenshotAction;
 
     /// Flag for viewer linked to other viewers
     bool linked;
@@ -75,6 +81,9 @@ protected slots:
 
     /// Callback function for linkToolButton
     void changeLinked(bool checked);
+
+    /// Save screenshot of current viewer
+    void saveScreenshot();
 
 signals:
 

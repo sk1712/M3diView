@@ -36,8 +36,6 @@ Qt3dViewerWidget::Qt3dViewerWidget(QWidget *parent)
 
     layout->addWidget(sliderWidget, 0, 1);
 
-    settingsToolButton->setVisible(false);
-
     connectSignals();
     setEnabled(false);
 }

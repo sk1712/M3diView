@@ -46,6 +46,12 @@ public:
     /// Get height in physical pixels
     int customHeight() const;
 
+    /// Save screenshot in file
+    bool saveScreenshotInFile(QString file);
+
+    /// Get image displayed in widget as QImage
+    QImage getDisplayedImage();
+
     /// Function to be implemented by all derived classes
     virtual void drawImage() const = 0;
 
