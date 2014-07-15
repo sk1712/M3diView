@@ -44,11 +44,11 @@ class QtMainWindow : public QMainWindow
     QAction *clearViewsAction;
 
     /// Toolbar actions
-    QAction *viewSelectedImageAction;
     QAction *zoomInAction;
     QAction *zoomOutAction;
     QAction *moveUpAction;
     QAction *moveDownAction;
+    QAction *screenshotToolbarAction;
 
     /// Image actions
     QAction *toggleVisibleAction;

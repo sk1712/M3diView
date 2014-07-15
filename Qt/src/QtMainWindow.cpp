@@ -105,6 +105,9 @@ void QtMainWindow::createToolBar() {
 
     toolbar->addAction(zoomInAction);
     toolbar->addAction(zoomOutAction);
+    toolbar->addSeparator();
+
+    toolbar->addAction(screenshotToolbarAction);
 }
 
 void QtMainWindow::createMenu() {
@@ -127,6 +130,9 @@ void QtMainWindow::createMenu() {
 }
 
 void QtMainWindow::createToolBarActions() {
+    screenshotToolbarAction = new QAction(tr("Save screenshot"), this);
+    screenshotToolbarAction->setIcon(QIcon(":/icons/screenshot.png"));
+
     zoomInAction = new QAction(tr("Zoom in"), this);
     zoomInAction->setIcon(QIcon(":/icons/zoom_in.png"));
     zoomInAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Equal));
@@ -196,6 +202,7 @@ void QtMainWindow::connectWindowSignals() {
     connect(zoomOutAction, SIGNAL(triggered()), this, SLOT(zoomOut()));
     connect(moveUpAction, SIGNAL(triggered()), this, SLOT(moveImageUp()));
     connect(moveDownAction, SIGNAL(triggered()), this, SLOT(moveImageDown()));
+    connect(screenshotToolbarAction, SIGNAL(triggered()), this, SLOT(saveScreenshot()));
 
     // Menu signals
     connect(openTargetAction, SIGNAL(triggered()), this, SLOT(openImage()));
