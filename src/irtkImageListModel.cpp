@@ -35,7 +35,7 @@ QVariant irtkImageListModel::data(const QModelIndex &index, int role) const {
                 return QIcon(":/icons/eye.png");
             else {
                 // Else show white icon
-                QPixmap pixmap(16, 16);
+                QPixmap pixmap(25, 25);
                 pixmap.fill();
                 QIcon icon(pixmap);
                 return icon;

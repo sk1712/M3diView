@@ -99,15 +99,16 @@ void QtMainWindow::createDockWindows() {
 void QtMainWindow::createToolBar() {
     toolbar = addToolBar(tr("View"));
 
-    toolbar->addAction(moveUpAction);
-    toolbar->addAction(moveDownAction);
+    toolbar->addAction(openImageToolbarAction);
+    toolbar->addAction(screenshotToolbarAction);
     toolbar->addSeparator();
 
     toolbar->addAction(zoomInAction);
     toolbar->addAction(zoomOutAction);
     toolbar->addSeparator();
 
-    toolbar->addAction(screenshotToolbarAction);
+    toolbar->addAction(moveUpAction);
+    toolbar->addAction(moveDownAction);    
 }
 
 void QtMainWindow::createMenu() {
@@ -116,13 +117,15 @@ void QtMainWindow::createMenu() {
     fileMenu->addAction(saveScreenshotAction);
 
     viewMenu = menuBar()->addMenu(tr("&View"));
-    viewMenu->addAction(viewOrthogonalAction);
-    viewMenu->addAction(viewAxialAction);
-    viewMenu->addAction(viewCoronalAction);
-    viewMenu->addAction(viewSagittalAction);
+    QMenu *addMenu = viewMenu->addMenu(tr("Add view"));
+    addMenu->setIcon(QIcon(":/icons/add_view.png"));
+    addMenu->addAction(viewOrthogonalAction);
+    addMenu->addAction(viewAxialAction);
+    addMenu->addAction(viewCoronalAction);
+    addMenu->addAction(viewSagittalAction);
 
-    viewMenu->addSeparator();
-    viewMenu->addAction(view3DAction);
+    addMenu->addSeparator();
+    addMenu->addAction(view3DAction);
 
     viewMenu->addSeparator();
     viewMenu->addAction(clearViewsAction);
@@ -130,6 +133,9 @@ void QtMainWindow::createMenu() {
 }
 
 void QtMainWindow::createToolBarActions() {
+    openImageToolbarAction = new QAction(tr("Add files"), this);
+    openImageToolbarAction->setIcon(QIcon(":/icons/add_file.png"));
+
     screenshotToolbarAction = new QAction(tr("Save screenshot"), this);
     screenshotToolbarAction->setIcon(QIcon(":/icons/screenshot.png"));
 
@@ -157,6 +163,7 @@ void QtMainWindow::createMenuActions() {
 
     saveScreenshotAction = new QAction(tr("Save screenshot"), this);
     saveScreenshotAction->setStatusTip((tr("Save screenshot")));
+    saveScreenshotAction->setIcon(QIcon(":/icons/screenshot.png"));
 
     viewAxialAction = new QAction(tr("Axial"), this);
     viewAxialAction->setStatusTip(tr("Add axial view"));
@@ -175,6 +182,7 @@ void QtMainWindow::createMenuActions() {
 
     clearViewsAction = new QAction(tr("Clear all"), this);
     clearViewsAction->setStatusTip(tr("Delete all views"));
+    clearViewsAction->setIcon(QIcon(":/icons/delete_view.png"));
 }
 
 void QtMainWindow::createImageMenuActions() {
@@ -199,11 +207,12 @@ void QtMainWindow::connectWindowSignals() {
     connect(deleteImageAction, SIGNAL(triggered()), this, SLOT(deleteImages()));
 
     // Toolbar signals
+    connect(openImageToolbarAction, SIGNAL(triggered()), this, SLOT(openImage()));
+    connect(screenshotToolbarAction, SIGNAL(triggered()), this, SLOT(saveScreenshot()));
     connect(zoomInAction, SIGNAL(triggered()), this, SLOT(zoomIn()));
     connect(zoomOutAction, SIGNAL(triggered()), this, SLOT(zoomOut()));
     connect(moveUpAction, SIGNAL(triggered()), this, SLOT(moveImageUp()));
     connect(moveDownAction, SIGNAL(triggered()), this, SLOT(moveImageDown()));
-    connect(screenshotToolbarAction, SIGNAL(triggered()), this, SLOT(saveScreenshot()));
 
     // Menu signals
     connect(openTargetAction, SIGNAL(triggered()), this, SLOT(openImage()));
