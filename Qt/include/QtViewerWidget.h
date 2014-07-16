@@ -34,6 +34,9 @@ protected:
     /// Save screenshot action
     QAction *saveScreenshotAction;
 
+    /// Flag for window expanded
+    bool expanded;
+
     /// Flag for viewer linked to other viewers
     bool linked;
 

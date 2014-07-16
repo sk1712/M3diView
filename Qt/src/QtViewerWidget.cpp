@@ -26,6 +26,7 @@ QtViewerWidget::QtViewerWidget(QWidget *parent) : QWidget(parent) {
 
     // By default link viewer to the rest of the viewers
     linked = true;
+    expanded = false;
 }
 
 void QtViewerWidget::setInvertedAxes(bool *) {
@@ -38,8 +39,8 @@ void QtViewerWidget::paintEvent(QPaintEvent *) {
 
 void QtViewerWidget::createToolButtons() {
     expandToolButton = new QToolButton();
-    expandToolButton->setIcon(QIcon(":/icons/expand_window.png"));
-    expandToolButton->setToolTip("Expand/collapse window");
+    expandToolButton->setIcon(QIcon(":/icons/expand.png"));
+    expandToolButton->setToolTip("Expand window");
 
     linkToolButton = new QToolButton();
     linkToolButton->setIcon(QIcon(":/icons/link.png"));
@@ -73,6 +74,17 @@ void QtViewerWidget::connectSignals() {
 }
 
 void QtViewerWidget::expandWindow() {
+    expanded = !expanded;
+
+    if (expanded) {
+        expandToolButton->setIcon(QIcon(":/icons/collapse.png"));
+        expandToolButton->setToolTip("Collapse window");
+    }
+    else {
+        expandToolButton->setIcon(QIcon(":/icons/expand.png"));
+        expandToolButton->setToolTip("Expand window");
+    }
+
     emit windowExpanded();
 }
 
