@@ -15,5 +15,7 @@
         <file>icons/add_file.png</file>
         <file>icons/collapse.png</file>
         <file>icons/expand.png</file>
+        <file>icons/add_view.png</file>
+        <file>icons/delete_view.png</file>
     </qresource>
 </RCC>
