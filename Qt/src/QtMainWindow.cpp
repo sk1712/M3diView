@@ -508,6 +508,7 @@ void QtMainWindow::saveScreenshot() {
     }
 
     QImage collage(width, height, QImage::Format_RGB32);
+    collage.fill(Qt::black);
     QPainter paint;
     paint.begin(&collage);
 
