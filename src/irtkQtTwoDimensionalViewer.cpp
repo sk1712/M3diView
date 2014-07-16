@@ -17,7 +17,77 @@ irtkQtTwoDimensionalViewer::~irtkQtTwoDimensionalViewer() {
     delete currentSlice;
 }
 
-vector<QRgb**> irtkQtTwoDimensionalViewer::GetDrawable() {
+QRgb** irtkQtTwoDimensionalViewer::GetOnlyADrawable() {
+    QRgb** drawable = new QRgb*[1];
+    // Set background color to transparent black
+    QRgb _backgroundColor = qRgba(0, 0, 0, 0);
+
+    map<int, irtkGreyImage *>::iterator it = _imageOutput.begin();
+    drawable[0] = new QRgb[it->second->GetNumberOfVoxels()];
+    irtkGreyPixel *original = it->second->GetPointerToVoxels();
+    QRgb *drawn = drawable[0];
+
+    irtkQtLookupTable *luTable = _lookupTable[it->first];
+    int i, j;
+
+    // Create a drawable for all images
+    for (j = 0; j < _height; j++) {
+        for (i = 0; i < _width; i++) {
+            if (*original >= 0) {
+                *drawn = luTable->lookupTable[*original];
+            } else {
+                *drawn = _backgroundColor;
+            }
+            original++;
+            drawn++;
+        }
+    }
+
+    return drawable;
+}
+
+QRgb** irtkQtTwoDimensionalViewer::GetOnlyBDrawable() {
+    QRgb** drawable = new QRgb*[1];
+    // Set background color to transparent black
+    QRgb _backgroundColor = qRgba(0, 0, 0, 0);
+
+    map<int, irtkGreyImage *>::iterator it = --_imageOutput.end();
+    drawable[0] = new QRgb[it->second->GetNumberOfVoxels()];
+    irtkGreyPixel *original = it->second->GetPointerToVoxels();
+    QRgb *drawn = drawable[0];
+
+    irtkQtLookupTable *luTable = _lookupTable[it->first];
+    int i, j;
+
+    // Create a drawable for all images
+    for (j = 0; j < _height; j++) {
+        for (i = 0; i < _width; i++) {
+            if (*original >= 0) {
+                *drawn = luTable->lookupTable[*original];
+            } else {
+                *drawn = _backgroundColor;
+            }
+            original++;
+            drawn++;
+        }
+    }
+
+    return drawable;
+}
+
+QRgb** irtkQtTwoDimensionalViewer::GetHShutterDrawable() {
+    return NULL;
+}
+
+QRgb** irtkQtTwoDimensionalViewer::GetVShutterDrawable() {
+    return NULL;
+}
+
+QRgb** irtkQtTwoDimensionalViewer::GetSubtractionDrawable() {
+    return NULL;
+}
+
+vector<QRgb**> irtkQtTwoDimensionalViewer::GetBlendDrawable() {
     vector<QRgb**> allDrawables;
     // Set background color to transparent black
     QRgb _backgroundColor = qRgba(0, 0, 0, 0);

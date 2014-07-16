@@ -240,6 +240,9 @@ private slots:
 
     /// Callback function for moving image down in the list
     void moveImageDown();
+
+    /// Callback function for blending mode changed
+    void blendModeChanged(int mode);
 };
 
 #endif // QTMAINWINDOW_H

@@ -35,6 +35,7 @@ QtMainWindow::QtMainWindow() {
     // By default add orthogonal and 3D view
     createOrthogonalView();
     create3dView();
+    visualToolWidget->onlyTwoImagesVisible(false);
 }
 
 QtMainWindow::~QtMainWindow() {
@@ -231,6 +232,7 @@ void QtMainWindow::connectToolSignals() {
     connect(visualToolWidget, SIGNAL(opacityChanged(int)), this, SLOT(opacityValueChanged(int)));
     connect(visualToolWidget, SIGNAL(minChanged(double)), this, SLOT(minDisplayValueChanged(double)));
     connect(visualToolWidget, SIGNAL(maxChanged(double)), this, SLOT(maxDisplayValueChanged(double)));
+    connect(visualToolWidget, SIGNAL(blendingOptionChanged(int)), this, SLOT(blendModeChanged(int)));
 }
 
 void QtMainWindow::disconnectViewerSignals() {
@@ -535,7 +537,7 @@ void QtMainWindow::saveScreenshot() {
                 this,tr("Save screenshot as"),
                 "", tr("Images (*.png *.xpm *.jpg)"));
     if (collage.save(fileName)) {
-        createMessageBox("Image successfully saved in " + fileName);
+        createMessageBox("Image successfully saved in " + fileName, QMessageBox::Information);
     }
     else {
         qCritical("Could not save screenshot in %s", qPrintable(fileName));
@@ -611,6 +613,8 @@ void QtMainWindow::deleteImages() {
         }
     }
 
+    visualToolWidget->onlyTwoImagesVisible(numDisplayedImages == 2);
+
     // Update the model
     delete imageModel;
     imageModel = new irtkImageListModel(list);
@@ -660,6 +664,8 @@ void QtMainWindow::toggleImageVisible() {
         deleteSingleImage(currentImageIndex);
         setUpViewerWidgets();
     }
+
+    visualToolWidget->onlyTwoImagesVisible(numDisplayedImages == 2);
 
     delete imageModel;
     imageModel = new irtkImageListModel(list);
@@ -1075,4 +1081,11 @@ void QtMainWindow::moveImageDown() {
 
         setUpViewerWidgets();
     }
+}
+
+void QtMainWindow::blendModeChanged(int mode) {
+    for (int i = 0; i < viewers.size(); i++) {
+        viewers[i]->SetBlendMode(mode);
+    }
+    updateDrawables();
 }

@@ -4,6 +4,7 @@
 QStringList irtkQtBaseViewer::_interpolationStringList;
 
 irtkQtBaseViewer::irtkQtBaseViewer() {
+    _blendMode = VIEW_BLEND;
     _targetImage = NULL;
 }
 
@@ -22,6 +23,35 @@ void irtkQtBaseViewer::SetInterpolationModeList() {
 
 QStringList irtkQtBaseViewer::GetInterpolationModeList() {
     return _interpolationStringList;
+}
+
+vector<QRgb**> irtkQtBaseViewer::GetDrawable() {
+    vector<QRgb**> allDrawables;
+
+    switch (_blendMode) {
+    case VIEW_A:
+        allDrawables.push_back(GetOnlyADrawable());
+        break;
+    case VIEW_B:
+        allDrawables.push_back(GetOnlyBDrawable());
+        break;
+    case VIEW_HSHUTTER:
+        allDrawables.push_back(GetHShutterDrawable());
+        break;
+    case VIEW_VSHUTTER:
+        allDrawables.push_back(GetVShutterDrawable());
+        break;
+    case VIEW_SUBTRACT:
+        allDrawables.push_back(GetSubtractionDrawable());
+        break;
+    case VIEW_BLEND:
+        allDrawables = GetBlendDrawable();
+        break;
+    default:
+        qCritical("Unknown blending option");
+    }
+
+    return allDrawables;
 }
 
 void irtkQtBaseViewer::AddToDisplayedImages(irtkQtImageObject *imageObject, int index) {

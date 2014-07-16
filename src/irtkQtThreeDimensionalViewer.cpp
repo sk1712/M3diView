@@ -17,7 +17,27 @@ irtkQtThreeDimensionalViewer::~irtkQtThreeDimensionalViewer() {
     delete [] currentSlice;
 }
 
-vector<QRgb**> irtkQtThreeDimensionalViewer::GetDrawable() {
+QRgb** irtkQtThreeDimensionalViewer::GetOnlyADrawable() {
+    return NULL;
+}
+
+QRgb** irtkQtThreeDimensionalViewer::GetOnlyBDrawable() {
+    return NULL;
+}
+
+QRgb** irtkQtThreeDimensionalViewer::GetHShutterDrawable() {
+    return NULL;
+}
+
+QRgb** irtkQtThreeDimensionalViewer::GetVShutterDrawable() {
+    return NULL;
+}
+
+QRgb** irtkQtThreeDimensionalViewer::GetSubtractionDrawable() {
+    return NULL;
+}
+
+vector<QRgb**> irtkQtThreeDimensionalViewer::GetBlendDrawable() {
     vector<QRgb**> allDrawables;
     QRgb _backgroundColor = qRgba(0, 0, 0, 0);
 

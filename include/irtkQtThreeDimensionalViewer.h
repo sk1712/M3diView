@@ -31,7 +31,17 @@ public:
     ~irtkQtThreeDimensionalViewer();
 
     /// Get the array of RGB values to be drawn on the screen
-    vector<QRgb**> GetDrawable();
+    QRgb** GetOnlyADrawable();
+
+    QRgb** GetOnlyBDrawable();
+
+    QRgb** GetHShutterDrawable();
+
+    QRgb** GetVShutterDrawable();
+
+    QRgb** GetSubtractionDrawable();
+
+    vector<QRgb**> GetBlendDrawable();
 
     /// Initialize the transformation from the input to the output image
     void InitializeTransformation();

@@ -103,6 +103,7 @@ void QtViewerWidget::saveScreenshot() {
     if (getGlWidget()->saveScreenshotInFile(fileName)) {
         QMessageBox message;
         message.setText("Image successfully saved in " + fileName);
+        message.setIcon(QMessageBox::Information);
         message.exec();
     }
     else {
