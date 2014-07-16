@@ -152,6 +152,7 @@ void QtMainWindow::createMenuActions() {
     openTargetAction = new QAction(tr("Open image file(s)..."), this);
     openTargetAction->setStatusTip(tr("Load new image file(s)"));
     openTargetAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_O));
+    openTargetAction->setIcon(QIcon(":/icons/add_file.png"));
     openTargetAction->setShortcutContext(Qt::ApplicationShortcut);
 
     saveScreenshotAction = new QAction(tr("Save screenshot"), this);
@@ -995,28 +996,30 @@ void QtMainWindow::listViewClicked(QModelIndex index) {
 }
 
 void QtMainWindow::listViewShowContextMenu(const QPoint &pos) {
-    QMenu imageMenu;
-    QPoint globalPos = imageListView->mapToGlobal(pos);
+    if (imageModel) {
+        QMenu imageMenu;
+        QPoint globalPos = imageListView->mapToGlobal(pos);
 
-    int selectedCount = imageListView->selectionModel()->selectedIndexes().size();
+        int selectedCount = imageListView->selectionModel()->selectedIndexes().size();
 
-    if ( selectedCount < 1 ) {
-        return;
-    }
-    if ( selectedCount == 1) {
-        currentImageIndex = imageListView->indexAt(pos).row();
-        imageMenu.addAction(toggleVisibleAction);
-        if (irtkQtViewer::Instance()->GetImageList().at(currentImageIndex)->IsVisible()) {
-            toggleVisibleAction->setChecked(true);
+        if ( selectedCount < 1 ) {
+            return;
         }
-        else {
-            toggleVisibleAction->setChecked(false);
+        if ( selectedCount == 1) {
+            currentImageIndex = imageListView->indexAt(pos).row();
+            imageMenu.addAction(toggleVisibleAction);
+            if (irtkQtViewer::Instance()->GetImageList().at(currentImageIndex)->IsVisible()) {
+                toggleVisibleAction->setChecked(true);
+            }
+            else {
+                toggleVisibleAction->setChecked(false);
+            }
         }
-    }
-    if ( selectedCount > 0 ) {
-        imageMenu.addAction(deleteImageAction);
-        // Show the menu only if the current image index is valid
-        imageMenu.exec( globalPos );
+        if ( selectedCount > 0 ) {
+            imageMenu.addAction(deleteImageAction);
+            // Show the menu only if the current image index is valid
+            imageMenu.exec( globalPos );
+        }
     }
 }
 
