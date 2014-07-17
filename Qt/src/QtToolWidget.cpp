@@ -30,13 +30,21 @@ QtToolWidget::QtToolWidget(QWidget * parent) : QWidget(parent) {
 }
 
 void QtToolWidget::setMaximumImageValue(double maxImage) {
+    minImageSlider->blockSignals(true);
+    maxImageSlider->blockSignals(true);
     minImageSlider->setMaximum(maxImage * 10);
     maxImageSlider->setMaximum(maxImage * 10);
+    minImageSlider->blockSignals(false);
+    maxImageSlider->blockSignals(false);
 }
 
 void QtToolWidget::setMinimumImageValue(double minImage) {
+    minImageSlider->blockSignals(true);
+    maxImageSlider->blockSignals(true);
     minImageSlider->setMinimum(minImage * 10);
     maxImageSlider->setMinimum(minImage * 10);
+    minImageSlider->blockSignals(false);
+    maxImageSlider->blockSignals(false);
 }
 
 void QtToolWidget::setDisplayMin(double min) {
