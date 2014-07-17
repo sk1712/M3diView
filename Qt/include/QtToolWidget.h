@@ -38,6 +38,12 @@ class QtToolWidget : public QWidget
                 *hShutterButton, *vShutterButton,
                 *subtractButton, *blendButton;
 
+    /// Label for mixing value
+    QLabel *blendMixLabel;
+
+    /// Slider for mixing value
+    QSlider *blendMixSlider;
+
     /// Minimum, maximum display values
     int minDisplay, maxDisplay;
 
@@ -66,6 +72,12 @@ public:
 
     /// Set interpolation
     void setInterpolation(int index);
+
+    /// Get blending option
+    int getBlendingOption() const;
+
+    /// Get display mix value
+    double getDisplayMix() const;
 
     /// Set if only two image are chosen as visible
     void onlyTwoImagesVisible(bool flag);
@@ -119,6 +131,9 @@ private slots:
     /// Callback function for blending option chabged
     void blendingButtonClicked(int option);
 
+    /// Callback function for blend mix value changed
+    void blendMixValueChanged(int value);
+
 signals:
 
     /// Signal emitted when min display value changes
@@ -138,6 +153,9 @@ signals:
 
     /// Signal emitted when blending option changes
     void blendingOptionChanged(int option);
+
+    /// Signal emitted when blend mix value changes
+    void blendMixChanged(double value);
 };
 
 #endif // QTTOOLWIDGET_H

@@ -243,6 +243,9 @@ private slots:
 
     /// Callback function for blending mode changed
     void blendModeChanged(int mode);
+
+    /// Callback function for display mix value changed
+    void displayMixValueChanged(double value);
 };
 
 #endif // QTMAINWINDOW_H

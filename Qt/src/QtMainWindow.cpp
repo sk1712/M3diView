@@ -233,6 +233,7 @@ void QtMainWindow::connectToolSignals() {
     connect(visualToolWidget, SIGNAL(minChanged(double)), this, SLOT(minDisplayValueChanged(double)));
     connect(visualToolWidget, SIGNAL(maxChanged(double)), this, SLOT(maxDisplayValueChanged(double)));
     connect(visualToolWidget, SIGNAL(blendingOptionChanged(int)), this, SLOT(blendModeChanged(int)));
+    connect(visualToolWidget, SIGNAL(blendMixChanged(double)), this, SLOT(displayMixValueChanged(double)));
 }
 
 void QtMainWindow::disconnectViewerSignals() {
@@ -310,6 +311,8 @@ Qt2dViewerWidget* QtMainWindow::createTwoDimensionalView(irtkQtBaseViewer::irtkV
     connect(qtViewer, SIGNAL(windowExpanded()), this, SLOT(showOnlyThisWidget()));
     connect(qtViewer, SIGNAL(windowDeleted()), this, SLOT(deleteThisWidget()));
 
+    viewer->SetBlendMixValue(visualToolWidget->getDisplayMix());
+    viewer->SetBlendMode(visualToolWidget->getBlendingOption());
     viewImage();
 
     return qtViewer;
@@ -328,6 +331,8 @@ Qt3dViewerWidget* QtMainWindow::createThreeDimensionalView() {
     connect(qtViewer, SIGNAL(windowExpanded()), this, SLOT(showOnlyThisWidget()));
     connect(qtViewer, SIGNAL(windowDeleted()), this, SLOT(deleteThisWidget()));
 
+    viewer->SetBlendMixValue(visualToolWidget->getDisplayMix());
+    viewer->SetBlendMode(visualToolWidget->getBlendingOption());
     viewImage();
 
     return qtViewer;
@@ -528,7 +533,8 @@ void QtMainWindow::saveScreenshot() {
         int y = (i / 2) * maxHeight;
 
         currentImage = images[i];
-        paint.drawImage(QPoint(x, y), images[i]);
+        paint.drawImage(QRect(x, y, currentImage.width(),
+                              currentImage.height()), currentImage);
     }
 
     paint.end();
@@ -779,6 +785,7 @@ void QtMainWindow::showOnlyThisWidget() {
     if (!singleViewerInScreen) {
         qDebug("Exiting single viewer mode");
         saveScreenshotAction->setEnabled(true);
+        screenshotToolbarAction->setEnabled(true);
 
         for (int i = 0; i < viewerWidgets.size(); i++) {
             viewerWidgets[i]->show();
@@ -787,6 +794,7 @@ void QtMainWindow::showOnlyThisWidget() {
     else {
         qDebug("Entering single viewer mode");
         saveScreenshotAction->setEnabled(false);
+        screenshotToolbarAction->setEnabled(false);
 
         QWidget *senderWidget = dynamic_cast<QWidget*>(sender());
         for (int i = 0; i < viewerWidgets.size(); i++) {
@@ -903,7 +911,8 @@ void QtMainWindow::updateOrigin(double x, double y, double z) {
 }
 
 void QtMainWindow::minDisplayValueChanged(double value) {
-    qDebug("Minimum display value changed");
+    qDebug("Minimum display value changed to %s",
+           qPrintable(QString::number(value)));
 
     QList<irtkQtImageObject*> & list = irtkQtViewer::Instance()->GetImageList();
     int index = imageListView->currentIndex().row();
@@ -916,7 +925,8 @@ void QtMainWindow::minDisplayValueChanged(double value) {
 }
 
 void QtMainWindow::maxDisplayValueChanged(double value) {
-    qDebug("Maximum display value changed");
+    qDebug("Maximum display value changed to %s",
+           qPrintable(QString::number(value)));
 
     QList<irtkQtImageObject*> & list = irtkQtViewer::Instance()->GetImageList();
     int index = imageListView->currentIndex().row();
@@ -998,8 +1008,8 @@ void QtMainWindow::listViewClicked(QModelIndex index) {
         visualToolWidget->setOpacity(imageObject->GetOpacity());
         visualToolWidget->setMinimumImageValue(imageObject->GetMinImageValue());
         visualToolWidget->setMaximumImageValue(imageObject->GetMaxImageValue());
-        visualToolWidget->setDisplayMax(imageObject->GetMaxDisplayValue());
         visualToolWidget->setDisplayMin(imageObject->GetMinDisplayValue());
+        visualToolWidget->setDisplayMax(imageObject->GetMaxDisplayValue());
     }
     else {
         visualToolWidget->setEnabled(false);
@@ -1086,6 +1096,13 @@ void QtMainWindow::moveImageDown() {
 void QtMainWindow::blendModeChanged(int mode) {
     for (int i = 0; i < viewers.size(); i++) {
         viewers[i]->SetBlendMode(mode);
+    }
+    updateDrawables();
+}
+
+void QtMainWindow::displayMixValueChanged(double value) {
+    for (int i = 0; i < viewers.size(); i++) {
+        viewers[i]->SetBlendMixValue(value);
     }
     updateDrawables();
 }

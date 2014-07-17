@@ -76,11 +76,92 @@ QRgb** irtkQtTwoDimensionalViewer::GetOnlyBDrawable() {
 }
 
 QRgb** irtkQtTwoDimensionalViewer::GetHShutterDrawable() {
-    return NULL;
+    QRgb** drawable = new QRgb*[1];
+    // Set background color to transparent black
+    QRgb _backgroundColor = qRgba(0, 0, 0, 0);
+
+    map<int, irtkGreyImage *>::iterator it = _imageOutput.begin();
+    drawable[0] = new QRgb[it->second->GetNumberOfVoxels()];
+
+    irtkGreyPixel *target = it->second->GetPointerToVoxels();
+    irtkQtLookupTable *targetTable = _lookupTable[it->first];
+
+    irtkGreyPixel *source = (++it)->second->GetPointerToVoxels();
+    irtkQtLookupTable *sourceTable = _lookupTable[it->first];
+
+    QRgb *drawn = drawable[0];
+    int i, j;
+
+    // Display target and source images with a horizontal shutter
+    for (j = 0; j < _height; j++) {
+        if (j < _viewMix * _height) {
+            for (i = 0; i < _width; i++) {
+                if (*target >= 0) {
+                    *drawn = targetTable->lookupTable[*target];
+                } else {
+                    *drawn = _backgroundColor;
+                }
+                target++;
+                source++;
+                drawn++;
+            }
+        } else {
+            for (i = 0; i < _width; i++) {
+                if (*source >= 0) {
+                    *drawn = sourceTable->lookupTable[*source];
+                } else {
+                    *drawn = _backgroundColor;
+                }
+                target++;
+                source++;
+                drawn++;
+            }
+        }
+    }
+
+    return drawable;
 }
 
 QRgb** irtkQtTwoDimensionalViewer::GetVShutterDrawable() {
-    return NULL;
+    QRgb** drawable = new QRgb*[1];
+    // Set background color to transparent black
+    QRgb _backgroundColor = qRgba(0, 0, 0, 0);
+
+    map<int, irtkGreyImage *>::iterator it = _imageOutput.begin();
+    drawable[0] = new QRgb[it->second->GetNumberOfVoxels()];
+
+    irtkGreyPixel *target = it->second->GetPointerToVoxels();
+    irtkQtLookupTable *targetTable = _lookupTable[it->first];
+
+    irtkGreyPixel *source = (++it)->second->GetPointerToVoxels();
+    irtkQtLookupTable *sourceTable = _lookupTable[it->first];
+
+    QRgb *drawn = drawable[0];
+    int i, j;
+
+    // Display target and source images with a vertical shutter
+    for (j = 0; j < _height; j++) {
+        for (i = 0; i < _width; i++) {
+            if (i < _viewMix * _width) {
+                if (*target >= 0) {
+                    *drawn = targetTable->lookupTable[*target];
+                } else {
+                    *drawn = _backgroundColor;
+                }
+            } else {
+                if (*source >= 0) {
+                    *drawn = sourceTable->lookupTable[*source];
+                } else {
+                    *drawn = _backgroundColor;
+                }
+            }
+            target++;
+            source++;
+            drawn++;
+        }
+    }
+
+    return drawable;
 }
 
 QRgb** irtkQtTwoDimensionalViewer::GetSubtractionDrawable() {

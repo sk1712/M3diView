@@ -16,6 +16,9 @@ QtToolWidget::QtToolWidget(QWidget * parent) : QWidget(parent) {
     opacitySlider = new QSlider(Qt::Horizontal);
     opacityLabel = new QLabel;
 
+    blendMixSlider = new QSlider(Qt::Horizontal);
+    blendMixLabel = new QLabel;
+
     colormapCombo = new QComboBox;
     interpolationCombo = new QComboBox;
 
@@ -73,6 +76,14 @@ void QtToolWidget::setInterpolation(int index) {
     }
 }
 
+int QtToolWidget::getBlendingOption() const {
+    return blendingButtonGroup->checkedId();
+}
+
+double QtToolWidget::getDisplayMix() const {
+    return (double) blendMixSlider->value() / 100.0;
+}
+
 void QtToolWidget::onlyTwoImagesVisible(bool flag) {
     onlyAButton->setEnabled(flag);
     onlyBButton->setEnabled(flag);
@@ -82,6 +93,8 @@ void QtToolWidget::onlyTwoImagesVisible(bool flag) {
 
     if (!flag) {
         blendButton->setChecked(true);
+        blendMixSlider->setEnabled(false);
+        emit blendingOptionChanged(blendingButtonGroup->id(blendButton));
     }
 }
 
@@ -135,6 +148,14 @@ void QtToolWidget::addWidgetsToLayout() {
     verticalLayout->addWidget(interpolationCombo);
 
     verticalLayout->addWidget(createButtonGroup());
+
+    QWidget *blendMixWidget = new QWidget;
+    QHBoxLayout *blendMixLayout = new QHBoxLayout(blendMixWidget);
+    blendMixLayout->addWidget(blendMixSlider);
+    blendMixLayout->addWidget(blendMixLabel);
+
+    verticalLayout->addWidget(new QLabel("Display mix:"));
+    verticalLayout->addWidget(blendMixWidget);
 
     QSpacerItem* spacer = new QSpacerItem( 20, 20, QSizePolicy::Minimum,
     QSizePolicy::Expanding );
@@ -192,12 +213,14 @@ void QtToolWidget::connectSignals() {
     connect(interpolationCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(interpolationIndexChanged(int)));
     connect(opacitySlider, SIGNAL(valueChanged(int)), this, SLOT(opacityValueChanged(int)));
     connect(blendingButtonGroup, SIGNAL(buttonClicked(int)), this, SLOT(blendingButtonClicked(int)));
+    connect(blendMixSlider, SIGNAL(valueChanged(int)), this, SLOT(blendMixValueChanged(int)));
 }
 
 void QtToolWidget::fixWidgetSizes() {
     minImageLabel->setFixedWidth(60);
     maxImageLabel->setFixedWidth(60);
     opacityLabel->setFixedWidth(60);
+    blendMixLabel->setFixedWidth(30);
 }
 
 void QtToolWidget::initializeValues() {
@@ -205,6 +228,8 @@ void QtToolWidget::initializeValues() {
     opacitySlider->setValue(255);
     minImageSlider->setRange(0, 0);
     maxImageSlider->setRange(0, 0);
+    blendMixSlider->setRange(0, 100);
+    blendMixSlider->setValue(50);
 }
 
 void QtToolWidget::minValueChanged(int value) {
@@ -258,6 +283,18 @@ void QtToolWidget::opacityValueChanged(int value) {
 }
 
 void QtToolWidget::blendingButtonClicked(int option) {
+    if ( (option == 2) || (option == 3)) {
+        blendMixSlider->setEnabled(true);
+    }
+    else {
+        blendMixSlider->setEnabled(false);
+    }
     emit blendingOptionChanged(option);
+}
+
+void QtToolWidget::blendMixValueChanged(int value) {
+    double blendMix = (double) value / 100.0;
+    blendMixLabel->setText(QString::number(blendMix, 'g', 2));
+    emit blendMixChanged(blendMix);
 }
 

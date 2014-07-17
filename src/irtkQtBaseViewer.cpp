@@ -5,6 +5,7 @@ QStringList irtkQtBaseViewer::_interpolationStringList;
 
 irtkQtBaseViewer::irtkQtBaseViewer() {
     _blendMode = VIEW_BLEND;
+    _viewMix = 0.5;
     _targetImage = NULL;
 }
 

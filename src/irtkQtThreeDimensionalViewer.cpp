@@ -18,19 +18,178 @@ irtkQtThreeDimensionalViewer::~irtkQtThreeDimensionalViewer() {
 }
 
 QRgb** irtkQtThreeDimensionalViewer::GetOnlyADrawable() {
-    return NULL;
+    QRgb** drawable = new QRgb*[3];
+    QRgb _backgroundColor = qRgba(0, 0, 0, 0);
+
+    int dimensions[3][2] = {
+        {sliceNum[0], sliceNum[1]},
+        {sliceNum[1], sliceNum[2]},
+        {sliceNum[0], sliceNum[2]}
+    };
+
+    map<int, irtkGreyImage **>::iterator it = _imageOutput.begin();
+
+    for (int dim = 0; dim < 3; dim++) {
+        drawable[dim] = new QRgb[it->second[dim]->GetNumberOfVoxels()];
+        irtkGreyPixel *original = it->second[dim]->GetPointerToVoxels();
+        QRgb *drawn = drawable[dim];
+
+        irtkQtLookupTable *luTable = _lookupTable[it->first];
+        int i, j;
+
+        for (j = 0; j < dimensions[dim][0]; j++) {
+            for (i = 0; i < dimensions[dim][1]; i++) {
+                if (*original >= 0) {
+                    *drawn = luTable->lookupTable[*original];
+                } else {
+                    *drawn = _backgroundColor;
+                }
+                original++;
+                drawn++;
+            }
+        }
+    }
+
+    return drawable;
 }
 
 QRgb** irtkQtThreeDimensionalViewer::GetOnlyBDrawable() {
-    return NULL;
+    QRgb** drawable = new QRgb*[3];
+    QRgb _backgroundColor = qRgba(0, 0, 0, 0);
+
+    int dimensions[3][2] = {
+        {sliceNum[0], sliceNum[1]},
+        {sliceNum[1], sliceNum[2]},
+        {sliceNum[0], sliceNum[2]}
+    };
+
+    map<int, irtkGreyImage **>::iterator it = --_imageOutput.end();
+
+    for (int dim = 0; dim < 3; dim++) {
+        drawable[dim] = new QRgb[it->second[dim]->GetNumberOfVoxels()];
+        irtkGreyPixel *original = it->second[dim]->GetPointerToVoxels();
+        QRgb *drawn = drawable[dim];
+
+        irtkQtLookupTable *luTable = _lookupTable[it->first];
+        int i, j;
+
+        for (j = 0; j < dimensions[dim][0]; j++) {
+            for (i = 0; i < dimensions[dim][1]; i++) {
+                if (*original >= 0) {
+                    *drawn = luTable->lookupTable[*original];
+                } else {
+                    *drawn = _backgroundColor;
+                }
+                original++;
+                drawn++;
+            }
+        }
+    }
+
+    return drawable;
 }
 
 QRgb** irtkQtThreeDimensionalViewer::GetHShutterDrawable() {
-    return NULL;
+    QRgb** drawable = new QRgb*[3];
+    QRgb _backgroundColor = qRgba(0, 0, 0, 0);
+
+    int dimensions[3][2] = {
+        {sliceNum[0], sliceNum[1]},
+        {sliceNum[1], sliceNum[2]},
+        {sliceNum[0], sliceNum[2]}
+    };
+
+    for (int dim = 0; dim < 3; dim++) {
+        map<int, irtkGreyImage **>::iterator it = _imageOutput.begin();
+        drawable[dim] = new QRgb[it->second[dim]->GetNumberOfVoxels()];
+
+        irtkGreyPixel *target = it->second[dim]->GetPointerToVoxels();
+        irtkQtLookupTable *targetTable = _lookupTable[it->first];
+
+        irtkGreyPixel *source = (++it)->second[dim]->GetPointerToVoxels();
+        irtkQtLookupTable *sourceTable = _lookupTable[it->first];
+
+        QRgb *drawn = drawable[dim];
+        int i, j;
+
+        // Display target and source images with a horizontal shutter
+        for (j = 0; j < dimensions[dim][1]; j++) {
+            if (j < _viewMix * dimensions[dim][1]) {
+                for (i = 0; i < dimensions[dim][0]; i++) {
+                    if (*target >= 0) {
+                        *drawn = targetTable->lookupTable[*target];
+                    } else {
+                        *drawn = _backgroundColor;
+                    }
+                    target++;
+                    source++;
+                    drawn++;
+                }
+            } else {
+                for (i = 0; i < dimensions[dim][1]; i++) {
+                    if (*source >= 0) {
+                        *drawn = sourceTable->lookupTable[*source];
+                    } else {
+                        *drawn = _backgroundColor;
+                    }
+                    target++;
+                    source++;
+                    drawn++;
+                }
+            }
+        }
+    }
+
+    return drawable;
 }
 
 QRgb** irtkQtThreeDimensionalViewer::GetVShutterDrawable() {
-    return NULL;
+    QRgb** drawable = new QRgb*[3];
+    QRgb _backgroundColor = qRgba(0, 0, 0, 0);
+
+    int dimensions[3][2] = {
+        {sliceNum[0], sliceNum[1]},
+        {sliceNum[1], sliceNum[2]},
+        {sliceNum[0], sliceNum[2]}
+    };
+
+    for (int dim = 0; dim < 3; dim++) {
+        map<int, irtkGreyImage **>::iterator it = _imageOutput.begin();
+        drawable[dim] = new QRgb[it->second[dim]->GetNumberOfVoxels()];
+
+        irtkGreyPixel *target = it->second[dim]->GetPointerToVoxels();
+        irtkQtLookupTable *targetTable = _lookupTable[it->first];
+
+        irtkGreyPixel *source = (++it)->second[dim]->GetPointerToVoxels();
+        irtkQtLookupTable *sourceTable = _lookupTable[it->first];
+
+        QRgb *drawn = drawable[dim];
+        int i, j;
+
+        // Display target and source images with a vertical shutter
+        for (j = 0; j < dimensions[dim][1]; j++) {
+            for (i = 0; i < dimensions[dim][0]; i++) {
+                if (i < _viewMix * dimensions[dim][0]) {
+                    if (*target >= 0) {
+                        *drawn = targetTable->lookupTable[*target];
+                    } else {
+                        *drawn = _backgroundColor;
+                    }
+                } else {
+                    if (*source >= 0) {
+                        *drawn = sourceTable->lookupTable[*source];
+                    } else {
+                        *drawn = _backgroundColor;
+                    }
+                }
+                target++;
+                source++;
+                drawn++;
+            }
+        }
+    }
+
+    return drawable;
 }
 
 QRgb** irtkQtThreeDimensionalViewer::GetSubtractionDrawable() {

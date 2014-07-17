@@ -42,6 +42,9 @@ protected:
     /// Blend mode
     irtkBlendMode _blendMode;
 
+    /// Blend mix value
+    double _viewMix;
+
     /// Number of slices in current view
     int* sliceNum;
 
@@ -96,13 +99,16 @@ public:
     void DecreaseResolution();
 
     /// Set image dimensions
-    void SetDimensions(int width, int height);
+    void SetDimensions(const int width, const int height);
 
     /// Get view mode (axial, sagittal, coronal)
     irtkViewMode GetViewMode() const;
 
     /// Set the blend mode
-    void SetBlendMode(int mode);
+    void SetBlendMode(const int mode);
+
+    /// Set blend mix value
+    void SetBlendMixValue(const double value);
 
     /// Get total number of slices
     int* GetSliceNumber() const;
@@ -250,7 +256,7 @@ inline void irtkQtBaseViewer::DecreaseResolution() {
         _dy += 0.1;
 }
 
-inline void irtkQtBaseViewer::SetDimensions(int width, int height) {
+inline void irtkQtBaseViewer::SetDimensions(const int width, const int height) {
     _width = width;
     _height = height;
 }
@@ -259,8 +265,12 @@ inline irtkQtBaseViewer::irtkViewMode irtkQtBaseViewer::GetViewMode() const {
     return _viewMode;
 }
 
-inline void irtkQtBaseViewer::SetBlendMode(int mode) {
+inline void irtkQtBaseViewer::SetBlendMode(const int mode) {
     _blendMode = static_cast<irtkBlendMode>(mode);
+}
+
+inline void irtkQtBaseViewer::SetBlendMixValue(const double value) {
+    _viewMix = value;
 }
 
 inline int* irtkQtBaseViewer::GetSliceNumber() const {
