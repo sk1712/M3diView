@@ -470,8 +470,6 @@ void QtMainWindow::setUpViewerWidgets() {
         viewerWidget->setMaximumSlice(viewer->GetSliceNumber());
         viewerWidget->setInvertedAxes(viewer->GetAxisInverted());
         viewerWidget->setCurrentSlice(viewer->GetCurrentSlice());
-        viewerWidget->getGlWidget()->updateDrawable(
-                    QVector<QRgb**>::fromStdVector(viewer->GetDrawable()));
     }
 
     // Re-register the viewers' signals
@@ -606,7 +604,6 @@ void QtMainWindow::deleteImages() {
             }
 
             deleteSingleImage(currentImageIndex);
-            setUpViewerWidgets();
         }
 
         // Delete item from the list
@@ -619,7 +616,11 @@ void QtMainWindow::deleteImages() {
         }
     }
 
+    setUpViewerWidgets();
     visualToolWidget->onlyTwoImagesVisible(numDisplayedImages == 2);
+    if (numDisplayedImages == 2) {
+        updateDrawables();
+    }
 
     // Update the model
     delete imageModel;
@@ -643,7 +644,6 @@ void QtMainWindow::toggleImageVisible() {
             list[currentImageIndex]->CreateImage();
             displaySingleImage(currentImageIndex);
             numDisplayedImages++;
-            setUpViewerWidgets();
             clickImage = true;
         }
         catch (irtkException) {
@@ -668,10 +668,13 @@ void QtMainWindow::toggleImageVisible() {
 
         list[currentImageIndex]->DeleteImage();
         deleteSingleImage(currentImageIndex);
-        setUpViewerWidgets();
     }
 
+    setUpViewerWidgets();
     visualToolWidget->onlyTwoImagesVisible(numDisplayedImages == 2);
+    if (numDisplayedImages == 2) {
+        updateDrawables();
+    }
 
     delete imageModel;
     imageModel = new irtkImageListModel(list);
@@ -1068,6 +1071,7 @@ void QtMainWindow::moveImageUp() {
         }
 
         setUpViewerWidgets();
+        updateDrawables();
     }
 }
 
@@ -1090,6 +1094,7 @@ void QtMainWindow::moveImageDown() {
         }
 
         setUpViewerWidgets();
+        updateDrawables();
     }
 }
 
