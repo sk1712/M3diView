@@ -101,6 +101,7 @@ void QtThreeDimensionalGlWidget::deleteDrawable() {
     for (it = _drawable.begin(); it != _drawable.end(); it++) {
         for (int i = 0; i < 3; i++)
             delete [] (*it)[i];
+        delete [] (*it);
     }
 
     _drawable.clear();

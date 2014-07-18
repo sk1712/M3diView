@@ -113,7 +113,7 @@ QRgb** irtkQtThreeDimensionalViewer::GetHShutterDrawable() {
         int i, j;
 
         // Display target and source images with a horizontal shutter
-        for (j = 0; j < dimensions[dim][1]; j++) {
+        for (j = 0; j < dimensions[dim][01]; j++) {
             if (j < _viewMix * dimensions[dim][1]) {
                 for (i = 0; i < dimensions[dim][0]; i++) {
                     if (*target >= 0) {
@@ -126,7 +126,7 @@ QRgb** irtkQtThreeDimensionalViewer::GetHShutterDrawable() {
                     drawn++;
                 }
             } else {
-                for (i = 0; i < dimensions[dim][1]; i++) {
+                for (i = 0; i < dimensions[dim][0]; i++) {
                     if (*source >= 0) {
                         *drawn = sourceTable->lookupTable[*source];
                     } else {

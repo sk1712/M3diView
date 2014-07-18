@@ -103,7 +103,7 @@ void QtTwoDimensionalGlWidget::deleteDrawable() {
     QVector<QRgb**>::iterator it;
 
     for (it = _drawable.begin(); it != _drawable.end(); it++) {
-        delete [] (*it[0]);
+        delete [] (*it)[0];
         delete it[0];
     }
 
