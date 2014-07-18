@@ -30,7 +30,7 @@ QRgb** irtkQtTwoDimensionalViewer::GetOnlyADrawable() {
     irtkQtLookupTable *luTable = _lookupTable[it->first];
     int i, j;
 
-    // Create a drawable for all images
+    // Create a drawable only for the first image
     for (j = 0; j < _height; j++) {
         for (i = 0; i < _width; i++) {
             if (*original >= 0) {
@@ -59,7 +59,7 @@ QRgb** irtkQtTwoDimensionalViewer::GetOnlyBDrawable() {
     irtkQtLookupTable *luTable = _lookupTable[it->first];
     int i, j;
 
-    // Create a drawable for all images
+    // Create a drawable only for the second image
     for (j = 0; j < _height; j++) {
         for (i = 0; i < _width; i++) {
             if (*original >= 0) {
@@ -165,7 +165,48 @@ QRgb** irtkQtTwoDimensionalViewer::GetVShutterDrawable() {
 }
 
 QRgb** irtkQtTwoDimensionalViewer::GetSubtractionDrawable() {
-    return NULL;
+    QRgb** drawable = new QRgb*[1];
+    // Set background color to transparent black
+    QRgb _backgroundColor = qRgba(0, 0, 0, 0);
+
+    double targetMin, targetMax;
+    targetMin = _lookupTable.begin()->second->GetImageMinValue();
+    targetMax = _lookupTable.begin()->second->GetImageMaxValue();
+
+    double sourceMin, sourceMax;
+    sourceMin = (--_lookupTable.end())->second->GetImageMinValue();
+    sourceMax = (--_lookupTable.end())->second->GetImageMaxValue();
+
+    double subtractionMin, subtractionMax;
+    subtractionMin = targetMin - sourceMax;
+    subtractionMax = targetMax - sourceMin;
+
+    irtkQtLookupTable subtractionLUtable;
+    subtractionLUtable.SetMinMaxImageValues(subtractionMin, subtractionMax);
+    subtractionLUtable.SetMinMaxDisplayValues(subtractionMin, subtractionMax);
+    subtractionLUtable.Initialize();
+
+    drawable[0] = new QRgb[_imageOutput.begin()->second->GetNumberOfVoxels()];
+    QRgb *drawn = drawable[0];
+    irtkGreyPixel *target = _imageOutput.begin()->second->GetPointerToVoxels();
+    irtkGreyPixel *source = (--_imageOutput.end())->second->GetPointerToVoxels();
+
+    int i, j;
+
+    for (j = 0; j < _height; j++) {
+        for (i = 0; i < _width; i++) {
+            if ((*target >= 0) && (*source >= 0)) {
+                *drawn = subtractionLUtable.lookupTable[(*target - *source + 255) / 2];
+            } else {
+                *drawn = _backgroundColor;
+            }
+            target++;
+            source++;
+            drawn++;
+        }
+    }
+
+    return drawable;
 }
 
 vector<QRgb**> irtkQtTwoDimensionalViewer::GetBlendDrawable() {

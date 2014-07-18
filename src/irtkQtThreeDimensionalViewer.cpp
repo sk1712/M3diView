@@ -193,7 +193,58 @@ QRgb** irtkQtThreeDimensionalViewer::GetVShutterDrawable() {
 }
 
 QRgb** irtkQtThreeDimensionalViewer::GetSubtractionDrawable() {
-    return NULL;
+    QRgb** drawable = new QRgb*[3];
+    QRgb _backgroundColor = qRgba(0, 0, 0, 0);
+
+    double targetMin, targetMax;
+    targetMin = _lookupTable.begin()->second->GetImageMinValue();
+    targetMax = _lookupTable.begin()->second->GetImageMaxValue();
+
+    double sourceMin, sourceMax;
+    sourceMin = (--_lookupTable.end())->second->GetImageMinValue();
+    sourceMax = (--_lookupTable.end())->second->GetImageMaxValue();
+
+    double subtractionMin, subtractionMax;
+    subtractionMin = targetMin - sourceMax;
+    subtractionMax = targetMax - sourceMin;
+
+    irtkQtLookupTable subtractionLUtable;
+    subtractionLUtable.SetMinMaxImageValues(subtractionMin, subtractionMax);
+    subtractionLUtable.SetMinMaxDisplayValues(subtractionMin, subtractionMax);
+    subtractionLUtable.Initialize();
+
+    int dimensions[3][2] = {
+        {sliceNum[0], sliceNum[1]},
+        {sliceNum[1], sliceNum[2]},
+        {sliceNum[0], sliceNum[2]}
+    };
+
+    for (int dim = 0; dim < 3; dim++) {
+        map<int, irtkGreyImage **>::iterator it = _imageOutput.begin();
+        drawable[dim] = new QRgb[it->second[dim]->GetNumberOfVoxels()];
+
+        irtkGreyPixel *target = it->second[dim]->GetPointerToVoxels();
+        irtkGreyPixel *source = (++it)->second[dim]->GetPointerToVoxels();
+
+        QRgb *drawn = drawable[dim];
+        int i, j;
+
+        // Display target and source images with a vertical shutter
+        for (j = 0; j < dimensions[dim][1]; j++) {
+            for (i = 0; i < dimensions[dim][0]; i++) {
+                if ((*target >= 0) && (*source >= 0)) {
+                    *drawn = subtractionLUtable.lookupTable[(*target - *source + 255) / 2];
+                } else {
+                    *drawn = _backgroundColor;
+                }
+                target++;
+                source++;
+                drawn++;
+            }
+        }
+    }
+
+    return drawable;
 }
 
 vector<QRgb**> irtkQtThreeDimensionalViewer::GetBlendDrawable() {
