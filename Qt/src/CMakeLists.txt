@@ -1,10 +1,16 @@
 cmake_minimum_required(VERSION 2.8.9)
 
-IF(APPLE)
-  set(CMAKE_PREFIX_PATH $ENV{HOME}/Qt5.1.1/5.1.1/clang_64/lib/cmake)
-ENDIF()
+if(APPLE)
+    # Check if environment variable QTDIR is set.
+    # Extra security for windows environment as well.
+    if (DEFINED ENV{QTDIR})
+        set(CMAKE_PREFIX_PATH $ENV{QTDIR} ${CMAKE_PREFIX_PATH})
+    else ()
+        message (FATAL_ERROR "ERROR: Environment variable QTDIR is not set. Please locate your Qt folder MY_QT5_DIR.")
+    endif ()
+endif()
 
-project(newviewer)
+project(m3diview)
 
 # Find includes in corresponding build directories
 SET (CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -15,6 +21,7 @@ SET (CMAKE_AUTOMOC ON)
 find_package(Qt5Concurrent REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5OpenGL REQUIRED)
+find_package(Qt5Core REQUIRED)
 
 set(VIEWER_HEADERS
 ../include/QtGlWidget.h
@@ -34,7 +41,7 @@ set(VIEWER_HEADERS
 ../../include/irtkQtThreeDimensionalViewer.h
 ../../include/irtkQtLookupTable.h)
 
-SET(VIEWER_SOURCES
+set(VIEWER_SOURCES
 main.cpp
 QtGlWidget.cpp 
 QtTwoDimensionalGlWidget.cpp
@@ -53,11 +60,11 @@ QtInfoWidget.cpp
 ../../src/irtkQtThreeDimensionalViewer.cpp
 ../../src/irtkQtLookupTable.cpp)
 
-SET(VIEWER_RESOURCES ../../resources.qrc)
+set(VIEWER_RESOURCES ../../resources.qrc)
 
 qt5_add_resources(ResourceSources ${VIEWER_RESOURCES})
 
-add_executable(newviewer MACOSX_BUNDLE ${VIEWER_SOURCES} ${VIEWER_HEADERS} ${ResourceSources})
+add_executable(m3diview MACOSX_BUNDLE ${VIEWER_SOURCES} ${VIEWER_HEADERS} ${ResourceSources})
 
 # Use the Widgets, Concurrent and OpenGL modules from Qt 5.
-qt5_use_modules(newviewer Widgets Concurrent OpenGL)
+qt5_use_modules(m3diview Widgets Concurrent OpenGL Core)

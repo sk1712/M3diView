@@ -23,6 +23,16 @@ int QtGlWidget::customHeight() const {
     return height() * pixelRatio;
 }
 
+bool QtGlWidget::saveScreenshotInFile(QString file) {
+    QImage screenshot = getDisplayedImage();
+    bool status = screenshot.save(file);
+    return status;
+}
+
+QImage QtGlWidget::getDisplayedImage() {
+    return this->grabFrameBuffer();
+}
+
 void QtGlWidget::updateDrawable(QVector<QRgb**> drawable) {
     deleteDrawable();
     _drawable = drawable;
@@ -58,15 +68,19 @@ void QtGlWidget::wheelEvent(QWheelEvent *event) {
 void QtGlWidget::keyPressEvent(QKeyEvent *event) {
     switch(event->key()) {
     case Qt::Key_Left:
+        qDebug("Left key pressed");
         emit leftKeyPressed();
         break;
     case Qt::Key_Right:
+        qDebug("Right key pressed");
         emit rightKeyPressed();
         break;
     case Qt::Key_Up:
+        qDebug("Up key pressed");
         emit upKeyPressed();
         break;
     case Qt::Key_Down:
+        qDebug("Down key pressed");
         emit downKeyPressed();
         break;
     default:

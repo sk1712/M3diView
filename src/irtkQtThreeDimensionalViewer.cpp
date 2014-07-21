@@ -1,11 +1,15 @@
 #include <irtkQtThreeDimensionalViewer.h>
 
+
 irtkQtThreeDimensionalViewer::irtkQtThreeDimensionalViewer() {
     ClearDisplayedImages();
 
     _viewMode = VIEW_3D;
+
     currentSlice = new int[3];
     sliceNum = new int[3];
+
+    inverted = new bool[3];
 }
 
 irtkQtThreeDimensionalViewer::~irtkQtThreeDimensionalViewer() {
@@ -13,7 +17,239 @@ irtkQtThreeDimensionalViewer::~irtkQtThreeDimensionalViewer() {
     delete [] currentSlice;
 }
 
-vector<QRgb**> irtkQtThreeDimensionalViewer::GetDrawable() {
+QRgb** irtkQtThreeDimensionalViewer::GetOnlyADrawable() {
+    QRgb** drawable = new QRgb*[3];
+    QRgb _backgroundColor = qRgba(0, 0, 0, 0);
+
+    int dimensions[3][2] = {
+        {sliceNum[0], sliceNum[1]},
+        {sliceNum[1], sliceNum[2]},
+        {sliceNum[0], sliceNum[2]}
+    };
+
+    map<int, irtkGreyImage **>::iterator it = _imageOutput.begin();
+
+    for (int dim = 0; dim < 3; dim++) {
+        drawable[dim] = new QRgb[it->second[dim]->GetNumberOfVoxels()];
+        irtkGreyPixel *original = it->second[dim]->GetPointerToVoxels();
+        QRgb *drawn = drawable[dim];
+
+        irtkQtLookupTable *luTable = _lookupTable[it->first];
+        int i, j;
+
+        for (j = 0; j < dimensions[dim][0]; j++) {
+            for (i = 0; i < dimensions[dim][1]; i++) {
+                if (*original >= 0) {
+                    *drawn = luTable->lookupTable[*original];
+                } else {
+                    *drawn = _backgroundColor;
+                }
+                original++;
+                drawn++;
+            }
+        }
+    }
+
+    return drawable;
+}
+
+QRgb** irtkQtThreeDimensionalViewer::GetOnlyBDrawable() {
+    QRgb** drawable = new QRgb*[3];
+    QRgb _backgroundColor = qRgba(0, 0, 0, 0);
+
+    int dimensions[3][2] = {
+        {sliceNum[0], sliceNum[1]},
+        {sliceNum[1], sliceNum[2]},
+        {sliceNum[0], sliceNum[2]}
+    };
+
+    map<int, irtkGreyImage **>::iterator it = --_imageOutput.end();
+
+    for (int dim = 0; dim < 3; dim++) {
+        drawable[dim] = new QRgb[it->second[dim]->GetNumberOfVoxels()];
+        irtkGreyPixel *original = it->second[dim]->GetPointerToVoxels();
+        QRgb *drawn = drawable[dim];
+
+        irtkQtLookupTable *luTable = _lookupTable[it->first];
+        int i, j;
+
+        for (j = 0; j < dimensions[dim][0]; j++) {
+            for (i = 0; i < dimensions[dim][1]; i++) {
+                if (*original >= 0) {
+                    *drawn = luTable->lookupTable[*original];
+                } else {
+                    *drawn = _backgroundColor;
+                }
+                original++;
+                drawn++;
+            }
+        }
+    }
+
+    return drawable;
+}
+
+QRgb** irtkQtThreeDimensionalViewer::GetHShutterDrawable() {
+    QRgb** drawable = new QRgb*[3];
+    QRgb _backgroundColor = qRgba(0, 0, 0, 0);
+
+    int dimensions[3][2] = {
+        {sliceNum[0], sliceNum[1]},
+        {sliceNum[1], sliceNum[2]},
+        {sliceNum[0], sliceNum[2]}
+    };
+
+    for (int dim = 0; dim < 3; dim++) {
+        map<int, irtkGreyImage **>::iterator it = _imageOutput.begin();
+        drawable[dim] = new QRgb[it->second[dim]->GetNumberOfVoxels()];
+
+        irtkGreyPixel *target = it->second[dim]->GetPointerToVoxels();
+        irtkQtLookupTable *targetTable = _lookupTable[it->first];
+
+        irtkGreyPixel *source = (++it)->second[dim]->GetPointerToVoxels();
+        irtkQtLookupTable *sourceTable = _lookupTable[it->first];
+
+        QRgb *drawn = drawable[dim];
+        int i, j;
+
+        // Display target and source images with a horizontal shutter
+        for (j = 0; j < dimensions[dim][01]; j++) {
+            if (j < _viewMix * dimensions[dim][1]) {
+                for (i = 0; i < dimensions[dim][0]; i++) {
+                    if (*target >= 0) {
+                        *drawn = targetTable->lookupTable[*target];
+                    } else {
+                        *drawn = _backgroundColor;
+                    }
+                    target++;
+                    source++;
+                    drawn++;
+                }
+            } else {
+                for (i = 0; i < dimensions[dim][0]; i++) {
+                    if (*source >= 0) {
+                        *drawn = sourceTable->lookupTable[*source];
+                    } else {
+                        *drawn = _backgroundColor;
+                    }
+                    target++;
+                    source++;
+                    drawn++;
+                }
+            }
+        }
+    }
+
+    return drawable;
+}
+
+QRgb** irtkQtThreeDimensionalViewer::GetVShutterDrawable() {
+    QRgb** drawable = new QRgb*[3];
+    QRgb _backgroundColor = qRgba(0, 0, 0, 0);
+
+    int dimensions[3][2] = {
+        {sliceNum[0], sliceNum[1]},
+        {sliceNum[1], sliceNum[2]},
+        {sliceNum[0], sliceNum[2]}
+    };
+
+    for (int dim = 0; dim < 3; dim++) {
+        map<int, irtkGreyImage **>::iterator it = _imageOutput.begin();
+        drawable[dim] = new QRgb[it->second[dim]->GetNumberOfVoxels()];
+
+        irtkGreyPixel *target = it->second[dim]->GetPointerToVoxels();
+        irtkQtLookupTable *targetTable = _lookupTable[it->first];
+
+        irtkGreyPixel *source = (++it)->second[dim]->GetPointerToVoxels();
+        irtkQtLookupTable *sourceTable = _lookupTable[it->first];
+
+        QRgb *drawn = drawable[dim];
+        int i, j;
+
+        // Display target and source images with a vertical shutter
+        for (j = 0; j < dimensions[dim][1]; j++) {
+            for (i = 0; i < dimensions[dim][0]; i++) {
+                if (i < _viewMix * dimensions[dim][0]) {
+                    if (*target >= 0) {
+                        *drawn = targetTable->lookupTable[*target];
+                    } else {
+                        *drawn = _backgroundColor;
+                    }
+                } else {
+                    if (*source >= 0) {
+                        *drawn = sourceTable->lookupTable[*source];
+                    } else {
+                        *drawn = _backgroundColor;
+                    }
+                }
+                target++;
+                source++;
+                drawn++;
+            }
+        }
+    }
+
+    return drawable;
+}
+
+QRgb** irtkQtThreeDimensionalViewer::GetSubtractionDrawable() {
+    QRgb** drawable = new QRgb*[3];
+    QRgb _backgroundColor = qRgba(0, 0, 0, 0);
+
+    double targetMin, targetMax;
+    targetMin = _lookupTable.begin()->second->GetImageMinValue();
+    targetMax = _lookupTable.begin()->second->GetImageMaxValue();
+
+    double sourceMin, sourceMax;
+    sourceMin = (--_lookupTable.end())->second->GetImageMinValue();
+    sourceMax = (--_lookupTable.end())->second->GetImageMaxValue();
+
+    double subtractionMin, subtractionMax;
+    subtractionMin = targetMin - sourceMax;
+    subtractionMax = targetMax - sourceMin;
+
+    if (!subtractionLookupTable) {
+        subtractionLookupTable = new irtkQtLookupTable;
+        subtractionLookupTable->SetMinMaxImageValues(subtractionMin, subtractionMax);
+        subtractionLookupTable->SetMinMaxDisplayValues(subtractionMin, subtractionMax);
+        subtractionLookupTable->Initialize();
+    }
+
+    int dimensions[3][2] = {
+        {sliceNum[0], sliceNum[1]},
+        {sliceNum[1], sliceNum[2]},
+        {sliceNum[0], sliceNum[2]}
+    };
+
+    for (int dim = 0; dim < 3; dim++) {
+        map<int, irtkGreyImage **>::iterator it = _imageOutput.begin();
+        drawable[dim] = new QRgb[it->second[dim]->GetNumberOfVoxels()];
+
+        irtkGreyPixel *target = it->second[dim]->GetPointerToVoxels();
+        irtkGreyPixel *source = (++it)->second[dim]->GetPointerToVoxels();
+
+        QRgb *drawn = drawable[dim];
+        int i, j;
+
+        // Display target and source images with a vertical shutter
+        for (j = 0; j < dimensions[dim][1]; j++) {
+            for (i = 0; i < dimensions[dim][0]; i++) {
+                if ((*target >= 0) && (*source >= 0)) {
+                    *drawn = subtractionLookupTable->lookupTable[(*target - *source + 255) / 2];
+                } else {
+                    *drawn = _backgroundColor;
+                }
+                target++;
+                source++;
+                drawn++;
+            }
+        }
+    }
+
+    return drawable;
+}
+
+vector<QRgb**> irtkQtThreeDimensionalViewer::GetBlendDrawable() {
     vector<QRgb**> allDrawables;
     QRgb _backgroundColor = qRgba(0, 0, 0, 0);
 
@@ -82,14 +318,57 @@ void CalculateSingleTransform(irtkImageTransformation** transform) {
     }
 }
 
+void irtkQtThreeDimensionalViewer::SetInterpolationMethod(int index,
+                                                          irtkQtImageObject::irtkQtInterpolationMode mode) {
+    for (int dim = 0; dim < 3; dim++)
+        delete _interpolator[index][dim];
+
+    switch (mode) {
+    case irtkQtImageObject::INTERPOLATION_NN:
+        for (int dim = 0; dim < 3; dim++)
+            _interpolator[index][dim] =
+                    irtkInterpolateImageFunction::New(Interpolation_NN, _image[index]);
+        break;
+    case irtkQtImageObject::INTERPOLATION_LINEAR:
+        for (int dim = 0; dim < 3; dim++)
+            _interpolator[index][dim] =
+                    irtkInterpolateImageFunction::New(Interpolation_Linear, _image[index]);
+        break;
+    case irtkQtImageObject::INTERPOLATION_B_SPLINE:
+        for (int dim = 0; dim < 3; dim++)
+            _interpolator[index][dim] =
+                    irtkInterpolateImageFunction::New(Interpolation_BSpline, _image[index]);
+        break;
+    case irtkQtImageObject::INTERPOLATION_C_SPLINE:
+        for (int dim = 0; dim < 3; dim++)
+            _interpolator[index][dim] =
+                    irtkInterpolateImageFunction::New(Interpolation_CSpline, _image[index]);
+        break;
+    case irtkQtImageObject::INTERPOLATION_SINC:
+        for (int dim = 0; dim < 3; dim++)
+            _interpolator[index][dim] =
+                    irtkInterpolateImageFunction::New(Interpolation_Sinc, _image[index]);
+        break;
+    default:
+        qCritical("Unknown interpolation option");
+    }
+
+    for (int dim = 0; dim < 3; dim++)
+        _transformFilter[index][dim]->PutInterpolator(_interpolator[index][dim]);
+
+    // Calculate the new output image
+    currentIndex = index;
+    CalculateCurrentOutput();
+}
+
 void irtkQtThreeDimensionalViewer::CalculateOutputImages() {
     irtkImageAttributes attr[3];
-    // width of output image
+    // Width of output image
     int width[3] = {sliceNum[0], sliceNum[1], sliceNum[0]};
-    // height of output image
+    // Height of output image
     int height[3] = {sliceNum[1], sliceNum[2], sliceNum[2]};
 
-    // store a backup of current origin
+    // Store a backup of current origin
     double originX_backup = _originX, originY_backup = _originY, originZ_backup = _originZ;
 
     for (int i = 0; i < 3; i++) {
@@ -104,7 +383,7 @@ void irtkQtThreeDimensionalViewer::CalculateOutputImages() {
         }
     }
 
-    // run the transformation for the different images in parallel
+    // Run the transformation for the different images in parallel
     QFuture<void> *threads = new QFuture<void>[_transformFilter.size()];
     int t_index = 0;
 
@@ -122,7 +401,7 @@ void irtkQtThreeDimensionalViewer::CalculateOutputImages() {
 
     delete [] threads;
 
-    // restore current origin
+    // Restore current origin
     _originX = originX_backup;
     _originY = originY_backup;
     _originZ = originZ_backup;
@@ -130,12 +409,12 @@ void irtkQtThreeDimensionalViewer::CalculateOutputImages() {
 
 void irtkQtThreeDimensionalViewer::CalculateCurrentOutput() {
     irtkImageAttributes attr[3];
-    // width of output image
+    // Width of output image
     int width[3] = {sliceNum[0], sliceNum[1], sliceNum[0]};
-    // height of output image
+    // Height of output image
     int height[3] = {sliceNum[1], sliceNum[2], sliceNum[2]};
 
-    // store a backup of current origin
+    // Store a backup of current origin
     double originX_backup = _originX, originY_backup = _originY, originZ_backup = _originZ;
 
     for (int i = 0; i < 3; i++) {
@@ -210,9 +489,57 @@ void irtkQtThreeDimensionalViewer::ResizeImage(int width, int height) {
 void irtkQtThreeDimensionalViewer::ChangeSlice(int* slice) {
     double originX, originY, originZ;
 
-    originX = slice[0];
-    originY = slice[1];
-    originZ = slice[2];
+    int iaxis, jaxis, kaxis;
+    _targetImage->Orientation(iaxis, jaxis, kaxis);
+
+    switch (iaxis) {
+    case IRTK_L2R:
+    case IRTK_R2L:
+        originX = slice[0];
+        break;
+    case IRTK_A2P:
+    case IRTK_P2A:
+        originX = slice[1];
+        break;
+    case IRTK_S2I:
+    case IRTK_I2S:
+        originX = slice[2];
+        break;
+    default:
+        break;
+    }
+    switch (jaxis) {
+    case IRTK_L2R:
+    case IRTK_R2L:
+        originY = slice[0];
+        break;
+    case IRTK_A2P:
+    case IRTK_P2A:
+        originY = slice[1];
+        break;
+    case IRTK_S2I:
+    case IRTK_I2S:
+        originY = slice[2];
+        break;
+    default:
+        break;
+    }
+    switch (kaxis) {
+    case IRTK_L2R:
+    case IRTK_R2L:
+        originZ = slice[0];
+        break;
+    case IRTK_A2P:
+    case IRTK_P2A:
+        originZ = slice[1];
+        break;
+    case IRTK_S2I:
+    case IRTK_I2S:
+        originZ = slice[2];
+        break;
+    default:
+        break;
+    }
 
     _targetImage->ImageToWorld(originX, originY, originZ);
 
@@ -229,12 +556,59 @@ void irtkQtThreeDimensionalViewer::UpdateCurrentSlice() {
     x = _originX;
     y = _originY;
     z = _originZ;
-
     _targetImage->WorldToImage(x, y, z);
 
-    currentSlice[0] = (int) round(x);
-    currentSlice[1] = (int) round(y);
-    currentSlice[2] = (int) round(z);
+    int iaxis, jaxis, kaxis;
+    _targetImage->Orientation(iaxis, jaxis, kaxis);
+
+    switch (iaxis) {
+    case IRTK_L2R:
+    case IRTK_R2L:
+        currentSlice[0] = round2(x);
+        break;
+    case IRTK_P2A:
+    case IRTK_A2P:
+        currentSlice[1] = round2(x);
+        break;
+    case IRTK_I2S:
+    case IRTK_S2I:
+        currentSlice[2] = round2(x);
+        break;
+    default:
+        break;
+    }
+    switch (jaxis) {
+    case IRTK_L2R:
+    case IRTK_R2L:
+        currentSlice[0] = round2(y);
+        break;
+    case IRTK_P2A:
+    case IRTK_A2P:
+        currentSlice[1] = round2(y);
+        break;
+    case IRTK_I2S:
+    case IRTK_S2I:
+        currentSlice[2] = round2(y);
+        break;
+    default:
+        break;
+    }
+    switch (kaxis) {
+    case IRTK_L2R:
+    case IRTK_R2L:
+        currentSlice[0] = round2(z);
+        break;
+    case IRTK_P2A:
+    case IRTK_A2P:
+        currentSlice[1] = round2(z);
+        break;
+    case IRTK_I2S:
+    case IRTK_S2I:
+        currentSlice[2] = round2(z);
+        break;
+    default:
+        break;
+    }
 }
 
 void irtkQtThreeDimensionalViewer::AddToMaps(irtkImage* newImage, int index) {
@@ -262,7 +636,7 @@ void irtkQtThreeDimensionalViewer::AddToMaps(irtkImage* newImage, int index) {
 void irtkQtThreeDimensionalViewer::SetOrientation(int view) {
     double x[3], y[3], z[3];
 
-    _targetImage->GetOrientation(x, y, z);
+    GetNeurologicalOrientation(x, y, z);
 
     switch (view) {
     case VIEW_AXIAL :
@@ -275,7 +649,7 @@ void irtkQtThreeDimensionalViewer::SetOrientation(int view) {
         irtkQtBaseViewer::SetOrientation(x, z, y);
         break;
     default:
-        cerr << "Not a valid type of two dimensional viewer" << endl;
+        qCritical("Not a valid type of two dimensional view");
         exit(1);
         break;
     }
@@ -287,27 +661,162 @@ void irtkQtThreeDimensionalViewer::ChangeViewSlice(int view) {
     _targetImage->GetOrigin(originX, originY, originZ);
     _targetImage->WorldToImage(originX, originY, originZ);
 
+    int iaxis, jaxis, kaxis;
+    _targetImage->Orientation(iaxis, jaxis, kaxis);
+
     switch (view) {
     case VIEW_AXIAL :
-        originZ = currentSlice[2];
-        _dx = _targetImage->GetXSize();
-        _dy = _targetImage->GetYSize();
+        switch (iaxis) {
+        case IRTK_L2R:
+        case IRTK_R2L:
+            _dx = _targetImage->GetXSize();
+            break;
+        case IRTK_P2A:
+        case IRTK_A2P:
+            _dy = _targetImage->GetXSize();
+            break;
+        case IRTK_I2S:
+        case IRTK_S2I:
+            originX = currentSlice[2];
+            break;
+        default:
+            break;
+        }
+        switch (jaxis) {
+        case IRTK_L2R:
+        case IRTK_R2L:
+            _dx = _targetImage->GetYSize();
+            break;
+        case IRTK_P2A:
+        case IRTK_A2P:
+            _dy = _targetImage->GetYSize();
+            break;
+        case IRTK_I2S:
+        case IRTK_S2I:
+            originY = currentSlice[2];
+            break;
+        default:
+            break;
+        }
+        switch (kaxis) {
+        case IRTK_L2R:
+        case IRTK_R2L:
+            _dx = _targetImage->GetZSize();
+            break;
+        case IRTK_P2A:
+        case IRTK_A2P:
+            _dy = _targetImage->GetZSize();
+            break;
+        case IRTK_I2S:
+        case IRTK_S2I:
+            originZ = currentSlice[2];
+        default:
+            break;
+        }
         _dz = 1;
         break;
     case VIEW_SAGITTAL :
-        originX = currentSlice[0];
-        _dx = _targetImage->GetYSize();
-        _dy = _targetImage->GetZSize();
+        switch (iaxis) {
+        case IRTK_L2R:
+        case IRTK_R2L:
+            originX = currentSlice[0];
+            break;
+        case IRTK_P2A:
+        case IRTK_A2P:
+            _dx = _targetImage->GetXSize();
+            break;
+        case IRTK_I2S:
+        case IRTK_S2I:
+            _dy = _targetImage->GetXSize();
+            break;
+        default:
+            break;
+        }
+        switch (jaxis) {
+        case IRTK_L2R:
+        case IRTK_R2L:
+            originY = currentSlice[0];
+            break;
+        case IRTK_P2A:
+        case IRTK_A2P:
+            _dx = _targetImage->GetYSize();
+            break;
+        case IRTK_I2S:
+        case IRTK_S2I:
+            _dy = _targetImage->GetYSize();
+            break;
+        default:
+            break;
+        }
+        switch (kaxis) {
+        case IRTK_L2R:
+        case IRTK_R2L:
+            originZ = currentSlice[0];
+            break;
+        case IRTK_P2A:
+        case IRTK_A2P:
+            _dx = _targetImage->GetZSize();
+            break;
+        case IRTK_I2S:
+        case IRTK_S2I:
+            _dy = _targetImage->GetZSize();
+        default:
+            break;
+        }
         _dz = 1;
         break;
     case VIEW_CORONAL :
-        originY = currentSlice[1];
-        _dx = _targetImage->GetXSize();
-        _dy = _targetImage->GetZSize();
+        switch (iaxis) {
+        case IRTK_L2R:
+        case IRTK_R2L:
+            _dx = _targetImage->GetXSize();
+            break;
+        case IRTK_P2A:
+        case IRTK_A2P:
+            originX = currentSlice[1];
+            break;
+        case IRTK_I2S:
+        case IRTK_S2I:
+            _dy = _targetImage->GetXSize();
+            break;
+        default:
+            break;
+        }
+        switch (jaxis) {
+        case IRTK_L2R:
+        case IRTK_R2L:
+            _dx = _targetImage->GetYSize();
+            break;
+        case IRTK_P2A:
+        case IRTK_A2P:
+            originY = currentSlice[1];
+            break;
+        case IRTK_I2S:
+        case IRTK_S2I:
+            _dy = _targetImage->GetYSize();
+            break;
+        default:
+            break;
+        }
+        switch (kaxis) {
+        case IRTK_L2R:
+        case IRTK_R2L:
+            _dx = _targetImage->GetZSize();
+            break;
+        case IRTK_P2A:
+        case IRTK_A2P:
+            originZ = currentSlice[1];
+            break;
+        case IRTK_I2S:
+        case IRTK_S2I:
+            _dy = _targetImage->GetZSize();
+        default:
+            break;
+        }
         _dz = 1;
         break;
     default:
-        cerr << "Not a valid type of two dimensional viewer" << endl;
+        qCritical("Not a valid type of two dimensional viewer");
         exit(1);
         break;
     }

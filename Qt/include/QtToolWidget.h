@@ -4,103 +4,158 @@
 #include <QComboBox>
 #include <QLabel>
 #include <QSlider>
+#include <QButtonGroup>
+#include <QPushButton>
 
 
 class QtToolWidget : public QWidget
 {
     Q_OBJECT
 
-    /// labels for min/max display values
+    /// Labels for min/max display values
     QLabel *minImageLabel, *maxImageLabel;
 
-    /// sliders for min/max display values
+    /// Sliders for min/max display values
     QSlider *minImageSlider, *maxImageSlider;
 
-    /// combobox for colormap choice
+    /// Combobox for colormap choice
     QComboBox* colormapCombo;
 
-    /// label for opacity value
+    /// Combobox for interpolation options
+    QComboBox* interpolationCombo;
+
+    /// Label for opacity value
     QLabel* opacityLabel;
 
-    /// slider for opacity value
+    /// Slider for opacity value
     QSlider* opacitySlider;
 
-    /// minimum, maximum display values
+    /// Button group for blending options
+    QButtonGroup* blendingButtonGroup;
+
+    /// Push buttons for image blending
+    QPushButton *onlyAButton, *onlyBButton,
+                *hShutterButton, *vShutterButton,
+                *subtractButton, *blendButton;
+
+    /// Label for mixing value
+    QLabel *blendMixLabel;
+
+    /// Slider for mixing value
+    QSlider *blendMixSlider;
+
+    /// Minimum, maximum display values
     int minDisplay, maxDisplay;
 
 public:
 
-    /// class constructor
+    /// Class constructor
     QtToolWidget(QWidget * parent = 0);
 
-    /// set maximum image value
+    /// Set maximum image value
     void setMaximumImageValue(double maxImage);
 
-    /// set minimum image value
+    /// Set minimum image value
     void setMinimumImageValue(double minImage);
 
-    /// set minimum display value
+    /// Set minimum display value
     void setDisplayMin(double min);
 
-    /// set maximum display value
+    /// Set maximum display value
     void setDisplayMax(double max);
 
-    /// set opacity value
+    /// Set opacity value
     void setOpacity(int opacity);
 
-    /// set colormap
+    /// Set colormap
     void setColormap(int index);
 
-    /// fill values of colormap combobox
+    /// Set interpolation
+    void setInterpolation(int index);
+
+    /// Get blending option
+    int getBlendingOption() const;
+
+    /// Get display mix value
+    double getDisplayMix() const;
+
+    /// Set if only two image are chosen as visible
+    void onlyTwoImagesVisible(bool flag);
+
+    /// Fill values of colormap combobox
     void fillColorCombo(const QStringList &values);
+
+    /// Fill values of interpolaton combobox
+    void fillInterpolationCombo(const QStringList &values);
+
+    /// Set if widget is enabled
+    void setEnabled(bool enabled);
 
 private:
 
-    /// create tool widgets
+    /// Create tool widgets
     void addWidgetsToLayout();
 
-    /// register observers
+    /// Create button group
+    QWidget *createButtonGroup();
+
+    /// Register widget signals
     void connectSignals();
 
-    /// unregister observers
-    void disconnectSignals();
-
-    /// set widgets' size
+    /// Set widgets' size
     void fixWidgetSizes();
 
-    /// initialize values
+    /// Initialize values
     void initializeValues();
 
-    /// create tools
+    /// Create tools
     void createTools();
 
 private slots:
 
-    /// callback function for min display value changed
+    /// Callback function for min display value changed
     void minValueChanged(int value);
 
-    /// callback function for max display value changed
+    /// Callback function for max display value changed
     void maxValueChanged(int value);
 
-    /// callback function for colormap index changed
+    /// Callback function for colormap index changed
     void colormapIndexChanged(int index);
 
-    /// callback function for opacity value changed
+    /// Callback function for interpolation index changed
+    void interpolationIndexChanged(int index);
+
+    /// Callback function for opacity value changed
     void opacityValueChanged(int value);
+
+    /// Callback function for blending option chabged
+    void blendingButtonClicked(int option);
+
+    /// Callback function for blend mix value changed
+    void blendMixValueChanged(int value);
 
 signals:
 
-    /// signal emitted when min display value changes
+    /// Signal emitted when min display value changes
     void minChanged(double value);
 
-    /// signal emitted when max display value changes
+    /// Signal emitted when max display value changes
     void maxChanged(double value);
 
-    /// signal emitted when colormap index changes
+    /// Signal emitted when colormap index changes
     void colormapChanged(int index);
 
-    /// signal emitted when opacity value changes
+    /// Signal emitted when interpolation index changes
+    void interpolationChanged(int index);
+
+    /// Signal emitted when opacity value changes
     void opacityChanged(int value);
+
+    /// Signal emitted when blending option changes
+    void blendingOptionChanged(int option);
+
+    /// Signal emitted when blend mix value changes
+    void blendMixChanged(double value);
 };
 
 #endif // QTTOOLWIDGET_H

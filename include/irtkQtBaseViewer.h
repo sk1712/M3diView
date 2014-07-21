@@ -15,161 +15,214 @@ class irtkQtBaseViewer : public QObject
 
 public:
 
-    /// view modes
+    /// View modes
     enum irtkViewMode {VIEW_AXIAL = 0, VIEW_SAGITTAL, VIEW_CORONAL, VIEW_3D};
+
+    /// Blend modes
+    enum irtkBlendMode {VIEW_A = 0, VIEW_B, VIEW_HSHUTTER, VIEW_VSHUTTER,
+                        VIEW_SUBTRACT, VIEW_BLEND};
 
 protected:
 
-    /// image origin
+    /// Image origin
     double _originX, _originY, _originZ;
 
-    /// orientation
+    /// Orientation
     double _axisX[3], _axisY[3], _axisZ[3];
 
-    /// resolution
+    /// Resolution
     double _dx, _dy, _dz;
 
-    /// dimensions
+    /// Dimensions
     int _width, _height;
 
-    /// view mode (axial, sagittal, coronal, 3D)
+    /// View mode (axial, sagittal, coronal, 3D)
     irtkViewMode _viewMode;
 
-    /// number of slices in current view
+    /// Blend mode
+    irtkBlendMode _blendMode;
+
+    /// Blend mix value
+    double _viewMix;
+
+    /// Number of slices in current view
     int* sliceNum;
 
-    /// slices currently visible
+    /// Slices currently visible
     int* currentSlice;
 
-    /// current index added to the images displayed
+    /// Flag true if corresponding axis is reversed
+    bool* inverted;
+
+    /// Current index added to the images displayed
     int currentIndex;
 
-    /// image against which all other images are transformed
+    /// Image against which all other images are transformed
     irtkImage* _targetImage;
 
-    /// original image map
+    /// Original image map
     map<int, irtkImage*> _image;
 
-    /// image lookup table map
+    /// Image lookup table map
     map<int, irtkQtLookupTable *> _lookupTable;
+
+    /// String list with names of color modes
+    static QStringList _interpolationStringList;
+
+    /// The lookup table used for subtraction
+    static irtkQtLookupTable *subtractionLookupTable;
 
 public:
 
-    /// class constructor
+    /// Class constructor
     irtkQtBaseViewer();
 
-    /// class destructor
+    /// Class destructor
     virtual ~irtkQtBaseViewer();
 
-    /// set target image
+    /// Fill the values of _interpolationStringList
+    static void SetInterpolationModeList();
+
+    /// Get the values of _interpolationStringList
+    static QStringList GetInterpolationModeList();
+
+    /// Set target image
     void SetTarget(irtkImage* image);
 
-    /// set image origin
+    /// Set image origin
     void SetOrigin(double x, double y, double z);
 
-    /// set image resolution
+    /// Set image resolution
     void SetResolution(double dx, double dy, double dz);
 
-    /// increase image resolution
+    /// Increase image resolution
     void IncreaseResolution();
 
-    /// decrease image resolution
+    /// Decrease image resolution
     void DecreaseResolution();
 
-    /// set image dimensions
-    void SetDimensions(int width, int height);
+    /// Set image dimensions
+    void SetDimensions(const int width, const int height);
 
-    /// get view mode (axial, sagittal, coronal)
-    irtkViewMode GetViewMode();
+    /// Get view mode (axial, sagittal, coronal)
+    irtkViewMode GetViewMode() const;
 
-    /// get total number of slices
-    int* GetSliceNumber();
+    /// Set the blend mode
+    void SetBlendMode(const int mode);
 
-    /// get current slice in image coordinates
-    int* GetCurrentSlice();
+    /// Set blend mix value
+    void SetBlendMixValue(const double value);
 
-    /// get the array of RGB values to be drawn on the screen
-    virtual vector<QRgb**> GetDrawable() = 0;
+    /// Get total number of slices
+    int* GetSliceNumber() const;
 
-    /// calculate the output image from the transformation
+    /// Get current slice in image coordinates
+    int* GetCurrentSlice() const;
+
+    /// Get flags for reverted axes
+    bool* GetAxisInverted() const;
+
+    /// Get the array of RGB values to be drawn on the screen
+    vector<QRgb**> GetDrawable();
+
+    virtual QRgb** GetOnlyADrawable() = 0;
+
+    virtual QRgb** GetOnlyBDrawable() = 0;
+
+    virtual QRgb** GetHShutterDrawable() = 0;
+
+    virtual QRgb** GetVShutterDrawable() = 0;
+
+    virtual QRgb** GetSubtractionDrawable() = 0;
+
+    virtual vector<QRgb**> GetBlendDrawable() = 0;
+
+    /// Set interpolation method
+    virtual void SetInterpolationMethod(int index,
+                                        irtkQtImageObject::irtkQtInterpolationMode mode) = 0;
+
+    /// Calculate the output image from the transformation
     virtual void CalculateOutputImages() = 0;
 
-    /// calculate single output image from the transformation
+    /// Calculate single output image from the transformation
     virtual void CalculateCurrentOutput() = 0;
 
-    /// initialize the transformation from the input to the output image
+    /// Initialize the transformation from the input to the output image
     virtual void InitializeTransformation() = 0;
 
-    /// initialize single transformation from the input to the output image
+    /// Initialize single transformation from the input to the output image
     virtual void InitializeCurrentTransformation() = 0;
 
-    /// delete all map elements and clear maps
+    /// Delete all map elements and clear maps
     virtual void ClearDisplayedImages() = 0;
 
-    /// add image object to the maps of images to be displayed
+    /// Add image object to the maps of images to be displayed
     virtual void AddToDisplayedImages(irtkQtImageObject *imageObject, int index);
 
-    /// delete single image
+    /// Delete single image
     virtual void DeleteSingleImage(int index);
 
-    /// move image with key previousKey to newKey
+    /// Move image with key previousKey to newKey
     virtual void MoveImage(int previousKey, int newKey);
 
-    /// update keys of maps after invalid image is deleted
+    /// Update keys of maps after invalid image is deleted
     virtual void UpdateKeysAfterIndexDeleted(int index) = 0;
 
 public slots:
 
-    /// callback function when image is resized to (width, height)
+    /// Callback function when image is resized to (width, height)
     virtual void ResizeImage(int width, int height) = 0;
 
-    /// callback function when slice is changed
+    /// Callback function when slice is changed
     virtual void ChangeSlice(int* slice) = 0;
 
-    /// callback function when origin is changed
+    /// Callback function when origin is changed
     virtual void ChangeOrigin(int x, int y) = 0;
 
 protected:
 
-    /// initialize the parameters of the output image
+    /// Initialize the parameters of the output image
     irtkImageAttributes InitializeAttributes();
 
-    /// initialize image origin
+    /// Initialize image origin
     void InitializeOrigin();
 
-    /// initialize image dimensions
+    /// Initialize image dimensions
     void InitializeDimensions();
 
-    /// initialize image orientation
+    /// Initialize image orientation
     void InitializeOrientation();
 
-    /// update the current slice (in image coordinates) corresponding to the world coordinates
+    /// Get neurological orientation
+    void GetNeurologicalOrientation(double *x, double *y, double *z);
+
+    /// Update the current slice (in image coordinates) corresponding to the world coordinates
     virtual void UpdateCurrentSlice() = 0;
 
-    /// add new image and corresponding tools to maps
+    /// Add new image and corresponding tools to maps
     virtual void AddToMaps(irtkImage* newImage, int index) = 0;
 
-    /// set image orientation
+    /// Set image orientation
     void SetOrientation(const double * xaxis, const double * yaxis, const double * zaxis);
 
-    /// move one of the displayed images higher in hierarchy
+    /// Move one of the displayed images higher in hierarchy
     template<class T>
     void MoveImageUp(map<int, T> & mymap, int previousKey, int newKey);
 
-    /// move one of the displayed images lower in hierarchy
+    /// Move one of the displayed images lower in hierarchy
     template<class T>
     void MoveImageDown(map<int, T> & mymap, int previousKey, int newKey);
 
-    /// update key values of maps after deleting invalid image
+    /// Update key values of maps after deleting invalid image
     template<class T>
     void UpdateKeysAfterIndexDeleted(map<int, T> & mymap, int index);
 
 signals:
 
-    /// signal emitted when image is resized
+    /// Signal emitted when image is resized
     void ImageResized(QVector<QRgb**>);
 
-    /// signal emitted when image origin changes
+    /// Signal emitted when image origin changes
     void OriginChanged(double originX, double originY, double originZ);
 };
 
@@ -206,21 +259,33 @@ inline void irtkQtBaseViewer::DecreaseResolution() {
         _dy += 0.1;
 }
 
-inline void irtkQtBaseViewer::SetDimensions(int width, int height) {
+inline void irtkQtBaseViewer::SetDimensions(const int width, const int height) {
     _width = width;
     _height = height;
 }
 
-inline irtkQtBaseViewer::irtkViewMode irtkQtBaseViewer::GetViewMode() {
+inline irtkQtBaseViewer::irtkViewMode irtkQtBaseViewer::GetViewMode() const {
     return _viewMode;
 }
 
-inline int* irtkQtBaseViewer::GetSliceNumber() {
+inline void irtkQtBaseViewer::SetBlendMode(const int mode) {
+    _blendMode = static_cast<irtkBlendMode>(mode);
+}
+
+inline void irtkQtBaseViewer::SetBlendMixValue(const double value) {
+    _viewMix = value;
+}
+
+inline int* irtkQtBaseViewer::GetSliceNumber() const {
     return sliceNum;
 }
 
-inline int* irtkQtBaseViewer::GetCurrentSlice() {
+inline int* irtkQtBaseViewer::GetCurrentSlice() const {
     return currentSlice;
+}
+
+inline bool* irtkQtBaseViewer::GetAxisInverted() const {
+    return inverted;
 }
 
 template<class T>

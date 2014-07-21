@@ -11,86 +11,101 @@
 
 class irtkQtImageObject
 {
+public:
 
-    /// flag showing if image is visible
+    /// Interpolation modes
+    enum irtkQtInterpolationMode {INTERPOLATION_NN, INTERPOLATION_LINEAR,
+                                  INTERPOLATION_C_SPLINE, INTERPOLATION_B_SPLINE,
+                                  INTERPOLATION_SINC};
+
+private:
+
+    /// Flag showing if image is visible
     bool _visible;
 
-    /// image full path
+    /// Image full path
     QString _path;
 
-    /// image file name
+    /// Image file name
     QString _fileName;
 
-    /// the corresponding irtk image
+    /// Corresponding irtk image
     irtkImage* _image;
 
-    /// the corresponding lookuptable
+    /// Corresponding lookuptable
     irtkQtLookupTable* _lookupTable;
+
+    /// Corresponding interpolation mode
+    irtkQtInterpolationMode _interpolation;
 
 public:
 
-    /// image object constructor
+    /// Image object constructor
     irtkQtImageObject(const QString &path);
 
-    /// image object destructor
+    /// Image object destructor
     ~irtkQtImageObject();
 
-    /// check if image is visible
+    /// Check if image is visible
     bool IsVisible() const;
 
-    /// set if image visible
+    /// Set if image visible
     void SetVisible(bool visible);
 
-    /// get image filename
+    /// Get image filename
     QString GetFileName() const;
 
-    /// get image full path
+    /// Get image full path
     QString GetPath() const;
 
-    /// get image
+    /// Get image
     irtkImage* GetImage() const;
 
-    /// get lookup table
+    /// Get lookup table
     irtkQtLookupTable* GetLookupTable() const;
 
-    /// create image object
+    /// Create image object
     void CreateImage();
 
-    /// delete image and lookup table
+    /// Delete image and lookup table
     void DeleteImage();
 
-    /// set opacity for the corresponding image
+    /// Set opacity for the corresponding image
     void SetOpacity(int value);
 
-    /// get opacity for the corresponding image
+    /// Get opacity for the corresponding image
     int GetOpacity();
 
-    /// get minimum value for the corresponding image
+    /// Get minimum value for the corresponding image
     double GetMinImageValue();
 
-    /// get maximum value for the corresponding image
+    /// Get maximum value for the corresponding image
     double GetMaxImageValue();
 
-    /// set minimum display value for the corresponding image
+    /// Get minimum display value for the corresponding image
     void SetMinDisplayValue(double min);
 
-    /// get minimum display value for the corresponding image
+    /// Get minimum display value for the corresponding image
     double GetMinDisplayValue() const;
 
-    /// set maximum display value for the corresponding image
+    /// Set maximum display value for the corresponding image
     void SetMaxDisplayValue(double max);
 
-    /// get maximum display value for the corresponding image
+    /// Get maximum display value for the corresponding image
     double GetMaxDisplayValue() const;
 
-    /// set colormap for the corresponding image
+    /// Set colormap for the corresponding image
     void SetColormap(irtkQtLookupTable::irtkColorMode mode);
 
-    /// get colormap for the corresponding image
+    /// Get colormap for the corresponding image
     int GetColormap() const;
 
-    /// convert image to the desired coordinate system
-    void ConvertImageToTarget();
+    /// Set interpolation function for the corresponding image
+    void SetInterpolation(irtkQtImageObject::irtkQtInterpolationMode mode);
+
+    /// Get interpolation function for the corresponding image
+    int GetInterpolation() const;
+
 };
 
 
@@ -204,6 +219,14 @@ inline int irtkQtImageObject::GetColormap() const {
     }
 
     return colormapIndex;
+}
+
+inline void irtkQtImageObject::SetInterpolation(irtkQtImageObject::irtkQtInterpolationMode mode) {
+    _interpolation = mode;
+}
+
+inline int irtkQtImageObject::GetInterpolation() const {
+    return _interpolation;
 }
 
 #endif // IRTKQTIMAGEOBJECT_H

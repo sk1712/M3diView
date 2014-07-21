@@ -12,48 +12,51 @@ class Qt3dViewerWidget : public QtViewerWidget
     /// OpenGL widget
     QtThreeDimensionalGlWidget *glWidget;
 
-    /// slice sliders
+    /// Slice sliders
     QSlider *axialSlider, *sagittalSlider, *coronalSlider;
 
-    /// slices currently shown
+    /// Slices currently shown
     int currentSlice[3];
 
 public:
 
-    /// class constructor
+    /// Class constructor
     Qt3dViewerWidget(QWidget *parent = 0);
 
-    /// class destructor
+    /// Class destructor
     QtGlWidget* getGlWidget() const;
 
-    /// update currentSlice
+    /// Update currentSlice
     void setCurrentSlice(int* current);
 
-    /// set image dimensions in image coordinates
+    /// Set image dimensions in image coordinates
     void setMaximumSlice(int *dim);
 
-    /// set viewer enabled
+    /// Set inverted axes attribute
+    void setInvertedAxes(bool *inverted);
+
+    /// Set viewer enabled
     void setEnabled(bool enabled);
 
 protected:
 
-    /// connect signals to slots
+    /// Connect signals to slots
     void connectSignals();
 
 private slots:
 
-    /// callback function when axial slider value changes
+    /// Callback function when axial slider value changes
     void axialSliceChanged(int value);
 
-    /// callback function when sagittal slider value changes
+    /// Callback function when sagittal slider value changes
     void sagittalSliceChanged(int value);
 
-    /// callback function when coronal slider value changes
+    /// Callback function when coronal slider value changes
     void coronalSliceChanged(int value);
 
 signals:
 
-    /// signal emitted when one of the sliders' value changes
+    /// Signal emitted when one of the sliders' value changes
     void sliderValueChanged(int* value);
 };
 

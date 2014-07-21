@@ -1,7 +1,7 @@
 #include <irtkQtViewer.h>
 
 
-// singleton class, initialize instance to NULL
+// Singleton class, initialize instance to NULL
 irtkQtViewer* irtkQtViewer::viewInstance = NULL;
 
 irtkQtViewer::irtkQtViewer() {
@@ -14,7 +14,7 @@ void irtkQtViewer::DestroyImages() {
 }
 
 irtkQtViewer* irtkQtViewer::Instance() {
-    // if there is no other instance of this class create one
+    // If there is no other instance of this class create one
     if (!viewInstance)
         viewInstance = new irtkQtViewer;
 
@@ -22,11 +22,11 @@ irtkQtViewer* irtkQtViewer::Instance() {
 }
 
 void irtkQtViewer::Destroy() {
-    // if there is a view instance
+    // If there is a view instance
     if (viewInstance) {
-        // delete all images in the list
+        // Delete all images in the list
         viewInstance->DestroyImages();
-        // and then delete the instance itselfs
+        // And then delete the instance itself
         delete viewInstance;
     }
 }
@@ -34,7 +34,7 @@ void irtkQtViewer::Destroy() {
 void irtkQtViewer::CreateImage(QString imageFileName) {
     irtkQtImageObject* newImage = NULL;
 
-    // create a new irtkQtImageObject and add it to the list
+    // Create a new irtkQtImageObject and add it to the list
     newImage = new irtkQtImageObject(imageFileName);
     _imageObjects.append(newImage);
 }

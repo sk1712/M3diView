@@ -24,24 +24,24 @@ QVariant irtkImageListModel::data(const QModelIndex &index, int role) const {
         return QVariant();
 
     switch (role) {
-        // text shown for the item
+        // Text shown for the item
         case Qt::DisplayRole :
             return _imageList.at(index.row())->GetFileName();
             break;
-        // icon shown next to the item
+        // Icon shown next to the item
         case Qt::DecorationRole :
             if (_imageList.at(index.row())->IsVisible())
-                // if image is visible show eye icon
+                // If image is visible show eye icon
                 return QIcon(":/icons/eye.png");
             else {
-                // else show white icon
-                QPixmap pixmap(16, 16);
+                // Else show white icon
+                QPixmap pixmap(25, 25);
                 pixmap.fill();
                 QIcon icon(pixmap);
                 return icon;
             }
             break;
-        // item tooltip
+        // Item tooltip
         case Qt::ToolTipRole :
             return _imageList.at(index.row())->GetPath();
             break;

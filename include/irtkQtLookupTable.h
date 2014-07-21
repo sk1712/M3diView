@@ -8,101 +8,118 @@ class irtkQtLookupTable
 {
 public:
 
-    /// color modes
-    enum irtkColorMode {MODE_RED, MODE_GREEN, MODE_BLUE, MODE_LUMINANCE, MODE_INVERSE};
+    /// Color modes
+    enum irtkColorMode {MODE_RED, MODE_GREEN, MODE_BLUE, MODE_LUMINANCE, MODE_INVERSE,
+                        MODE_JACOBIAN, MODE_JACOBIAN_EXPANSION, MODE_JACOBIAN_CONTRACTION,
+                        MODE_HOTMETAL, MODE_RAINBOW};
 
-    /// the corresponding lookup table
+    /// The corresponding lookup table
     QRgb *lookupTable;
 
 private:
 
-    /// alpha coefficient
+    /// Alpha coefficient
     int _alpha;
 
-    /// minimum and maximum display values
+    /// Minimum and maximum display values
     double minDisplay, maxDisplay;
 
-    /// minimum and maximum image values
+    /// Minimum and maximum image values
     double minImage, maxImage;
 
-    /// color mode
+    /// Color mode
     irtkColorMode _mode;
 
-    /// string list with names of color modes
+    /// String list with names of color modes
     static QStringList _colorStringList;
 
 public:
 
-    /// class constructor
+    /// Class constructor
     irtkQtLookupTable();
 
-    /// class destructor
+    /// Class destructor
     ~irtkQtLookupTable();
 
-    /// initialize look up table
+    /// Initialize look up table
     void Initialize();
 
-    /// fill the values of _colorStringList
+    /// Fill the values of _colorStringList
     static void SetColorModeList();
 
-    /// get the values of _colorStringList
+    /// Get the values of _colorStringList
     static QStringList GetColorModeList();
 
-    /// set image alpha value
+    /// Set image alpha value
     void SetAlpha(int a);
 
-    /// get image alpha value
+    /// Get image alpha value
     int GetAlpha() const;
 
-    /// set image minimum displayed value
+    /// Set image minimum displayed value
     void SetMinDisplayValue(double value);
 
-    /// get image minimum displayed value
+    /// Get image minimum displayed value
     double GetMinDisplayValue() const;
 
-    /// set image maximum displayed value
+    /// Set image maximum displayed value
     void SetMaxDisplayValue(double value);
 
-    /// get image maximum displayed value
+    /// Get image maximum displayed value
     double GetMaxDisplayValue() const;
 
-    /// get actual image minimum value
+    /// Get actual image minimum value
     double GetImageMinValue() const;
 
-    /// get actual image maximum value
+    /// Get actual image maximum value
     double GetImageMaxValue() const;
 
-    /// set minimum and maximum values
+    /// Set minimum and maximum values
     void SetMinMaxDisplayValues(double min, double max);
 
-    /// get minimum and maximum image values
+    /// Get minimum and maximum image values
     void GetMinMaxImageValues(double & min, double & max);
 
-    /// set minimum and maximum image values
+    /// Set minimum and maximum image values
     void SetMinMaxImageValues(double min, double max);
 
-    /// set color mode
+    /// Set color mode
     void SetColorMode(irtkColorMode mode);
 
-    /// get color mode
+    /// Get color mode
     int GetColorMode() const;
 
 private:
 
-    /// red color mode
+    /// Red color mode
     void SetColorModeToRed();
 
-    /// green color mode
+    /// Green color mode
     void SetColorModeToGreen();
 
-    /// blue color mode
+    /// Blue color mode
     void SetColorModeToBlue();
 
-    /// color mode luminance
+    /// Color mode luminance
     void SetColorModeToLuminance();
 
-    /// color mode inverse luminance
+    /// Color mode inverse luminance
     void SetColorModeToInverse();
+
+    /// Color mode Jacobian
+    void SetColorModeToJacobian();
+
+    /// Color mode Jacobian expansion
+    void SetColorModeToJacobianExpansion();
+
+    /// Color mode Jacobian contraction
+    void SetColorModeToJacobianContraction();
+
+    /// Color mode hot metal
+    void SetColorModeToHotmetal();
+
+    /// Color mode rainbow
+    void SetColorModeToRainbow();
 };
 
 

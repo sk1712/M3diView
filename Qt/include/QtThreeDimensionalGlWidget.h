@@ -8,99 +8,105 @@ class QtThreeDimensionalGlWidget : public QtGlWidget
 {
     Q_OBJECT
 
-    /// rotation around y axis (horizontal) and x axis (vertical) of the model
+    /// Rotation around y axis (horizontal) and x axis (vertical) of the model
     float horizontalRotation, verticalRotation;
 
-    /// camera field of view, window width and height
+    /// Camera field of view, window width and height
     float cameraFOV, width, height;
 
-    /// mouse position when dragging started
+    /// Mouse position when dragging started
     QPoint lastPosition;
 
-    /// dimensions of quads, number of slices in each direction
+    /// Dimensions of quads, number of slices in each direction
     int dimensions[3];
 
-    /// current slice in each direction
+    /// Current slice in each direction
     int currentSlice[3];
 
-    /// texture parameters where images are stored
+    /// Inverted axes
+    bool invertedAxis[3];
+
+    /// Texture parameters where images are stored
     GLuint textures[3];
 
-    /// flags used to rotate model and/or move camera when drawing
+    /// Flags used to rotate model and/or move camera when drawing
     bool doRotation, moveCamera;
 
 public:
 
-    /// class constructor
+    /// Class constructor
     QtThreeDimensionalGlWidget(QWidget *parent = NULL);
 
-    /// class destructor
+    /// Class destructor
     ~QtThreeDimensionalGlWidget();
 
-    /// set image dimensions (in image coordinates)
+    /// Set image dimensions (in image coordinates)
     void setDimensions(int *dim);
 
-    /// set current slices
+    /// Set current slices
     void setCurrentSlice(int *current);
 
-    /// update the images to be drawn
+    /// Set inverted axis flag
+    void setInvertedAxis(bool *inverted);
+
+    /// Update the images to be drawn
     void updateDrawable(QVector<QRgb**> drawable);
 
 protected:
 
-    /// function to initialize OpenGL inherited from QGLWidget
+    /// Function to initialize OpenGL inherited from QGLWidget
     void initializeGL();
 
-    /// function called whenever OpenGL scene is resized inherited from QGLWidget
+    /// Function called whenever OpenGL scene is resized inherited from QGLWidget
     void resizeGL(int w, int h);
 
-    /// function called whenever scene is painted inherited from QGLWidget
+    /// Function called whenever scene is painted inherited from QGLWidget
     void paintGL();
 
-    /// perform a rotation
+    /// Perform a rotation
     void rotate();
 
-    /// delete drawable
+    /// Delete drawable
     void deleteDrawable();
 
-    /// callback function handling mouse press
+    /// Callback function handling mouse press
     void mousePressEvent(QMouseEvent *event);
 
-    /// callback function handling mouse release
+    /// Callback function handling mouse release
     void mouseReleaseEvent(QMouseEvent *event);
 
-    /// callback function handling mouse move
+    /// Callback function handling mouse move
     void mouseMoveEvent(QMouseEvent *event);
 
 private:
 
-    /// draw planes with textured images on screen
+    /// Draw planes with textured images on screen
     void drawImage() const;
 
-    /// draw borders of planes with different colours
+    /// Draw borders of planes with different colours
     void drawBorders();
 
-    /// map 2D images to textures
+    /// Map 2D images to textures
     void createTextures();
 
-    /// register the signals of the widget
+    /// Register the signals of the widget
     void connectSignals();
 
 private slots:
 
-    /// rotate model to the left
+    /// Rotate model to the left
     void rotateLeft();
 
-    /// rotate model to the right
+    /// Rotate model to the right
     void rotateRight();
 
-    /// rotate model upwards
+    /// Rotate model upwards
     void rotateUp();
 
-    /// rotate model downwards
+    /// Rotate model downwards
     void rotateDown();
 
-    /// zoom in/out on mouse wheel
+    /// Zoom in/out on mouse wheel
     void changeZoom(int numSteps);
 };
 
@@ -115,6 +121,12 @@ inline void QtThreeDimensionalGlWidget::setCurrentSlice(int *current) {
     currentSlice[0] = current[0];
     currentSlice[1] = current[1];
     currentSlice[2] = current[2];
+}
+
+inline void QtThreeDimensionalGlWidget::setInvertedAxis(bool *inverted) {
+    invertedAxis[0] = inverted[0];
+    invertedAxis[1] = inverted[1];
+    invertedAxis[2] = inverted[2];
 }
 
 #endif // QTTHREEDIMENSIONALGLWIDGET_H

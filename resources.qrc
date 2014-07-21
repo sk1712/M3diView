@@ -2,15 +2,26 @@
     <qresource prefix="/">
         <file>icons/zoom_in.png</file>
         <file>icons/zoom_out.png</file>
-        <file>icons/expand_window.png</file>
         <file>icons/delete.png</file>
         <file>icons/link.png</file>
-        <file>icons/view_image.png</file>
-        <file>icons/opacity.png</file>
         <file>icons/eye.png</file>
         <file>icons/arrow_down.png</file>
         <file>icons/arrow_up.png</file>
         <file>stylesheets/stylesheet.qss</file>
         <file>icons/erase.png</file>
+        <file>icons/settings.png</file>
+        <file>icons/save.png</file>
+        <file>icons/screenshot.png</file>
+        <file>icons/add_file.png</file>
+        <file>icons/collapse.png</file>
+        <file>icons/expand.png</file>
+        <file>icons/add_view.png</file>
+        <file>icons/delete_view.png</file>
+        <file>icons/imageA.png</file>
+        <file>icons/imageB.png</file>
+        <file>icons/imageVShutter.png</file>
+        <file>icons/imageHShutter.png</file>
+        <file>icons/subtract.png</file>
+        <file>icons/blend.png</file>
     </qresource>
 </RCC>
