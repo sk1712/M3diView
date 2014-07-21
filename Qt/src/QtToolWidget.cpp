@@ -157,10 +157,6 @@ void QtToolWidget::addWidgetsToLayout() {
     verticalLayout->addWidget(new QLabel("Display mix:"));
     verticalLayout->addWidget(blendMixWidget);
 
-    QSpacerItem* spacer = new QSpacerItem( 20, 20, QSizePolicy::Minimum,
-    QSizePolicy::Expanding );
-    verticalLayout->addItem( spacer );
-
     setLayout(verticalLayout);
 }
 
@@ -168,33 +164,51 @@ QWidget* QtToolWidget::createButtonGroup() {
     QGridLayout *buttonLayout = new QGridLayout;
     blendingButtonGroup = new QButtonGroup;
 
-    onlyAButton = new QPushButton("Only A", this);
+    onlyAButton = new QPushButton("", this);
     onlyAButton->setCheckable(true);
+    onlyAButton->setIcon(QIcon(":/icons/imageA.png"));
+    onlyAButton->setIconSize(QSize(64,64));
+    onlyAButton->setToolTip("Only A");
     buttonLayout->addWidget(onlyAButton, 0, 0);
     blendingButtonGroup->addButton(onlyAButton, 0);
 
-    onlyBButton = new QPushButton("Only B", this);
+    onlyBButton = new QPushButton("", this);
     onlyBButton->setCheckable(true);
+    onlyBButton->setIcon(QIcon(":/icons/imageB.png"));
+    onlyBButton->setIconSize(QSize(64,64));
+    onlyBButton->setToolTip("Only B");
     buttonLayout->addWidget(onlyBButton, 1, 0);
     blendingButtonGroup->addButton(onlyBButton, 1);
 
-    hShutterButton = new QPushButton("Horizontal shutter", this);
+    hShutterButton = new QPushButton("", this);
     hShutterButton->setCheckable(true);
+    hShutterButton->setIcon(QIcon(":/icons/imageHShutter.png"));
+    hShutterButton->setIconSize(QSize(64,64));
+    hShutterButton->setToolTip("Horizontal Shutter");
     buttonLayout->addWidget(hShutterButton, 0, 1);
     blendingButtonGroup->addButton(hShutterButton, 2);
 
-    vShutterButton = new QPushButton("Vertical shutter", this);
+    vShutterButton = new QPushButton("", this);
     vShutterButton->setCheckable(true);
+    vShutterButton->setIcon(QIcon(":/icons/imageVShutter.png"));
+    vShutterButton->setIconSize(QSize(64,64));
+    vShutterButton->setToolTip("Vertical Shutter");
     buttonLayout->addWidget(vShutterButton, 1, 1);
     blendingButtonGroup->addButton(vShutterButton, 3);
 
-    subtractButton = new QPushButton("Subtract images", this);
+    subtractButton = new QPushButton("", this);
     subtractButton->setCheckable(true);
+    subtractButton->setIcon(QIcon(":/icons/subtract.png"));
+    subtractButton->setIconSize(QSize(64,64));
+    subtractButton->setToolTip("Subtract Images");
     buttonLayout->addWidget(subtractButton, 0, 2);
     blendingButtonGroup->addButton(subtractButton, 4);
 
-    blendButton = new QPushButton("Blend images", this);
+    blendButton = new QPushButton("", this);
     blendButton->setCheckable(true);
+    blendButton->setIcon(QIcon(":/icons/blend.png"));
+    blendButton->setIconSize(QSize(64,64));
+    blendButton->setToolTip("Blend Images");
     buttonLayout->addWidget(blendButton, 1, 2);
     blendingButtonGroup->addButton(blendButton, 5);
 

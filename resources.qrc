@@ -17,5 +17,11 @@
         <file>icons/expand.png</file>
         <file>icons/add_view.png</file>
         <file>icons/delete_view.png</file>
+        <file>icons/imageA.png</file>
+        <file>icons/imageB.png</file>
+        <file>icons/imageVShutter.png</file>
+        <file>icons/imageHShutter.png</file>
+        <file>icons/subtract.png</file>
+        <file>icons/blend.png</file>
     </qresource>
 </RCC>
