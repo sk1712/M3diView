@@ -3,7 +3,7 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QSpacerItem>
-#include <QString>
+#include <QFrame>
 
 
 QtToolWidget::QtToolWidget(QWidget * parent) : QWidget(parent) {
@@ -147,6 +147,10 @@ void QtToolWidget::addWidgetsToLayout() {
     verticalLayout->addWidget(new QLabel("Interpolation:"));
     verticalLayout->addWidget(interpolationCombo);
 
+    QFrame *horizontalFrame = new QFrame;
+    horizontalFrame->setFrameShape(QFrame::HLine);
+    horizontalFrame->setFrameShadow(QFrame::Sunken);
+    verticalLayout->addWidget(horizontalFrame);
     verticalLayout->addWidget(createButtonGroup());
 
     QWidget *blendMixWidget = new QWidget;
@@ -156,6 +160,10 @@ void QtToolWidget::addWidgetsToLayout() {
 
     verticalLayout->addWidget(new QLabel("Display mix:"));
     verticalLayout->addWidget(blendMixWidget);
+
+    QSpacerItem* spacer = new QSpacerItem( 20, 20, QSizePolicy::Minimum,
+                                                   QSizePolicy::Expanding );
+    verticalLayout->addItem(spacer);
 
     setLayout(verticalLayout);
 }

@@ -5,7 +5,7 @@
 #include <QToolBar>
 #include <QFileDialog>
 #include <QDir>
-#include <QDebug>
+#include <QScrollArea>
 
 #include <QGridLayout>
 #include <QVBoxLayout>
@@ -94,7 +94,10 @@ void QtMainWindow::createDockWindows() {
     irtkQtBaseViewer::SetInterpolationModeList();
     visualToolWidget->fillInterpolationCombo(irtkQtBaseViewer::GetInterpolationModeList());
 
-    toolsTabWidget->addTab(visualToolWidget, tr("Visualisation"));
+    QScrollArea *scrollArea = new QScrollArea;
+    scrollArea->setWidget(visualToolWidget);
+    scrollArea->setWidgetResizable(true);
+    toolsTabWidget->addTab(scrollArea, tr("Visualisation"));
 }
 
 void QtMainWindow::createToolBar() {
