@@ -4,6 +4,8 @@
 #include <QComboBox>
 #include <QLabel>
 #include <QSlider>
+#include <QButtonGroup>
+#include <QPushButton>
 
 
 class QtToolWidget : public QWidget
@@ -27,6 +29,20 @@ class QtToolWidget : public QWidget
 
     /// Slider for opacity value
     QSlider* opacitySlider;
+
+    /// Button group for blending options
+    QButtonGroup* blendingButtonGroup;
+
+    /// Push buttons for image blending
+    QPushButton *onlyAButton, *onlyBButton,
+                *hShutterButton, *vShutterButton,
+                *subtractButton, *blendButton;
+
+    /// Label for mixing value
+    QLabel *blendMixLabel;
+
+    /// Slider for mixing value
+    QSlider *blendMixSlider;
 
     /// Minimum, maximum display values
     int minDisplay, maxDisplay;
@@ -57,22 +73,34 @@ public:
     /// Set interpolation
     void setInterpolation(int index);
 
+    /// Get blending option
+    int getBlendingOption() const;
+
+    /// Get display mix value
+    double getDisplayMix() const;
+
+    /// Set if only two image are chosen as visible
+    void onlyTwoImagesVisible(bool flag);
+
     /// Fill values of colormap combobox
     void fillColorCombo(const QStringList &values);
 
     /// Fill values of interpolaton combobox
     void fillInterpolationCombo(const QStringList &values);
 
+    /// Set if widget is enabled
+    void setEnabled(bool enabled);
+
 private:
 
     /// Create tool widgets
     void addWidgetsToLayout();
 
-    /// Register observers
-    void connectSignals();
+    /// Create button group
+    QWidget *createButtonGroup();
 
-    /// Unregister observers
-    void disconnectSignals();
+    /// Register widget signals
+    void connectSignals();
 
     /// Set widgets' size
     void fixWidgetSizes();
@@ -100,6 +128,12 @@ private slots:
     /// Callback function for opacity value changed
     void opacityValueChanged(int value);
 
+    /// Callback function for blending option chabged
+    void blendingButtonClicked(int option);
+
+    /// Callback function for blend mix value changed
+    void blendMixValueChanged(int value);
+
 signals:
 
     /// Signal emitted when min display value changes
@@ -116,6 +150,12 @@ signals:
 
     /// Signal emitted when opacity value changes
     void opacityChanged(int value);
+
+    /// Signal emitted when blending option changes
+    void blendingOptionChanged(int option);
+
+    /// Signal emitted when blend mix value changes
+    void blendMixChanged(double value);
 };
 
 #endif // QTTOOLWIDGET_H

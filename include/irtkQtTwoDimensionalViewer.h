@@ -31,7 +31,17 @@ public:
     ~irtkQtTwoDimensionalViewer();
 
     /// Get the array of RGB values to be drawn on the screen
-    vector<QRgb**> GetDrawable();
+    QRgb** GetOnlyADrawable();
+
+    QRgb** GetOnlyBDrawable();
+
+    QRgb** GetHShutterDrawable();
+
+    QRgb** GetVShutterDrawable();
+
+    QRgb** GetSubtractionDrawable();
+
+    vector<QRgb**> GetBlendDrawable();
 
     /// Set interpolation method
     void SetInterpolationMethod(int index, irtkQtImageObject::irtkQtInterpolationMode mode);

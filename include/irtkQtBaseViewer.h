@@ -18,6 +18,10 @@ public:
     /// View modes
     enum irtkViewMode {VIEW_AXIAL = 0, VIEW_SAGITTAL, VIEW_CORONAL, VIEW_3D};
 
+    /// Blend modes
+    enum irtkBlendMode {VIEW_A = 0, VIEW_B, VIEW_HSHUTTER, VIEW_VSHUTTER,
+                        VIEW_SUBTRACT, VIEW_BLEND};
+
 protected:
 
     /// Image origin
@@ -34,6 +38,12 @@ protected:
 
     /// View mode (axial, sagittal, coronal, 3D)
     irtkViewMode _viewMode;
+
+    /// Blend mode
+    irtkBlendMode _blendMode;
+
+    /// Blend mix value
+    double _viewMix;
 
     /// Number of slices in current view
     int* sliceNum;
@@ -58,6 +68,9 @@ protected:
 
     /// String list with names of color modes
     static QStringList _interpolationStringList;
+
+    /// The lookup table used for subtraction
+    static irtkQtLookupTable *subtractionLookupTable;
 
 public:
 
@@ -89,10 +102,16 @@ public:
     void DecreaseResolution();
 
     /// Set image dimensions
-    void SetDimensions(int width, int height);
+    void SetDimensions(const int width, const int height);
 
     /// Get view mode (axial, sagittal, coronal)
     irtkViewMode GetViewMode() const;
+
+    /// Set the blend mode
+    void SetBlendMode(const int mode);
+
+    /// Set blend mix value
+    void SetBlendMixValue(const double value);
 
     /// Get total number of slices
     int* GetSliceNumber() const;
@@ -104,7 +123,19 @@ public:
     bool* GetAxisInverted() const;
 
     /// Get the array of RGB values to be drawn on the screen
-    virtual vector<QRgb**> GetDrawable() = 0;
+    vector<QRgb**> GetDrawable();
+
+    virtual QRgb** GetOnlyADrawable() = 0;
+
+    virtual QRgb** GetOnlyBDrawable() = 0;
+
+    virtual QRgb** GetHShutterDrawable() = 0;
+
+    virtual QRgb** GetVShutterDrawable() = 0;
+
+    virtual QRgb** GetSubtractionDrawable() = 0;
+
+    virtual vector<QRgb**> GetBlendDrawable() = 0;
 
     /// Set interpolation method
     virtual void SetInterpolationMethod(int index,
@@ -228,13 +259,21 @@ inline void irtkQtBaseViewer::DecreaseResolution() {
         _dy += 0.1;
 }
 
-inline void irtkQtBaseViewer::SetDimensions(int width, int height) {
+inline void irtkQtBaseViewer::SetDimensions(const int width, const int height) {
     _width = width;
     _height = height;
 }
 
 inline irtkQtBaseViewer::irtkViewMode irtkQtBaseViewer::GetViewMode() const {
     return _viewMode;
+}
+
+inline void irtkQtBaseViewer::SetBlendMode(const int mode) {
+    _blendMode = static_cast<irtkBlendMode>(mode);
+}
+
+inline void irtkQtBaseViewer::SetBlendMixValue(const double value) {
+    _viewMix = value;
 }
 
 inline int* irtkQtBaseViewer::GetSliceNumber() const {

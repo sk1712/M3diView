@@ -50,8 +50,8 @@ void QtGlWidget::mousePressEvent(QMouseEvent *event) {
 }
 
 void QtGlWidget::wheelEvent(QWheelEvent *event) {
-//    // delta = the distance that the wheel is rotated, in eighths of a degree
-//    // Most mouse types work in steps of 15 degrees
+    // delta = the distance that the wheel is rotated, in eighths of a degree
+    // Most mouse types work in steps of 15 degrees
     QPoint numPixels = event->pixelDelta();
     QPoint numDegrees = event->angleDelta() / 8;
 
