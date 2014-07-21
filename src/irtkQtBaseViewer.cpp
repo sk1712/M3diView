@@ -3,6 +3,8 @@
 
 QStringList irtkQtBaseViewer::_interpolationStringList;
 
+irtkQtLookupTable *irtkQtBaseViewer::subtractionLookupTable = NULL;
+
 irtkQtBaseViewer::irtkQtBaseViewer() {
     _blendMode = VIEW_BLEND;
     _viewMix = 0.5;
@@ -12,6 +14,7 @@ irtkQtBaseViewer::irtkQtBaseViewer() {
 irtkQtBaseViewer::~irtkQtBaseViewer() {
     delete [] sliceNum;
     delete [] inverted;
+    delete subtractionLookupTable;
 }
 
 void irtkQtBaseViewer::SetInterpolationModeList() {
@@ -31,21 +34,31 @@ vector<QRgb**> irtkQtBaseViewer::GetDrawable() {
 
     switch (_blendMode) {
     case VIEW_A:
+        delete subtractionLookupTable;
+        subtractionLookupTable = NULL;
         allDrawables.push_back(GetOnlyADrawable());
         break;
     case VIEW_B:
+        delete subtractionLookupTable;
+        subtractionLookupTable = NULL;
         allDrawables.push_back(GetOnlyBDrawable());
         break;
     case VIEW_HSHUTTER:
+        delete subtractionLookupTable;
+        subtractionLookupTable = NULL;
         allDrawables.push_back(GetHShutterDrawable());
         break;
     case VIEW_VSHUTTER:
+        delete subtractionLookupTable;
+        subtractionLookupTable = NULL;
         allDrawables.push_back(GetVShutterDrawable());
         break;
     case VIEW_SUBTRACT:
         allDrawables.push_back(GetSubtractionDrawable());
         break;
     case VIEW_BLEND:
+        delete subtractionLookupTable;
+        subtractionLookupTable = NULL;
         allDrawables = GetBlendDrawable();
         break;
     default:

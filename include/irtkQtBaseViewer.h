@@ -69,6 +69,9 @@ protected:
     /// String list with names of color modes
     static QStringList _interpolationStringList;
 
+    /// The lookup table used for subtraction
+    static irtkQtLookupTable *subtractionLookupTable;
+
 public:
 
     /// Class constructor

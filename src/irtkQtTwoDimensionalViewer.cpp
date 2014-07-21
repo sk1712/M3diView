@@ -181,10 +181,12 @@ QRgb** irtkQtTwoDimensionalViewer::GetSubtractionDrawable() {
     subtractionMin = targetMin - sourceMax;
     subtractionMax = targetMax - sourceMin;
 
-    irtkQtLookupTable subtractionLUtable;
-    subtractionLUtable.SetMinMaxImageValues(subtractionMin, subtractionMax);
-    subtractionLUtable.SetMinMaxDisplayValues(subtractionMin, subtractionMax);
-    subtractionLUtable.Initialize();
+    if (!subtractionLookupTable) {
+        subtractionLookupTable = new irtkQtLookupTable;
+        subtractionLookupTable->SetMinMaxImageValues(subtractionMin, subtractionMax);
+        subtractionLookupTable->SetMinMaxDisplayValues(subtractionMin, subtractionMax);
+        subtractionLookupTable->Initialize();
+    }
 
     drawable[0] = new QRgb[_imageOutput.begin()->second->GetNumberOfVoxels()];
     QRgb *drawn = drawable[0];
@@ -196,7 +198,7 @@ QRgb** irtkQtTwoDimensionalViewer::GetSubtractionDrawable() {
     for (j = 0; j < _height; j++) {
         for (i = 0; i < _width; i++) {
             if ((*target >= 0) && (*source >= 0)) {
-                *drawn = subtractionLUtable.lookupTable[(*target - *source + 255) / 2];
+                *drawn = subtractionLookupTable->lookupTable[(*target - *source + 255) / 2];
             } else {
                 *drawn = _backgroundColor;
             }

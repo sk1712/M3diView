@@ -208,10 +208,12 @@ QRgb** irtkQtThreeDimensionalViewer::GetSubtractionDrawable() {
     subtractionMin = targetMin - sourceMax;
     subtractionMax = targetMax - sourceMin;
 
-    irtkQtLookupTable subtractionLUtable;
-    subtractionLUtable.SetMinMaxImageValues(subtractionMin, subtractionMax);
-    subtractionLUtable.SetMinMaxDisplayValues(subtractionMin, subtractionMax);
-    subtractionLUtable.Initialize();
+    if (!subtractionLookupTable) {
+        subtractionLookupTable = new irtkQtLookupTable;
+        subtractionLookupTable->SetMinMaxImageValues(subtractionMin, subtractionMax);
+        subtractionLookupTable->SetMinMaxDisplayValues(subtractionMin, subtractionMax);
+        subtractionLookupTable->Initialize();
+    }
 
     int dimensions[3][2] = {
         {sliceNum[0], sliceNum[1]},
@@ -233,7 +235,7 @@ QRgb** irtkQtThreeDimensionalViewer::GetSubtractionDrawable() {
         for (j = 0; j < dimensions[dim][1]; j++) {
             for (i = 0; i < dimensions[dim][0]; i++) {
                 if ((*target >= 0) && (*source >= 0)) {
-                    *drawn = subtractionLUtable.lookupTable[(*target - *source + 255) / 2];
+                    *drawn = subtractionLookupTable->lookupTable[(*target - *source + 255) / 2];
                 } else {
                     *drawn = _backgroundColor;
                 }
