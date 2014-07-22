@@ -1,7 +1,6 @@
 #include <irtkQtViewer.h>
 
-
-// Singleton class, initialize instance to NULL
+// Initialize instance to null
 irtkQtViewer* irtkQtViewer::viewInstance = NULL;
 
 irtkQtViewer::irtkQtViewer() {

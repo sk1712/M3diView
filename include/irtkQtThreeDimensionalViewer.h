@@ -3,8 +3,6 @@
 
 #include <irtkQtBaseViewer.h>
 
-#include <QtConcurrentMap>
-
 
 class irtkQtThreeDimensionalViewer : public irtkQtBaseViewer
 {
@@ -30,32 +28,37 @@ public:
     /// Class destructor
     ~irtkQtThreeDimensionalViewer();
 
-    /// Get the array of RGB values to be drawn on the screen
+    /// If two images are visible, view only the first one
     QRgb** GetOnlyADrawable();
 
+    /// If two images are visible, view only the second one
     QRgb** GetOnlyBDrawable();
 
+    /// If two images are visible, view both of them with a horizontal shutter
     QRgb** GetHShutterDrawable();
 
+    /// If two images are visible, view both of them with a vertical shutter
     QRgb** GetVShutterDrawable();
 
+    /// If two images are visible, view the result of their subtraction
     QRgb** GetSubtractionDrawable();
 
+    /// Blend the images using their opacity values
     vector<QRgb**> GetBlendDrawable();
 
-    /// Initialize the transformation from the input to the output image
+    /// Initialize the transformations from the input to the output images
     void InitializeTransformation();
 
-    /// Initialize single transformation from the input to the output image
+    /// Initialize a single transformation from the input to the output image
     void InitializeCurrentTransformation();
 
     /// Set interpolation method
     void SetInterpolationMethod(int index, irtkQtImageObject::irtkQtInterpolationMode mode);
 
-    /// Calculate the output image from the transformation
+    /// Calculate the output images from the transformations
     void CalculateOutputImages();
 
-    /// Calculate single output image from the transformation
+    /// Calculate a single output image from the transformation
     void CalculateCurrentOutput();
 
     /// Delete all map elements and clear maps

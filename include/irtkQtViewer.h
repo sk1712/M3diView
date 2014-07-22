@@ -4,13 +4,16 @@
 #include <irtkQtTwoDimensionalViewer.h>
 #include <irtkQtThreeDimensionalViewer.h>
 
+/*
+ * Signleton class where list of loaded images is stored
+ */
 
 class irtkQtViewer
 {
     /// List of loaded images
     QList<irtkQtImageObject*> _imageObjects;
 
-    /// Instance of class (singleton)
+    /// Instance of class
     static irtkQtViewer* viewInstance;
 
     /// Private constructor

@@ -3,11 +3,15 @@
 
 #include <irtkQtImageObject.h>
 
-#include <qtconcurrentrun.h>
+#include <QtConcurrentRun>
+#include <QtConcurrentMap>
 
 #include <QObject>
 #include <QVector>
 
+/*
+ * Base irtkViewer class where image transformations are performed
+ */
 
 class irtkQtBaseViewer : public QObject
 {
@@ -51,7 +55,7 @@ protected:
     /// Slices currently visible
     int* currentSlice;
 
-    /// Flag true if corresponding axis is reversed
+    /// Flag true if corresponding axis is inverted
     bool* inverted;
 
     /// Current index added to the images displayed
@@ -90,10 +94,16 @@ public:
     void SetTarget(irtkImage* image);
 
     /// Set image origin
-    void SetOrigin(double x, double y, double z);
+    void SetOrigin(const double x, const double y, const double z);
+
+    /// Get image origin
+    void GetOrigin(double &x, double &y, double &z);
 
     /// Set image resolution
-    void SetResolution(double dx, double dy, double dz);
+    void SetResolution(const double dx, const double dy, const double dz);
+
+    /// Get image resolution
+    void GetResolution(double &dx, double &dy, double &dz);
 
     /// Increase image resolution
     void IncreaseResolution();
@@ -104,14 +114,14 @@ public:
     /// Set image dimensions
     void SetDimensions(const int width, const int height);
 
-    /// Get view mode (axial, sagittal, coronal)
+    /// Get view mode (axial, sagittal, coronal, 3D)
     irtkViewMode GetViewMode() const;
 
     /// Set the blend mode
     void SetBlendMode(const int mode);
 
-    /// Set blend mix value
-    void SetBlendMixValue(const double value);
+    /// Set image mix value
+    void SetMixValue(const double value);
 
     /// Get total number of slices
     int* GetSliceNumber() const;
@@ -119,35 +129,41 @@ public:
     /// Get current slice in image coordinates
     int* GetCurrentSlice() const;
 
-    /// Get flags for reverted axes
+    /// Get flags for inverted axes
     bool* GetAxisInverted() const;
 
     /// Get the array of RGB values to be drawn on the screen
     vector<QRgb**> GetDrawable();
 
+    /// If two images are visible, view only the first one
     virtual QRgb** GetOnlyADrawable() = 0;
 
+    /// If two images are visible, view only the second one
     virtual QRgb** GetOnlyBDrawable() = 0;
 
+    /// If two images are visible, view both of them with a horizontal shutter
     virtual QRgb** GetHShutterDrawable() = 0;
 
+    /// If two images are visible, view both of them with a vertical shutter
     virtual QRgb** GetVShutterDrawable() = 0;
 
+    /// If two images are visible, view the result of their subtraction
     virtual QRgb** GetSubtractionDrawable() = 0;
 
+    /// Blend the images using their opacity values
     virtual vector<QRgb**> GetBlendDrawable() = 0;
 
     /// Set interpolation method
     virtual void SetInterpolationMethod(int index,
                                         irtkQtImageObject::irtkQtInterpolationMode mode) = 0;
 
-    /// Calculate the output image from the transformation
+    /// Calculate the output images from the transformations
     virtual void CalculateOutputImages() = 0;
 
-    /// Calculate single output image from the transformation
+    /// Calculate a single output image from a transformation
     virtual void CalculateCurrentOutput() = 0;
 
-    /// Initialize the transformation from the input to the output image
+    /// Initialize the transformations from the input to the output images
     virtual void InitializeTransformation() = 0;
 
     /// Initialize single transformation from the input to the output image
@@ -193,7 +209,7 @@ protected:
     /// Initialize image orientation
     void InitializeOrientation();
 
-    /// Get neurological orientation
+    /// Get neurological axes orientation
     void GetNeurologicalOrientation(double *x, double *y, double *z);
 
     /// Update the current slice (in image coordinates) corresponding to the world coordinates
@@ -231,18 +247,31 @@ inline void irtkQtBaseViewer::SetTarget(irtkImage *image) {
     _targetImage = image;
 }
 
-inline void irtkQtBaseViewer::SetOrigin(double x, double y, double z) {
+inline void irtkQtBaseViewer::SetOrigin(const double x, const double y, const double z) {
     _originX = x;
     _originY = y;
     _originZ = z;
 
+    // Update the image coordinates after changing the world coordinates
     UpdateCurrentSlice();
+}
+
+inline void irtkQtBaseViewer::GetOrigin(double &x, double &y, double &z) {
+    x = _originX;
+    y = _originY;
+    z = _originZ;
 }
 
 inline void irtkQtBaseViewer::SetResolution(double dx, double dy, double dz) {
     _dx = dx;
     _dy = dy;
     _dz = dz;
+}
+
+inline void irtkQtBaseViewer::GetResolution(double &dx, double &dy, double &dz) {
+    dx = _dx;
+    dy = _dy;
+    dz = _dz;
 }
 
 inline void irtkQtBaseViewer::IncreaseResolution() {
@@ -272,7 +301,7 @@ inline void irtkQtBaseViewer::SetBlendMode(const int mode) {
     _blendMode = static_cast<irtkBlendMode>(mode);
 }
 
-inline void irtkQtBaseViewer::SetBlendMixValue(const double value) {
+inline void irtkQtBaseViewer::SetMixValue(const double value) {
     _viewMix = value;
 }
 

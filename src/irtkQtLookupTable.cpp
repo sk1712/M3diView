@@ -65,7 +65,6 @@ void irtkQtLookupTable::Initialize() {
 
 void irtkQtLookupTable::SetColorModeList() {
     // Colors should be in the same order as in irtkColor mode enumeration
-
     _colorStringList << "Red"
                      << "Green"
                      << "Blue"
@@ -169,23 +168,23 @@ void irtkQtLookupTable::SetColorModeToInverse() {
 void irtkQtLookupTable::SetColorModeToJacobian() {
     double minD = round((minDisplay - minImage) * 255 / (maxImage - minImage));
     double maxD = round((maxDisplay - minImage) * 255 / (maxImage - minImage));
-    double hundred = 2.55;
+    double threshold = 2.55;
 
     QColor color;
 
-    for (int i = 0; i < ((minD < hundred) ? minD : hundred); i++) {
+    for (int i = 0; i < ((minD < threshold) ? minD : threshold); i++) {
         color.setHsvF(180.0 / 360.0, 1, 1);
         lookupTable[i] = qRgba(color.red(), color.green(), color.blue(), _alpha);
     }
-    for (int i = minD; i <= hundred; i++) {
-        color.setHsvF(- (i - hundred) / (minD - hundred) * 60.0 / 360.0 + 240.0 / 360.0, 1, 1);
+    for (int i = minD; i <= threshold; i++) {
+        color.setHsvF(- (i - threshold) / (minD - threshold) * 60.0 / 360.0 + 240.0 / 360.0, 1, 1);
         lookupTable[i] = qRgba(color.red(), color.green(), color.blue(), _alpha);
     }
-    for (int i = hundred; i <= maxD; i++) {
-        color.setHsvF((i - hundred) / (maxD - hundred) * 60.0 / 360.0, 1, 1);
+    for (int i = threshold; i <= maxD; i++) {
+        color.setHsvF((i - threshold) / (maxD - threshold) * 60.0 / 360.0, 1, 1);
         lookupTable[i] = qRgba(color.red(), color.green(), color.blue(), _alpha);
     }
-    for (int i = ((maxD > hundred) ? maxD : hundred); i <= 255; i++) {
+    for (int i = ((maxD > threshold) ? maxD : threshold); i <= 255; i++) {
         color.setHsvF(60.0 / 360.0, 1, 1);
         lookupTable[i] = qRgba(color.red(), color.green(), color.blue(), _alpha);
     }
@@ -194,11 +193,11 @@ void irtkQtLookupTable::SetColorModeToJacobian() {
 void irtkQtLookupTable::SetColorModeToJacobianExpansion() {
     double minD = round((minDisplay - minImage) * 255 / (maxImage - minImage));
     double maxD = round((maxDisplay - minImage) * 255 / (maxImage - minImage));
-    double hundred = 2.55;
+    double threshold = 2.55;
 
     int i, _min, _max;
-    _min = ((minD > hundred) ? minD : hundred);
-    _max = ((maxD > hundred) ? maxD : hundred);
+    _min = ((minD > threshold) ? minD : threshold);
+    _max = ((maxD > threshold) ? maxD : threshold);
 
     QColor color;
 
@@ -218,11 +217,11 @@ void irtkQtLookupTable::SetColorModeToJacobianExpansion() {
 void irtkQtLookupTable::SetColorModeToJacobianContraction() {
     double minD = round((minDisplay - minImage) * 255 / (maxImage - minImage));
     double maxD = round((maxDisplay - minImage) * 255 / (maxImage - minImage));
-    double hundred = 2.55;
+    double threshold = 2.55;
 
     int i, _min, _max;
-    _min = ((minD < hundred) ? minD : hundred);
-    _max = ((maxD < hundred) ? maxD : hundred);
+    _min = ((minD < threshold) ? minD : threshold);
+    _max = ((maxD < threshold) ? maxD : threshold);
 
     QColor color;
 
