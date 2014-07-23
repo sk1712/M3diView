@@ -34,9 +34,6 @@ public:
     /// Class constructor
     QtGlWidget(QWidget *parent = NULL);
 
-    /// Class destructor
-    //virtual ~QtGlWidget();
-
     /// Size hint for widget
     QSize sizeHint() const;
 

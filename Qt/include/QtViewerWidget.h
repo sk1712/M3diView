@@ -3,15 +3,21 @@
 
 #include <QtGlWidget.h>
 
-#include <QSlider>
-#include <QToolButton>
 #include <QMenu>
+#include <QSlider>
 
+class QToolButton;
+
+/*
+ * Base class for widget containing the OpenGL widget
+ * and tools
+ */
 
 class QtViewerWidget : public QWidget
 {
     Q_OBJECT
 
+    /// Parent widget of all tool buttons
     QWidget *toolWidget;
 
 protected:

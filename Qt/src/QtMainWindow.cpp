@@ -1,15 +1,15 @@
 #include <QtMainWindow.h>
 
-#include <QDockWidget>
-#include <QMenuBar>
-#include <QToolBar>
-#include <QFileDialog>
 #include <QDir>
-#include <QScrollArea>
-
+#include <QDockWidget>
+#include <QFileDialog>
 #include <QGridLayout>
+#include <QListView>
+#include <QMenuBar>
+#include <QScrollArea>
+#include <QTabWidget>
+#include <QToolBar>
 #include <QVBoxLayout>
-
 
 QtMainWindow::QtMainWindow() {
     mainViewWidget = new QWidget();
@@ -314,9 +314,9 @@ Qt2dViewerWidget* QtMainWindow::createTwoDimensionalView(irtkQtBaseViewer::irtkV
     connect(qtViewer, SIGNAL(windowExpanded()), this, SLOT(showOnlyThisWidget()));
     connect(qtViewer, SIGNAL(windowDeleted()), this, SLOT(deleteThisWidget()));
 
-    viewer->SetBlendMixValue(visualToolWidget->getDisplayMix());
+    viewer->SetMixValue(visualToolWidget->getDisplayMix());
     viewer->SetBlendMode(visualToolWidget->getBlendingOption());
-    viewImage();
+    viewImages();
 
     return qtViewer;
 }
@@ -334,9 +334,9 @@ Qt3dViewerWidget* QtMainWindow::createThreeDimensionalView() {
     connect(qtViewer, SIGNAL(windowExpanded()), this, SLOT(showOnlyThisWidget()));
     connect(qtViewer, SIGNAL(windowDeleted()), this, SLOT(deleteThisWidget()));
 
-    viewer->SetBlendMixValue(visualToolWidget->getDisplayMix());
+    viewer->SetMixValue(visualToolWidget->getDisplayMix());
     viewer->SetBlendMode(visualToolWidget->getBlendingOption());
-    viewImage();
+    viewImages();
 
     return qtViewer;
 }
@@ -507,7 +507,7 @@ void QtMainWindow::saveScreenshot() {
     QImage currentImage;
 
     int maxWidth = 0, maxHeight = 0;
-
+    // Get the maximum viewer width and height and store viewer images in list
     QList<QtViewerWidget*>::iterator it;
     for (it = viewerWidgets.begin(); it != viewerWidgets.end(); it++) {
         currentImage = (*it)->getGlWidget()->getDisplayedImage();
@@ -518,17 +518,19 @@ void QtMainWindow::saveScreenshot() {
 
     int width = maxWidth;
     int height = maxHeight;
-
+    // Specify the collage width and height
     if (viewerWidgets.size() > 1) {
         width = maxWidth * 2;
         height = maxHeight * ((int) (viewerWidgets.size()-1) / 2 + 1);
     }
 
+    // Initialize the collage image and fill it with black
     QImage collage(width, height, QImage::Format_RGB32);
     collage.fill(Qt::black);
     QPainter paint;
     paint.begin(&collage);
 
+    // Draw each individual image in the collage image
     for (int i = 0; i < images.size(); i++) {
         int x = (i % 2) * maxWidth;
         int y = (i / 2) * maxHeight;
@@ -540,6 +542,7 @@ void QtMainWindow::saveScreenshot() {
 
     paint.end();
 
+    // Save image in the specified file
     QString fileName = QFileDialog::getSaveFileName(
                 this,tr("Save screenshot as"),
                 "", tr("Images (*.png *.xpm *.jpg)"));
@@ -551,7 +554,7 @@ void QtMainWindow::saveScreenshot() {
     }
 }
 
-void QtMainWindow::viewImage() {
+void QtMainWindow::viewImages() {
     QtViewerWidget *viewerWidget = viewerWidgets[viewerWidgets.size()-1];
     irtkQtBaseViewer *viewer = viewers[viewers.size()-1];
 
@@ -567,7 +570,7 @@ void QtMainWindow::viewImage() {
     viewer->InitializeTransformation();
     viewer->CalculateOutputImages();
 
-    // Set up the viewer widgets
+    // Set up the viewer widget
     viewerWidget->setEnabled(true);
     viewerWidget->setInvertedAxes(viewer->GetAxisInverted());
     viewerWidget->setMaximumSlice(viewer->GetSliceNumber());
@@ -683,6 +686,7 @@ void QtMainWindow::toggleImageVisible() {
     imageModel = new irtkImageListModel(list);
     imageListView->setModel(imageModel);
 
+    // Emulate click to show image information
     if (clickImage) {
         QModelIndex idx = imageModel->index(currentImageIndex, 0);
         imageListView->setCurrentIndex(idx);
@@ -726,17 +730,7 @@ void QtMainWindow::zoomIn() {
     }
 
     // Update the viewers
-    for (int i = 0; i < viewers.size(); i++) {
-        viewerWidget = dynamic_cast<Qt2dViewerWidget*>(viewerWidgets[i]);
-        viewer = viewers[i];
-
-        if (viewerWidget != 0) {
-            if (viewerWidget->getGlWidget()->isEnabled()) {
-                viewerWidget->getGlWidget()->updateDrawable(
-                            QVector<QRgb**>::fromStdVector(viewer->GetDrawable()));
-            }
-        }
-    }
+    updateDrawables();
 
     delete [] threads;
 }
@@ -770,17 +764,7 @@ void QtMainWindow::zoomOut() {
     }
 
     // Update the viewers
-    for (int i = 0; i < viewers.size(); i++) {
-        viewerWidget = dynamic_cast<Qt2dViewerWidget*>(viewerWidgets[i]);
-        viewer = viewers[i];
-
-        if (viewerWidget != 0) {
-            if (viewerWidget->getGlWidget()->isEnabled()) {
-                viewerWidget->getGlWidget()->updateDrawable(
-                            QVector<QRgb**>::fromStdVector(viewer->GetDrawable()));
-            }
-        }
-    }
+    updateDrawables();
 
     delete [] threads;
 }
@@ -1049,7 +1033,6 @@ void QtMainWindow::listViewShowContextMenu(const QPoint &pos) {
         }
         if ( selectedCount > 0 ) {
             imageMenu.addAction(deleteImageAction);
-            // Show the menu only if the current image index is valid
             imageMenu.exec( globalPos );
         }
     }
@@ -1110,7 +1093,7 @@ void QtMainWindow::blendModeChanged(int mode) {
 
 void QtMainWindow::displayMixValueChanged(double value) {
     for (int i = 0; i < viewers.size(); i++) {
-        viewers[i]->SetBlendMixValue(value);
+        viewers[i]->SetMixValue(value);
     }
     updateDrawables();
 }

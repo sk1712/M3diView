@@ -1,25 +1,12 @@
 #include <Qt2dViewerWidget.h>
 
 #include <QGridLayout>
-
+#include <QLabel>
 
 Qt2dViewerWidget::Qt2dViewerWidget(QWidget *parent)
     : QtViewerWidget(parent)
 {
-    QGridLayout *layout = dynamic_cast<QGridLayout*>(this->layout());
-
-    glWidget = new QtTwoDimensionalGlWidget(this);
-    layout->addWidget(glWidget, 0, 0);
-    layout->setColumnStretch(0, 1);
-
-    sliceSlider = new QSlider(Qt::Vertical);
-    sliceSlider->setMinimum(1);
-    sliceSlider->setTracking(false);
-    layout->addWidget(sliceSlider, 0, 1);
-
-    sliceLabel = new QLabel();
-    layout->addWidget(sliceLabel, 1, 0, 1, 2, Qt::AlignRight);
-
+    createWidgets();
     createOptionsMenu();
     connectSignals();
     setEnabled(false);
@@ -34,13 +21,28 @@ void Qt2dViewerWidget::initializeParameters() {
     maximumSlice = 0;
 }
 
+void Qt2dViewerWidget::createWidgets() {
+    QGridLayout *layout = dynamic_cast<QGridLayout*>(this->layout());
+
+    glWidget = new QtTwoDimensionalGlWidget(this);
+    layout->addWidget(glWidget, 0, 0);
+    layout->setColumnStretch(0, 1);
+
+    sliceSlider = new QSlider(Qt::Vertical);
+    sliceSlider->setMinimum(1);
+    sliceSlider->setTracking(false);
+    layout->addWidget(sliceSlider, 0, 1);
+
+    sliceLabel = new QLabel();
+    layout->addWidget(sliceLabel, 1, 0, 1, 2, Qt::AlignRight);
+}
+
 void Qt2dViewerWidget::connectSignals() {
     connect(glWidget, SIGNAL(wheelMoved(int)), this, SLOT(changeSlider(int)));
     connect(sliceSlider, SIGNAL(valueChanged(int)), this, SLOT(updateSlice(int)));
 
     connect(showLabelsAction, SIGNAL(toggled(bool)), this, SLOT(toggleLabelsVisible(bool)));
     connect(showCursorAction, SIGNAL(toggled(bool)), this, SLOT(toggleCursorVisible(bool)));
-
 }
 
 void Qt2dViewerWidget::createOptionsMenu() {

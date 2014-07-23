@@ -2,10 +2,20 @@
 
 #include <QGridLayout>
 #include <QVBoxLayout>
-
+#include <QSlider>
 
 Qt3dViewerWidget::Qt3dViewerWidget(QWidget *parent)
     : QtViewerWidget(parent) {
+    createWidgets();
+    connectSignals();
+    setEnabled(false);
+}
+
+void Qt3dViewerWidget::setInvertedAxes(bool *inverted) {
+    glWidget->setInvertedAxis(inverted);
+}
+
+void Qt3dViewerWidget::createWidgets() {
     QGridLayout *layout = dynamic_cast<QGridLayout*>(this->layout());
 
     glWidget = new QtThreeDimensionalGlWidget(this);
@@ -35,13 +45,6 @@ Qt3dViewerWidget::Qt3dViewerWidget(QWidget *parent)
     sliderLayout->addWidget(coronalSlider);
 
     layout->addWidget(sliderWidget, 0, 1);
-
-    connectSignals();
-    setEnabled(false);
-}
-
-void Qt3dViewerWidget::setInvertedAxes(bool *inverted) {
-    glWidget->setInvertedAxis(inverted);
 }
 
 void Qt3dViewerWidget::connectSignals() {

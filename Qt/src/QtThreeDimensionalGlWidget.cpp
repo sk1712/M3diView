@@ -2,10 +2,9 @@
 
 #include <QMouseEvent>
 
-
 QtThreeDimensionalGlWidget::QtThreeDimensionalGlWidget(QWidget *parent)
     :QtGlWidget(parent) {
-    // Rotate model when first displaying to show that it is 3D
+    // Rotate model when first displaying
     horizontalRotation = 5.0f;
     verticalRotation = 5.0f;
     cameraFOV = 45.0f;
@@ -149,8 +148,8 @@ void QtThreeDimensionalGlWidget::drawImage() const {
     width = (float) dimensions[0]/2;
     height = (float) dimensions[1]/2;
     slice = currentSlice[2] - dimensions[2]/2.0;
-    if (invertedAxis[2])
-        slice *= -1;
+    if (invertedAxis[2]) slice *= -1;
+
     glBindTexture(GL_TEXTURE_2D, textures[0]);
     glBegin(GL_QUADS);
     glColor3f(0.0f, 0.0f, 0.0f);
@@ -164,8 +163,8 @@ void QtThreeDimensionalGlWidget::drawImage() const {
     width = (float) dimensions[1]/2;
     height = (float) dimensions[2]/2;
     slice = currentSlice[0] - dimensions[0]/2.0;
-    if (invertedAxis[0])
-        slice *= -1;
+    if (invertedAxis[0]) slice *= -1;
+
     glBindTexture(GL_TEXTURE_2D, textures[1]);
     glBegin(GL_QUADS);
     glTexCoord2f(0.0, 0.0); glVertex3f(-width, -height, slice);
@@ -178,8 +177,8 @@ void QtThreeDimensionalGlWidget::drawImage() const {
     width = (float) dimensions[0]/2;
     height = (float) dimensions[2]/2;
     slice = currentSlice[1] - dimensions[1]/2.0;
-    if (invertedAxis[1])
-        slice *= -1;
+    if (invertedAxis[1]) slice *= -1;
+
     glBindTexture(GL_TEXTURE_2D, textures[2]);
     glBegin(GL_QUADS);
     glTexCoord2f(0.0, 0.0); glVertex3f(slice, -height, -width);
@@ -198,8 +197,8 @@ void QtThreeDimensionalGlWidget::drawBorders() {
     width = (float) dimensions[0]/2;
     height = (float) dimensions[1]/2;
     slice = currentSlice[2] - dimensions[2]/2.0;
-    if (invertedAxis[2])
-        slice *= -1;
+    if (invertedAxis[2]) slice *= -1;
+
     qglColor(Qt::yellow);
     glBegin(GL_LINES);
     glVertex3f(-height, slice, -width);
@@ -222,8 +221,8 @@ void QtThreeDimensionalGlWidget::drawBorders() {
     width = (float) dimensions[1]/2;
     height = (float) dimensions[2]/2;
     slice = currentSlice[0] - dimensions[0]/2.0;
-    if (invertedAxis[0])
-        slice *= -1;
+    if (invertedAxis[0]) slice *= -1;
+
     qglColor(Qt::red);
     glBegin(GL_LINES);
     glVertex3f(-width, -height, slice);
@@ -246,8 +245,8 @@ void QtThreeDimensionalGlWidget::drawBorders() {
     width = (float) dimensions[0]/2;
     height = (float) dimensions[2]/2;
     slice = currentSlice[1] - dimensions[1]/2.0;
-    if (invertedAxis[1])
-        slice *= -1;
+    if (invertedAxis[1]) slice *= -1;
+
     qglColor(Qt::green);
     glBegin(GL_LINES);
     glVertex3f(slice, -height, -width);

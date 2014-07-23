@@ -4,8 +4,8 @@
 #include <QtViewerWidget.h>
 #include <QtTwoDimensionalGlWidget.h>
 
-#include <QLabel>
 
+class QLabel;
 
 class Qt2dViewerWidget : public QtViewerWidget
 {
@@ -65,6 +65,9 @@ private:
 
     /// Initialize current and maximum slice
     void initializeParameters();
+
+    /// Create component widgets
+    void createWidgets();
 
     /// Connect signals
     void connectSignals();

@@ -1,8 +1,8 @@
 #ifndef QTMAINWINDOW_H
 #define QTMAINWINDOW_H
 
-#include <irtkQtViewer.h>
 #include <irtkImageListModel.h>
+#include <irtkQtViewer.h>
 
 #include <Qt2dViewerWidget.h>
 #include <Qt3dViewerWidget.h>
@@ -10,9 +10,10 @@
 #include <QtInfoWidget.h>
 
 #include <QMainWindow>
-#include <QListView>
-#include <QTabWidget>
 #include <QMessageBox>
+
+class QListView;
+class QTabWidget;
 
 
 class QtMainWindow : public QMainWindow
@@ -170,7 +171,7 @@ private slots:
     void saveScreenshot();
 
     /// Callback function for viewSelectedImageAction
-    void viewImage();
+    void viewImages();
 
     /// Callback function for deleteImageAction
     void deleteImages();
