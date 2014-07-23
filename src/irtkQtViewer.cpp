@@ -1,5 +1,8 @@
 #include <irtkQtViewer.h>
 
+#include <QFile>
+#include <QXmlStreamWriter>
+
 // Initialize instance to null
 irtkQtViewer* irtkQtViewer::viewInstance = NULL;
 
@@ -44,4 +47,44 @@ irtkQtTwoDimensionalViewer* irtkQtViewer::CreateTwoDimensionalViewer(irtkQtBaseV
 
 irtkQtThreeDimensionalViewer* irtkQtViewer::CreateThreeDimensionalViewer() {
     return new irtkQtThreeDimensionalViewer();
+}
+
+void irtkQtViewer::ReadConfiguration(const QString fileName) {
+
+}
+
+void irtkQtViewer::WriteConfiguration(const QString fileName) {
+//    imageList.clear();
+//    viewerList.clear();
+
+    QFile xmlFile(fileName);
+    if (xmlFile.open(QIODevice::WriteOnly)) {
+        QXmlStreamWriter stream(&xmlFile);
+
+        stream.setAutoFormatting(true);
+        stream.writeStartDocument();
+
+        stream.writeStartElement("images");
+        QList<irtkQtImageObject*>::iterator it;
+        for (it = _imageObjects.begin(); it != _imageObjects.end(); it++) {
+            stream.writeStartElement("image");
+
+            if ((*it)->IsVisible()) {
+                stream.writeAttribute("visible", "true");
+            }
+            else {
+                stream.writeAttribute("visible", "false");
+            }
+            stream.writeTextElement("file", (*it)->GetPath());
+            stream.writeTextElement("minimumDisplay", QString::number((*it)->GetMinDisplayValue()));
+            stream.writeTextElement("maximumDisplay", QString::number((*it)->GetMaxDisplayValue()));
+            stream.writeTextElement("opacity", QString::number((*it)->GetOpacity()));
+            stream.writeTextElement("interpolation", QString::number((*it)->GetInterpolation()));
+
+            stream.writeEndElement();
+        }
+        stream.writeEndElement();
+
+        stream.writeEndDocument();
+    }
 }

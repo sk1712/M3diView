@@ -4,12 +4,36 @@
 #include <irtkQtTwoDimensionalViewer.h>
 #include <irtkQtThreeDimensionalViewer.h>
 
+struct irtkQtConfigurationImage {
+    QString fileName;
+    double minDisplay;
+    double maxDisplay;
+    int opacity;
+    bool visible;
+    QString interpolation;
+};
+
+struct irtkQtConfigurationViewer {
+    QString type;
+    bool cursorVisible;
+    bool labelVisible;
+    bool fullScreen;
+    double origin[3];
+    double resolution[3];
+};
+
 /*
  * Signleton class where list of loaded images is stored
  */
 
 class irtkQtViewer
 {
+    /// Image list
+    QList<irtkQtConfigurationImage> imageList;
+
+    /// Viewer list
+    QList<irtkQtConfigurationViewer> viewerList;
+
     /// List of loaded images
     QList<irtkQtImageObject*> _imageObjects;
 
@@ -48,6 +72,12 @@ public:
 
     /// Get reference to image list
     QList<irtkQtImageObject*> & GetImageList();
+
+    /// Read configuration file
+    void ReadConfiguration(const QString fileName);
+
+    /// Write configuration file
+    void WriteConfiguration(const QString fileName);
 };
 
 

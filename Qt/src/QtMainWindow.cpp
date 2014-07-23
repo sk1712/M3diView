@@ -119,6 +119,9 @@ void QtMainWindow::createMenu() {
     fileMenu = menuBar()->addMenu(tr("&File"));
     fileMenu->addAction(openTargetAction);
     fileMenu->addAction(saveScreenshotAction);
+    fileMenu->addSeparator();
+    fileMenu->addAction(loadConfigurationAction);
+    fileMenu->addAction(saveConfigurationAction);
 
     viewMenu = menuBar()->addMenu(tr("&View"));
     QMenu *addMenu = viewMenu->addMenu(tr("Add view"));
@@ -168,6 +171,12 @@ void QtMainWindow::createMenuActions() {
     saveScreenshotAction = new QAction(tr("Save screenshot"), this);
     saveScreenshotAction->setStatusTip((tr("Save screenshot")));
     saveScreenshotAction->setIcon(QIcon(":/icons/screenshot.png"));
+
+    loadConfigurationAction = new QAction(tr("Load configuration file"), this);
+    loadConfigurationAction->setIcon(QIcon(":/icons/open_config.png"));
+
+    saveConfigurationAction = new QAction(tr("Save configuration file"), this);
+    saveConfigurationAction->setIcon(QIcon(":/icons/save_config.png"));
 
     viewAxialAction = new QAction(tr("Axial"), this);
     viewAxialAction->setStatusTip(tr("Add axial view"));
@@ -221,6 +230,8 @@ void QtMainWindow::connectWindowSignals() {
     // Menu signals
     connect(openTargetAction, SIGNAL(triggered()), this, SLOT(openImage()));
     connect(saveScreenshotAction, SIGNAL(triggered()), this, SLOT(saveScreenshot()));
+    connect(loadConfigurationAction, SIGNAL(triggered()), this, SLOT(loadConfigurationFile()));
+    connect(saveConfigurationAction, SIGNAL(triggered()), this, SLOT(saveConfigutationFile()));
     connect(viewAxialAction, SIGNAL(triggered()), this, SLOT(createAxialView()));
     connect(viewCoronalAction, SIGNAL(triggered()), this, SLOT(createCoronalView()));
     connect(viewSagittalAction, SIGNAL(triggered()), this, SLOT(createSagittalView()));
@@ -1096,4 +1107,17 @@ void QtMainWindow::displayMixValueChanged(double value) {
         viewers[i]->SetMixValue(value);
     }
     updateDrawables();
+}
+
+void QtMainWindow::loadConfigurationFile() {
+
+}
+
+void QtMainWindow::saveConfigutationFile() {
+    // Save image in the specified file
+    QString fileName = QFileDialog::getSaveFileName(
+                this,tr("Save screenshot as"),
+                "", tr("XML (*.xml)"));
+
+    irtkQtViewer::Instance()->WriteConfiguration(fileName);
 }

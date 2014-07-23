@@ -35,6 +35,8 @@ class QtMainWindow : public QMainWindow
     /// File actions
     QAction *openTargetAction;
     QAction *saveScreenshotAction;
+    QAction *loadConfigurationAction;
+    QAction *saveConfigurationAction;
 
     /// View actions
     QAction *viewAxialAction;
@@ -247,6 +249,12 @@ private slots:
 
     /// Callback function for display mix value changed
     void displayMixValueChanged(double value);
+
+    /// Callback function for loading configuration file
+    void loadConfigurationFile();
+
+    /// Callback function for saving configuration file
+    void saveConfigutationFile();
 };
 
 #endif // QTMAINWINDOW_H
