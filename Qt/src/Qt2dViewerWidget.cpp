@@ -12,6 +12,14 @@ Qt2dViewerWidget::Qt2dViewerWidget(QWidget *parent)
     setEnabled(false);
 }
 
+bool Qt2dViewerWidget::labelsVisible() {
+    return showLabelsAction->isChecked();
+}
+
+bool Qt2dViewerWidget::cursorVisible() {
+    return showCursorAction->isChecked();
+}
+
 void Qt2dViewerWidget::updateLabel() {
     sliceLabel->setText(QString::number(currentSlice) + " of " + QString::number(maximumSlice));
 }
@@ -46,12 +54,12 @@ void Qt2dViewerWidget::connectSignals() {
 }
 
 void Qt2dViewerWidget::createOptionsMenu() {
-    showLabelsAction = new QAction(tr("Show labels"), this);
+    showLabelsAction = new QAction(tr("Show Labels"), this);
     showLabelsAction->setCheckable(true);
     showLabelsAction->setChecked(true);
     settingsMenu->addAction(showLabelsAction);
 
-    showCursorAction = new QAction(tr("Show cursor"), this);
+    showCursorAction = new QAction(tr("Show Cursor"), this);
     showCursorAction->setCheckable(true);
     showCursorAction->setChecked(true);
     settingsMenu->addAction(showCursorAction);

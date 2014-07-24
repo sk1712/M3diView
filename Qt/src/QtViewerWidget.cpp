@@ -59,7 +59,7 @@ void QtViewerWidget::createToolButtons() {
     settingsToolButton->setMenu(settingsMenu);
     settingsToolButton->setPopupMode(QToolButton::InstantPopup);
 
-    saveScreenshotAction = new QAction(tr("Save image as..."), this);
+    saveScreenshotAction = new QAction(tr("Save Image As..."), this);
     saveScreenshotAction->setIcon(QIcon(":/icons/save_as.png"));
     settingsMenu->addAction(saveScreenshotAction);
 }

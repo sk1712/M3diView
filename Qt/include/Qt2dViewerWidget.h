@@ -26,7 +26,6 @@ class Qt2dViewerWidget : public QtViewerWidget
     /// Show cursor action
     QAction *showCursorAction;
 
-
     /// Slice currently shown
     int currentSlice;
 
@@ -55,6 +54,12 @@ public:
 
     /// Set object name (used for styling the widgets
     void setObjectName(QString objectName);
+
+    /// Get whether labels are visible
+    bool labelsVisible();
+
+    /// Get whether cursor is visible
+    bool cursorVisible();
 
 protected:
 

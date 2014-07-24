@@ -4,6 +4,9 @@
 #include <irtkQtTwoDimensionalViewer.h>
 #include <irtkQtThreeDimensionalViewer.h>
 
+class QXmlStreamWriter;
+class QXmlStreamReader;
+
 struct irtkQtConfigurationImage {
     QString fileName;
     double minDisplay;
@@ -11,6 +14,7 @@ struct irtkQtConfigurationImage {
     int opacity;
     bool visible;
     QString interpolation;
+    QString colormap;
 };
 
 struct irtkQtConfigurationViewer {
@@ -18,15 +22,16 @@ struct irtkQtConfigurationViewer {
     bool cursorVisible;
     bool labelVisible;
     bool fullScreen;
+    bool linked;
     double origin[3];
     double resolution[3];
 };
 
 /*
- * Signleton class responsible for configuration
+ * Singleton class responsible for configuration
  */
 
-class irtkQtViewer
+class irtkQtConfiguration
 {
     /// Image list
     QList<irtkQtConfigurationImage> _imageList;
@@ -38,24 +43,30 @@ class irtkQtViewer
     QList<irtkQtImageObject*> _imageObjectList;
 
     /// Instance of class
-    static irtkQtViewer* viewInstance;
+    static irtkQtConfiguration* viewInstance;
 
     /// Private constructor
-    irtkQtViewer();
+    irtkQtConfiguration();
 
     /// Copy operator
-    irtkQtViewer(irtkQtViewer const&);
+    irtkQtConfiguration(irtkQtConfiguration const&);
 
     /// Assignment operator
-    irtkQtViewer& operator=(irtkQtViewer const&);
+    irtkQtConfiguration& operator=(irtkQtConfiguration const&);
 
     /// Delete all image objects
     void DestroyImages();
 
+    /// Write image list and attributes in configuration file
+    void WriteImages(QXmlStreamWriter& xmlWriter);
+
+    /// Write viewer list and attributes in configuration file
+    void WriteViewers(QXmlStreamWriter& xmlWriter);
+
 public:
 
     /// Get instance of class
-    static irtkQtViewer* Instance();
+    static irtkQtConfiguration* Instance();
 
     /// Delete instance of class
     static void Destroy();
@@ -67,18 +78,22 @@ public:
     QList<irtkQtImageObject*> & GetImageObjectList();
 
     /// Read configuration file
-    void ReadConfiguration(const QString fileName);
+    void Read(const QString fileName);
 
     /// Write configuration file
-    void WriteConfiguration(const QString fileName);
+    void Write(const QString fileName);
 
     /// Set list with viewer info
-    void SetViewerList(QList<irtkQtConfigurationViewer> const&);
+    void SetViewerList(QList<irtkQtConfigurationViewer> const &viewerList);
 };
 
 
-inline QList<irtkQtImageObject*> & irtkQtViewer::GetImageObjectList() {
+inline QList<irtkQtImageObject*> & irtkQtConfiguration::GetImageObjectList() {
     return _imageObjectList;
+}
+
+inline void irtkQtConfiguration::SetViewerList(QList<irtkQtConfigurationViewer> const &viewerList) {
+    _viewerList = viewerList;
 }
 
 #endif // IRTKQTCONFIGURATION_H

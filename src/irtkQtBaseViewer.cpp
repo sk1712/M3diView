@@ -1,8 +1,5 @@
 #include <irtkQtBaseViewer.h>
 
-// Initialize static interpolation string list
-QStringList irtkQtBaseViewer::_interpolationStringList;
-
 // Initialize static subtraction lookup table to null
 irtkQtLookupTable *irtkQtBaseViewer::subtractionLookupTable = NULL;
 
@@ -21,18 +18,6 @@ irtkQtBaseViewer::~irtkQtBaseViewer() {
     delete [] sliceNum;
     delete [] inverted;
     delete subtractionLookupTable;
-}
-
-void irtkQtBaseViewer::SetInterpolationModeList() {
-    _interpolationStringList << "Nearest-neighbor"
-                             << "Linear"
-                             << "C-spline"
-                             << "B-spline"
-                             << "Sinc";
-}
-
-QStringList irtkQtBaseViewer::GetInterpolationModeList() {
-    return _interpolationStringList;
 }
 
 vector<QRgb**> irtkQtBaseViewer::GetDrawable() {

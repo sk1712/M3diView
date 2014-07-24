@@ -2,6 +2,9 @@
 
 #include <QFileInfo>
 
+// Initialize static interpolation string list
+QStringList irtkQtImageObject::_interpolationStringList;
+
 irtkQtImageObject::irtkQtImageObject(const QString &path)
     : _path(path)
 {
@@ -17,6 +20,18 @@ irtkQtImageObject::irtkQtImageObject(const QString &path)
 irtkQtImageObject::~irtkQtImageObject() {
     delete _image;
     delete _lookupTable;
+}
+
+void irtkQtImageObject::SetInterpolationModeList() {
+    _interpolationStringList << "Nearest-neighbor"
+                             << "Linear"
+                             << "C-spline"
+                             << "B-spline"
+                             << "Sinc";
+}
+
+QStringList irtkQtImageObject::GetInterpolationModeList() {
+    return _interpolationStringList;
 }
 
 void irtkQtImageObject::CreateImage() {

@@ -41,6 +41,9 @@ private:
     /// Corresponding interpolation mode
     irtkQtInterpolationMode _interpolation;
 
+    /// String list with names of color modes
+    static QStringList _interpolationStringList;
+
 public:
 
     /// Image object constructor
@@ -48,6 +51,12 @@ public:
 
     /// Image object destructor
     ~irtkQtImageObject();
+
+    /// Fill the values of _interpolationStringList
+    static void SetInterpolationModeList();
+
+    /// Get the values of _interpolationStringList
+    static QStringList GetInterpolationModeList();
 
     /// Check if image is visible
     bool IsVisible() const;
@@ -229,7 +238,13 @@ inline void irtkQtImageObject::SetInterpolation(irtkQtImageObject::irtkQtInterpo
 }
 
 inline int irtkQtImageObject::GetInterpolation() const {
-    return _interpolation;
+    int interpolationIndex = -1;
+
+    if (_lookupTable) {
+        interpolationIndex = _interpolation;
+    }
+
+    return interpolationIndex;
 }
 
 #endif // IRTKQTIMAGEOBJECT_H

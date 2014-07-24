@@ -70,9 +70,6 @@ protected:
     /// Image lookup table map
     map<int, irtkQtLookupTable *> _lookupTable;
 
-    /// String list with names of color modes
-    static QStringList _interpolationStringList;
-
     /// The lookup table used for subtraction
     static irtkQtLookupTable *subtractionLookupTable;
 
@@ -83,12 +80,6 @@ public:
 
     /// Class destructor
     virtual ~irtkQtBaseViewer();
-
-    /// Fill the values of _interpolationStringList
-    static void SetInterpolationModeList();
-
-    /// Get the values of _interpolationStringList
-    static QStringList GetInterpolationModeList();
 
     /// Set target image
     void SetTarget(irtkImage* image);
