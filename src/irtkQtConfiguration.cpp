@@ -1,18 +1,19 @@
-#include <irtkQtViewer.h>
+#include <irtkQtConfiguration.h>
 
 #include <QFile>
+#include <QMessageBox>
 #include <QXmlStreamWriter>
 
 // Initialize instance to null
 irtkQtViewer* irtkQtViewer::viewInstance = NULL;
 
 irtkQtViewer::irtkQtViewer() {
-    _imageObjects.clear();
+    _imageObjectList.clear();
 }
 
 void irtkQtViewer::DestroyImages() {
-    while (!_imageObjects.isEmpty())
-        delete _imageObjects.takeFirst();
+    while (!_imageObjectList.isEmpty())
+        delete _imageObjectList.takeFirst();
 }
 
 irtkQtViewer* irtkQtViewer::Instance() {
@@ -38,15 +39,7 @@ void irtkQtViewer::CreateImage(QString imageFileName) {
 
     // Create a new irtkQtImageObject and add it to the list
     newImage = new irtkQtImageObject(imageFileName);
-    _imageObjects.append(newImage);
-}
-
-irtkQtTwoDimensionalViewer* irtkQtViewer::CreateTwoDimensionalViewer(irtkQtBaseViewer::irtkViewMode viewMode) {
-    return new irtkQtTwoDimensionalViewer(viewMode);
-}
-
-irtkQtThreeDimensionalViewer* irtkQtViewer::CreateThreeDimensionalViewer() {
-    return new irtkQtThreeDimensionalViewer();
+    _imageObjectList.append(newImage);
 }
 
 void irtkQtViewer::ReadConfiguration(const QString fileName) {
@@ -54,9 +47,6 @@ void irtkQtViewer::ReadConfiguration(const QString fileName) {
 }
 
 void irtkQtViewer::WriteConfiguration(const QString fileName) {
-//    imageList.clear();
-//    viewerList.clear();
-
     QFile xmlFile(fileName);
     if (xmlFile.open(QIODevice::WriteOnly)) {
         QXmlStreamWriter stream(&xmlFile);
@@ -64,27 +54,41 @@ void irtkQtViewer::WriteConfiguration(const QString fileName) {
         stream.setAutoFormatting(true);
         stream.writeStartDocument();
 
+        stream.writeStartElement("m3diview");
+
         stream.writeStartElement("images");
         QList<irtkQtImageObject*>::iterator it;
-        for (it = _imageObjects.begin(); it != _imageObjects.end(); it++) {
+        for (it = _imageObjectList.begin(); it != _imageObjectList.end(); it++) {
             stream.writeStartElement("image");
 
             if ((*it)->IsVisible()) {
                 stream.writeAttribute("visible", "true");
+                stream.writeTextElement("minimumDisplay", QString::number((*it)->GetMinDisplayValue()));
+                stream.writeTextElement("maximumDisplay", QString::number((*it)->GetMaxDisplayValue()));
+                stream.writeTextElement("opacity", QString::number((*it)->GetOpacity()));
+                stream.writeTextElement("colormap",
+                                        irtkQtLookupTable::GetColorModeList().at((*it)->GetColormap()));
+                stream.writeTextElement("interpolation",
+                                        irtkQtImageObject::GetInterpolationModeList().at((*it)->GetInterpolation()));
             }
             else {
                 stream.writeAttribute("visible", "false");
             }
             stream.writeTextElement("file", (*it)->GetPath());
-            stream.writeTextElement("minimumDisplay", QString::number((*it)->GetMinDisplayValue()));
-            stream.writeTextElement("maximumDisplay", QString::number((*it)->GetMaxDisplayValue()));
-            stream.writeTextElement("opacity", QString::number((*it)->GetOpacity()));
-            stream.writeTextElement("interpolation", QString::number((*it)->GetInterpolation()));
 
             stream.writeEndElement();
         }
-        stream.writeEndElement();
+        stream.writeEndElement(); // images
+
+        stream.writeEndElement(); // m3diview
 
         stream.writeEndDocument();
+    }
+    else {
+        QMessageBox msgBox;
+        msgBox.setText("Could not open file");
+        msgBox.setInformativeText(fileName);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.exec();
     }
 }

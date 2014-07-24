@@ -1,5 +1,5 @@
-#ifndef IRTKQTVIEWER_H
-#define IRTKQTVIEWER_H
+#ifndef IRTKQTCONFIGURATION_H
+#define IRTKQTCONFIGURATION_H
 
 #include <irtkQtTwoDimensionalViewer.h>
 #include <irtkQtThreeDimensionalViewer.h>
@@ -23,19 +23,19 @@ struct irtkQtConfigurationViewer {
 };
 
 /*
- * Signleton class where list of loaded images is stored
+ * Signleton class responsible for configuration
  */
 
 class irtkQtViewer
 {
     /// Image list
-    QList<irtkQtConfigurationImage> imageList;
+    QList<irtkQtConfigurationImage> _imageList;
 
     /// Viewer list
-    QList<irtkQtConfigurationViewer> viewerList;
+    QList<irtkQtConfigurationViewer> _viewerList;
 
     /// List of loaded images
-    QList<irtkQtImageObject*> _imageObjects;
+    QList<irtkQtImageObject*> _imageObjectList;
 
     /// Instance of class
     static irtkQtViewer* viewInstance;
@@ -63,26 +63,22 @@ public:
     /// Create image object from the given file name
     void CreateImage(QString imageFileName);
 
-    /// Create a 2D viewer of certain view (axial, sagittal, coronal)
-    /// defined by viewMode
-    irtkQtTwoDimensionalViewer* CreateTwoDimensionalViewer(irtkQtBaseViewer::irtkViewMode viewMode);
-
-    /// Create a 3D viewer
-    irtkQtThreeDimensionalViewer* CreateThreeDimensionalViewer();
-
     /// Get reference to image list
-    QList<irtkQtImageObject*> & GetImageList();
+    QList<irtkQtImageObject*> & GetImageObjectList();
 
     /// Read configuration file
     void ReadConfiguration(const QString fileName);
 
     /// Write configuration file
     void WriteConfiguration(const QString fileName);
+
+    /// Set list with viewer info
+    void SetViewerList(QList<irtkQtConfigurationViewer> const&);
 };
 
 
-inline QList<irtkQtImageObject*> & irtkQtViewer::GetImageList() {
-    return _imageObjects;
+inline QList<irtkQtImageObject*> & irtkQtViewer::GetImageObjectList() {
+    return _imageObjectList;
 }
 
-#endif // IRTKQTVIEWER_H
+#endif // IRTKQTCONFIGURATION_H
