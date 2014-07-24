@@ -2,7 +2,7 @@
 #define QTMAINWINDOW_H
 
 #include <irtkImageListModel.h>
-#include <irtkQtViewer.h>
+#include <irtkQtConfiguration.h>
 
 #include <Qt2dViewerWidget.h>
 #include <Qt3dViewerWidget.h>
@@ -34,6 +34,7 @@ class QtMainWindow : public QMainWindow
 
     /// File actions
     QAction *openTargetAction;
+    QAction *clearImagesAction;
     QAction *saveScreenshotAction;
     QAction *loadConfigurationAction;
     QAction *saveConfigurationAction;
@@ -155,8 +156,11 @@ private:
     /// Add single image to displayed images
     void displaySingleImage(int index);
 
-    /// Delete signle image from displayed images
+    /// Delete single image from displayed images
     void deleteSingleImage(int index);
+
+    /// Delete images with indices provided in the rowList
+    void deleteImages(QList<int> rowList);
 
     /// Set up viewer widgets
     void setUpViewerWidgets();
@@ -164,10 +168,16 @@ private:
     /// Update all drawables
     void updateDrawables();
 
+    /// Create configuration viewer list
+    void createConfigurationViewerList();
+
 private slots:
 
     /// Callback function for openTargetAction
     void openImage();
+
+    /// Callback function for clearImagesAction
+    void clearImages();
 
     /// Callback function for saveScreenshotAction
     void saveScreenshot();
@@ -176,7 +186,7 @@ private slots:
     void viewImages();
 
     /// Callback function for deleteImageAction
-    void deleteImages();
+    void deleteSelectedImages();
 
     /// Callback function for toggleVisibleAction
     void toggleImageVisible();
