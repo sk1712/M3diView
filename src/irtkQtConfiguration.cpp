@@ -16,6 +16,50 @@ void irtkQtConfiguration::DestroyImages() {
         delete _imageObjectList.takeFirst();
 }
 
+void irtkQtConfiguration::ReadImages(QXmlStreamReader &xmlReader) {
+    _imageList.clear();
+
+    while (! (xmlReader.isEndElement() && (xmlReader.name() == "images") ) ) {
+        xmlReader.readNext();
+
+        if (xmlReader.isStartElement()) {
+            if (xmlReader.name() == "image") {
+                irtkQtConfigurationImage image;
+                _imageList.push_back(image);
+                if (xmlReader.attributes().at(0).name() == "visible") {
+                    image.visible = (xmlReader.attributes().at(0).value() == "true");
+                }
+            }
+            else if (xmlReader.name() == "minimumDisplay") {
+                _imageList.back().minDisplay = xmlReader.readElementText().toDouble();
+            }
+            else if (xmlReader.name() == "maximumDisplay") {
+                _imageList.back().maxDisplay = xmlReader.readElementText().toDouble();
+            }
+            else if (xmlReader.name() == "opacity") {
+                _imageList.back().opacity = xmlReader.readElementText().toInt();
+            }
+            else if (xmlReader.name() == "colormap") {
+                _imageList.back().colormap = xmlReader.readElementText();
+            }
+            else if (xmlReader.name() == "interpolation") {
+                _imageList.back().interpolation = xmlReader.readElementText();
+            }
+            else if (xmlReader.name() == "file") {
+                _imageList.back().fileName = xmlReader.readElementText();
+            }
+        }
+    }
+
+    cout << "Read images" << endl;
+}
+
+void irtkQtConfiguration::ReadViewers(QXmlStreamReader &xmlReader) {
+    _viewerList.clear();
+
+    cout << "Read viewers" << endl;
+}
+
 void irtkQtConfiguration::WriteImages(QXmlStreamWriter &xmlWriter) {
     xmlWriter.writeStartElement("images");
 
@@ -25,9 +69,12 @@ void irtkQtConfiguration::WriteImages(QXmlStreamWriter &xmlWriter) {
 
         if ((*it)->IsVisible()) {
             xmlWriter.writeAttribute("visible", "true");
-            xmlWriter.writeTextElement("minimumDisplay", QString::number((*it)->GetMinDisplayValue()));
-            xmlWriter.writeTextElement("maximumDisplay", QString::number((*it)->GetMaxDisplayValue()));
-            xmlWriter.writeTextElement("opacity", QString::number((*it)->GetOpacity()));
+            xmlWriter.writeTextElement("minimumDisplay",
+                                       QString::number((*it)->GetMinDisplayValue()));
+            xmlWriter.writeTextElement("maximumDisplay",
+                                       QString::number((*it)->GetMaxDisplayValue()));
+            xmlWriter.writeTextElement("opacity",
+                                       QString::number((*it)->GetOpacity()));
             xmlWriter.writeTextElement("colormap",
                                     irtkQtLookupTable::GetColorModeList().at((*it)->GetColormap()));
             xmlWriter.writeTextElement("interpolation",
@@ -106,26 +153,61 @@ void irtkQtConfiguration::CreateImage(QString imageFileName) {
     _imageObjectList.append(newImage);
 }
 
-void irtkQtConfiguration::Read(const QString fileName) {
+bool irtkQtConfiguration::Read(const QString fileName) {
+    QFile inFile(fileName);
 
+    if (inFile.open(QIODevice::ReadOnly)) {
+        QXmlStreamReader xml(&inFile);
+
+        if (xml.readNextStartElement()) {
+            if (xml.name() != "m3diview") {
+                return false;
+            }
+        }
+
+        while (xml.readNextStartElement()) {
+            if (xml.name() == "images") {
+                ReadImages(xml);
+            }
+            else if (xml.name() == "viewers") {
+                ReadViewers(xml);
+            }
+        }
+
+        if (xml.hasError()) {
+            return false;
+        }
+    }
+    else {
+        QMessageBox msgBox;
+        msgBox.setText("Could not open file");
+        msgBox.setInformativeText(fileName);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.exec();
+
+        return false;
+    }
+
+    return true;
 }
 
 void irtkQtConfiguration::Write(const QString fileName) {
-    QFile xmlFile(fileName);
-    if (xmlFile.open(QIODevice::WriteOnly)) {
-        QXmlStreamWriter stream(&xmlFile);
-        stream.setAutoFormatting(true);
+    QFile outFile(fileName);
+
+    if (outFile.open(QIODevice::WriteOnly)) {
+        QXmlStreamWriter xml(&outFile);
+        xml.setAutoFormatting(true);
 
         // Start xml document
-        stream.writeStartDocument();
+        xml.writeStartDocument();
 
-        stream.writeStartElement("m3diview");
-        WriteImages(stream);
-        WriteViewers(stream);
-        stream.writeEndElement(); // m3diview
+        xml.writeStartElement("m3diview");
+        WriteImages(xml);
+        WriteViewers(xml);
+        xml.writeEndElement(); // m3diview
 
         // End xml document
-        stream.writeEndDocument();
+        xml.writeEndDocument();
     }
     else {
         QMessageBox msgBox;

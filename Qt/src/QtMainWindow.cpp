@@ -586,6 +586,37 @@ void QtMainWindow::createConfigurationViewerList() {
     irtkQtConfiguration::Instance()->SetViewerList(viewerList);
 }
 
+void QtMainWindow::loadConfigurationImageList() {
+    QList<irtkQtConfigurationImage> imageList;
+    imageList = irtkQtConfiguration::Instance()->GetImageList();
+
+    QStringList fileList;
+    QList<irtkQtConfigurationImage>::iterator it;
+    for (it = imageList.begin(); it != imageList.end(); it++) {
+        fileList.push_back(it->fileName);
+    }
+
+    loadImages(fileList);
+
+    QList<irtkQtImageObject*> & list = irtkQtConfiguration::Instance()->GetImageObjectList();
+    for (int i = 0; i < list.size(); i++) {
+        if (imageList[i].visible) {
+            currentImageIndex = i;
+            toggleImageVisible();
+
+            list[i]->SetMinDisplayValue(imageList[i].minDisplay);
+            list[i]->SetMaxDisplayValue(imageList[i].maxDisplay);
+            list[i]->SetOpacity(imageList[i].opacity);
+            list[i]->SetColormap(imageList[i].colormap);
+            list[i]->SetInterpolation(imageList[i].interpolation);
+        }
+    }
+}
+
+void QtMainWindow::loadConfigurationViewerList() {
+
+}
+
 void QtMainWindow::openImage() {
 #ifdef Q_OS_MAC
     QString selfilter = tr("IMG (*.gipl *.z *.hdr *.gz *.nii)");
@@ -1176,8 +1207,22 @@ void QtMainWindow::displayMixValueChanged(double value) {
 }
 
 void QtMainWindow::loadConfigurationFile() {
-    clearImages();
-    clearViews();
+    // Load configuration file
+    QString selfilter = tr("XML (*.xml)");
+    QString fileName = QFileDialog::getOpenFileName(this,
+                       tr("Open File"), QDir::homePath(),
+                       tr("All files (*.*);;XML (*.xml)" ),
+                       &selfilter);
+
+    if (irtkQtConfiguration::Instance()->Read(fileName)) {
+        clearImages();
+        clearViews();
+        loadConfigurationImageList();
+        loadConfigurationViewerList();
+    }
+    else {
+        createMessageBox("Could not read configuration file", QMessageBox::Critical);
+    }
 }
 
 void QtMainWindow::saveConfigutationFile() {

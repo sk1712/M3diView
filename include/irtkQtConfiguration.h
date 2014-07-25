@@ -57,6 +57,12 @@ class irtkQtConfiguration
     /// Delete all image objects
     void DestroyImages();
 
+    /// Read image list from configuration file
+    void ReadImages(QXmlStreamReader& xmlReader);
+
+    /// Read viewer list from configuration file
+    void ReadViewers(QXmlStreamReader& xmlReader);
+
     /// Write image list and attributes in configuration file
     void WriteImages(QXmlStreamWriter& xmlWriter);
 
@@ -78,13 +84,19 @@ public:
     QList<irtkQtImageObject*> & GetImageObjectList();
 
     /// Read configuration file
-    void Read(const QString fileName);
+    bool Read(const QString fileName);
 
     /// Write configuration file
     void Write(const QString fileName);
 
     /// Set list with viewer info
     void SetViewerList(QList<irtkQtConfigurationViewer> const &viewerList);
+
+    /// Get image list
+    QList<irtkQtConfigurationImage> GetImageList() const;
+
+    /// Get viewer list
+    QList<irtkQtConfigurationViewer> GetViewerList() const;
 };
 
 
@@ -94,6 +106,14 @@ inline QList<irtkQtImageObject*> & irtkQtConfiguration::GetImageObjectList() {
 
 inline void irtkQtConfiguration::SetViewerList(QList<irtkQtConfigurationViewer> const &viewerList) {
     _viewerList = viewerList;
+}
+
+inline QList<irtkQtConfigurationImage> irtkQtConfiguration::GetImageList() const {
+    return _imageList;
+}
+
+inline QList<irtkQtConfigurationViewer> irtkQtConfiguration::GetViewerList() const {
+    return _viewerList;
 }
 
 #endif // IRTKQTCONFIGURATION_H

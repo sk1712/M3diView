@@ -171,6 +171,12 @@ private:
     /// Create configuration viewer list
     void createConfigurationViewerList();
 
+    /// Load configuration image list
+    void loadConfigurationImageList();
+
+    /// Load configuration viewer list
+    void loadConfigurationViewerList();
+
 private slots:
 
     /// Callback function for openTargetAction
