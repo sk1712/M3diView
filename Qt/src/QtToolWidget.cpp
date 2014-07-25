@@ -23,7 +23,7 @@ void QtToolWidget::setMaximumImageValue(double maxImage) {
 
     minImageSlider->setMaximum(maxImage * 10);
     maxImageSlider->setMaximum(maxImage * 10);
-    maxImageLabel->setText(QString::number(maxImage));
+    maxImageLabel->setText(QString::number(maxImage, 'f', 1));
 
     minImageSlider->blockSignals(false);
     maxImageSlider->blockSignals(false);
@@ -35,7 +35,7 @@ void QtToolWidget::setMinimumImageValue(double minImage) {
 
     minImageSlider->setMinimum(minImage * 10);
     maxImageSlider->setMinimum(minImage * 10);
-    minImageLabel->setText(QString::number(minImage));
+    minImageLabel->setText(QString::number(minImage, 'g', 1));
 
     minImageSlider->blockSignals(false);
     maxImageSlider->blockSignals(false);

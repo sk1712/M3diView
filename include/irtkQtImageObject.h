@@ -109,17 +109,11 @@ public:
     /// Set colormap for the corresponding image
     void SetColormap(irtkQtLookupTable::irtkColorMode mode);
 
-    /// Overloaded function
-    void SetColormap(QString modeString);
-
     /// Get colormap for the corresponding image
     int GetColormap() const;
 
     /// Set interpolation function for the corresponding image
     void SetInterpolation(irtkQtImageObject::irtkQtInterpolationMode mode);
-
-    /// Overloaded function
-    void SetInterpolation(QString interpolationString);
 
     /// Get interpolation function for the corresponding image
     int GetInterpolation() const;

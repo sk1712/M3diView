@@ -16,8 +16,16 @@ bool Qt2dViewerWidget::labelsVisible() {
     return showLabelsAction->isChecked();
 }
 
+void Qt2dViewerWidget::setLabelsVisible(const bool visible) {
+    showLabelsAction->setChecked(visible);
+}
+
 bool Qt2dViewerWidget::cursorVisible() {
     return showCursorAction->isChecked();
+}
+
+void Qt2dViewerWidget::setCursorVisible(const bool visible) {
+    showCursorAction->setChecked(visible);
 }
 
 void Qt2dViewerWidget::updateLabel() {

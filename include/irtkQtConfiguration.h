@@ -20,7 +20,7 @@ struct irtkQtConfigurationImage {
 struct irtkQtConfigurationViewer {
     QString type;
     bool cursorVisible;
-    bool labelVisible;
+    bool labelsVisible;
     bool fullScreen;
     bool linked;
     double origin[3];

@@ -74,25 +74,3 @@ void irtkQtImageObject::DeleteImage() {
     _image = NULL;
     _lookupTable = NULL;
 }
-
-void irtkQtImageObject::SetColormap(QString modeString) {
-    QStringList modeList = irtkQtLookupTable::GetColorModeList();
-
-    for (int i = 0; i < modeList.size(); i++) {
-        if (modeList[i] == modeString) {
-            _lookupTable->SetColorMode(static_cast<irtkQtLookupTable::irtkColorMode>(i));
-            _lookupTable->Initialize();
-            break;
-        }
-    }
-}
-
-void irtkQtImageObject::SetInterpolation(QString interpolationString) {
-    QStringList interpolationList = _interpolationStringList;
-
-    for (int i = 0; i < interpolationList.size(); i++) {
-        if (interpolationList[i] == interpolationString) {
-            _interpolation = static_cast<irtkQtInterpolationMode>(i);
-        }
-    }
-}

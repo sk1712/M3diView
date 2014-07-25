@@ -26,9 +26,8 @@ void irtkQtConfiguration::ReadImages(QXmlStreamReader &xmlReader) {
             if (xmlReader.name() == "image") {
                 irtkQtConfigurationImage image;
                 _imageList.push_back(image);
-                if (xmlReader.attributes().at(0).name() == "visible") {
-                    image.visible = (xmlReader.attributes().at(0).value() == "true");
-                }
+                QXmlStreamAttributes attr = xmlReader.attributes();
+                _imageList.back().visible = (attr.value("visible").toString() == "true");
             }
             else if (xmlReader.name() == "minimumDisplay") {
                 _imageList.back().minDisplay = xmlReader.readElementText().toDouble();
@@ -50,14 +49,48 @@ void irtkQtConfiguration::ReadImages(QXmlStreamReader &xmlReader) {
             }
         }
     }
-
-    cout << "Read images" << endl;
 }
 
 void irtkQtConfiguration::ReadViewers(QXmlStreamReader &xmlReader) {
     _viewerList.clear();
 
-    cout << "Read viewers" << endl;
+    while (! (xmlReader.isEndElement() && (xmlReader.name() == "viewers") ) ) {
+        xmlReader.readNext();
+
+        if (xmlReader.isStartElement()) {
+            if (xmlReader.name() == "viewer") {
+                irtkQtConfigurationViewer viewer;
+                _viewerList.push_back(viewer);
+
+                QXmlStreamAttributes attr = xmlReader.attributes();
+                _viewerList.back().fullScreen = (attr.value("fullScreen").toString() == "true");
+                _viewerList.back().linked = (attr.value("linked").toString() == "true");
+                _viewerList.back().labelsVisible = (attr.value("labelsVisible").toString() == "true");
+                _viewerList.back().cursorVisible = (attr.value("cursorVisible").toString() == "true");
+            }
+            else if (xmlReader.name() == "type") {
+                _viewerList.back().type = xmlReader.readElementText();
+            }
+            else if (xmlReader.name() == "origin_x") {
+                _viewerList.back().origin[0] = xmlReader.readElementText().toDouble();
+            }
+            else if (xmlReader.name() == "origin_y") {
+                _viewerList.back().origin[1] = xmlReader.readElementText().toDouble();
+            }
+            else if (xmlReader.name() == "origin_z") {
+                _viewerList.back().origin[2] = xmlReader.readElementText().toDouble();
+            }
+            else if (xmlReader.name() == "resolution_x") {
+                _viewerList.back().resolution[0] = xmlReader.readElementText().toDouble();
+            }
+            else if (xmlReader.name() == "resolution_y") {
+                _viewerList.back().resolution[1] = xmlReader.readElementText().toDouble();
+            }
+            else if (xmlReader.name() == "resolution_z") {
+                _viewerList.back().resolution[2] = xmlReader.readElementText().toDouble();
+            }
+        }
+    }
 }
 
 void irtkQtConfiguration::WriteImages(QXmlStreamWriter &xmlWriter) {
@@ -101,7 +134,7 @@ void irtkQtConfiguration::WriteViewers(QXmlStreamWriter &xmlWriter) {
         xmlWriter.writeAttribute("fullScreen",
                                  (v_it->fullScreen) ? "true" : "false");
         xmlWriter.writeAttribute("labelsVisible",
-                                 (v_it->labelVisible) ? "true" : "false");
+                                 (v_it->labelsVisible) ? "true" : "false");
         xmlWriter.writeAttribute("cursorVisible",
                                  (v_it->cursorVisible) ? "true" : "false");
         xmlWriter.writeAttribute("linked",
@@ -109,17 +142,13 @@ void irtkQtConfiguration::WriteViewers(QXmlStreamWriter &xmlWriter) {
 
         xmlWriter.writeTextElement("type", v_it->type);
 
-        xmlWriter.writeStartElement("origin");
-        xmlWriter.writeTextElement("x", QString::number(v_it->origin[0]));
-        xmlWriter.writeTextElement("y", QString::number(v_it->origin[1]));
-        xmlWriter.writeTextElement("z", QString::number(v_it->origin[2]));
-        xmlWriter.writeEndElement();
+        xmlWriter.writeTextElement("origin_x", QString::number(v_it->origin[0]));
+        xmlWriter.writeTextElement("origin_y", QString::number(v_it->origin[1]));
+        xmlWriter.writeTextElement("origin_z", QString::number(v_it->origin[2]));
 
-        xmlWriter.writeStartElement("resolution");
-        xmlWriter.writeTextElement("x", QString::number(v_it->resolution[0]));
-        xmlWriter.writeTextElement("y", QString::number(v_it->resolution[1]));
-        xmlWriter.writeTextElement("z", QString::number(v_it->resolution[2]));
-        xmlWriter.writeEndElement();
+        xmlWriter.writeTextElement("resolution_x", QString::number(v_it->resolution[0]));
+        xmlWriter.writeTextElement("resolution_y", QString::number(v_it->resolution[1]));
+        xmlWriter.writeTextElement("resolution_z", QString::number(v_it->resolution[2]));
 
         xmlWriter.writeEndElement();
     }

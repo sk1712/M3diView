@@ -11,6 +11,12 @@
 #include <QToolBar>
 #include <QVBoxLayout>
 
+/// free function used to calculate the output images
+/// in parallel for the different viewers
+void CalculateOutputImage(irtkQtBaseViewer* viewer) {
+    viewer->CalculateOutputImages();
+}
+
 QtMainWindow::QtMainWindow() {
     mainViewWidget = new QWidget();
     QGridLayout *layout = new QGridLayout;
@@ -177,10 +183,10 @@ void QtMainWindow::createMenuActions() {
     saveScreenshotAction->setStatusTip(tr("Save screenshot"));
     saveScreenshotAction->setIcon(QIcon(":/icons/screenshot.png"));
 
-    loadConfigurationAction = new QAction(tr("Load Configuration File"), this);
+    loadConfigurationAction = new QAction(tr("Load Configuration"), this);
     loadConfigurationAction->setIcon(QIcon(":/icons/open_config.png"));
 
-    saveConfigurationAction = new QAction(tr("Save Configuration File"), this);
+    saveConfigurationAction = new QAction(tr("Save Configuration"), this);
     saveConfigurationAction->setIcon(QIcon(":/icons/save_config.png"));
 
     viewAxialAction = new QAction(tr("Axial"), this);
@@ -570,8 +576,11 @@ void QtMainWindow::createConfigurationViewerList() {
 
         if (is2D) {
             Qt2dViewerWidget *twoDWidget = dynamic_cast<Qt2dViewerWidget*>(viewerWidgets[i]);
-            viewer.labelVisible = twoDWidget->labelsVisible();
+            viewer.labelsVisible = twoDWidget->labelsVisible();
             viewer.cursorVisible = twoDWidget->cursorVisible();
+        }
+        else {
+            viewer.labelsVisible = viewer.cursorVisible = false;
         }
 
         viewer.fullScreen = singleViewerInScreen && viewerWidgets[i]->isVisible();
@@ -596,7 +605,11 @@ void QtMainWindow::loadConfigurationImageList() {
         fileList.push_back(it->fileName);
     }
 
+    // Load list of images in imageListView
     loadImages(fileList);
+
+    QStringList modeList = irtkQtLookupTable::GetColorModeList();
+    QStringList interpolationList = irtkQtImageObject::GetInterpolationModeList();
 
     QList<irtkQtImageObject*> & list = irtkQtConfiguration::Instance()->GetImageObjectList();
     for (int i = 0; i < list.size(); i++) {
@@ -604,17 +617,65 @@ void QtMainWindow::loadConfigurationImageList() {
             currentImageIndex = i;
             toggleImageVisible();
 
-            list[i]->SetMinDisplayValue(imageList[i].minDisplay);
-            list[i]->SetMaxDisplayValue(imageList[i].maxDisplay);
-            list[i]->SetOpacity(imageList[i].opacity);
-            list[i]->SetColormap(imageList[i].colormap);
-            list[i]->SetInterpolation(imageList[i].interpolation);
+            int index = -1;
+            for (int j = 0; j < modeList.size(); j++) {
+                if (modeList[j] == imageList[i].colormap) {
+                    index = j;
+                    break;
+                }
+            }
+            visualToolWidget->setColormap(index);
+
+            index = -1;
+            for (int j = 0; j < interpolationList.size(); j++) {
+                if (interpolationList[j] == imageList[i].interpolation) {
+                    index = j;
+                    break;
+                }
+            }
+            visualToolWidget->setInterpolation(index);
+
+            visualToolWidget->setOpacity(imageList[i].opacity);
+            visualToolWidget->setDisplayMin(imageList[i].minDisplay);
+            visualToolWidget->setDisplayMax(imageList[i].maxDisplay);
         }
     }
 }
 
 void QtMainWindow::loadConfigurationViewerList() {
+    QList<irtkQtConfigurationViewer> viewerList;
+    viewerList = irtkQtConfiguration::Instance()->GetViewerList();
 
+    QList<irtkQtConfigurationViewer>::iterator it;
+    for (it = viewerList.begin(); it != viewerList.end(); it++) {
+        if (it->type == "3D") {
+            create3dView();
+        }
+        else {
+            if (it->type == "Axial") {
+                createAxialView();
+            }
+            else if (it->type == "Sagittal") {
+                createSagittalView();
+            }
+            else if (it->type == "Coronal") {
+                createCoronalView();
+            }
+
+            Qt2dViewerWidget *viewerWidget = dynamic_cast<Qt2dViewerWidget*>(viewerWidgets.back());
+            viewerWidget->setCursorVisible(it->cursorVisible);
+            viewerWidget->setLabelsVisible(it->labelsVisible);
+        }
+
+        viewerWidgets.back()->setLinked(it->linked);
+        if (it->fullScreen) viewerWidgets.back()->expandWindow();
+
+        viewers.back()->SetOrigin(it->origin[0], it->origin[1], it->origin[2]);
+        viewers.back()->SetResolution(it->resolution[0], it->resolution[1],
+                it->resolution[2]);
+    }
+
+    setUpViewerWidgets();
 }
 
 void QtMainWindow::openImage() {
@@ -801,12 +862,6 @@ void QtMainWindow::toggleImageVisible() {
         emit imageListView->clicked(idx);
     }
 
-}
-
-/// free function used to calculate the output images
-/// in parallel for the different viewers
-void CalculateOutputImage(irtkQtBaseViewer* viewer) {
-    viewer->CalculateOutputImages();
 }
 
 void QtMainWindow::zoomIn() {

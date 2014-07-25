@@ -19,8 +19,27 @@ QtViewerWidget::QtViewerWidget(QWidget *parent) : QWidget(parent) {
     expanded = false;
 }
 
+void QtViewerWidget::setLinked(const bool link) {
+    linkToolButton->setChecked(link);
+}
+
 void QtViewerWidget::setInvertedAxes(bool *) {
 
+}
+
+void QtViewerWidget::expandWindow() {
+    expanded = !expanded;
+
+    if (expanded) {
+        expandToolButton->setIcon(QIcon(":/icons/collapse.png"));
+        expandToolButton->setToolTip("Collapse window");
+    }
+    else {
+        expandToolButton->setIcon(QIcon(":/icons/expand.png"));
+        expandToolButton->setToolTip("Expand window");
+    }
+
+    emit windowExpanded();
 }
 
 void QtViewerWidget::paintEvent(QPaintEvent *) {
@@ -70,21 +89,6 @@ void QtViewerWidget::connectSignals() {
     connect(deleteToolButton, SIGNAL(clicked()), this, SLOT(deleteWindow()));
 
     connect(saveScreenshotAction, SIGNAL(triggered()), this, SLOT(saveScreenshot()));
-}
-
-void QtViewerWidget::expandWindow() {
-    expanded = !expanded;
-
-    if (expanded) {
-        expandToolButton->setIcon(QIcon(":/icons/collapse.png"));
-        expandToolButton->setToolTip("Collapse window");
-    }
-    else {
-        expandToolButton->setIcon(QIcon(":/icons/expand.png"));
-        expandToolButton->setToolTip("Expand window");
-    }
-
-    emit windowExpanded();
 }
 
 void QtViewerWidget::deleteWindow() {

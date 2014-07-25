@@ -253,7 +253,7 @@ inline void irtkQtBaseViewer::GetOrigin(double &x, double &y, double &z) {
     z = _originZ;
 }
 
-inline void irtkQtBaseViewer::SetResolution(double dx, double dy, double dz) {
+inline void irtkQtBaseViewer::SetResolution(const double dx, const double dy, const double dz) {
     _dx = dx;
     _dy = dy;
     _dz = dz;

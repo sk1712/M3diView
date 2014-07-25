@@ -58,8 +58,14 @@ public:
     /// Get whether labels are visible
     bool labelsVisible();
 
+    /// Set whether labels are visible
+    void setLabelsVisible(const bool visible);
+
     /// Get whether cursor is visible
     bool cursorVisible();
+
+    /// Set whether cursor is visible
+    void setCursorVisible(const bool visible);
 
 protected:
 
