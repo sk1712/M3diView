@@ -1,15 +1,21 @@
 #include <QtMainWindow.h>
 
-#include <QDockWidget>
-#include <QMenuBar>
-#include <QToolBar>
-#include <QFileDialog>
 #include <QDir>
-#include <QScrollArea>
-
+#include <QDockWidget>
+#include <QFileDialog>
 #include <QGridLayout>
+#include <QListView>
+#include <QMenuBar>
+#include <QScrollArea>
+#include <QTabWidget>
+#include <QToolBar>
 #include <QVBoxLayout>
 
+/// free function used to calculate the output images
+/// in parallel for the different viewers
+void CalculateOutputImage(irtkQtBaseViewer* viewer) {
+    viewer->CalculateOutputImages();
+}
 
 QtMainWindow::QtMainWindow() {
     mainViewWidget = new QWidget();
@@ -40,11 +46,11 @@ QtMainWindow::QtMainWindow() {
 
 QtMainWindow::~QtMainWindow() {
     clearLists();
-    irtkQtViewer::Destroy();
+    irtkQtConfiguration::Destroy();
 }
 
 void QtMainWindow::loadImages(const QStringList &fileList) {
-    irtkQtViewer* instance = irtkQtViewer::Instance();
+    irtkQtConfiguration* instance = irtkQtConfiguration::Instance();
 
     // Create an irtkImageObject for each new image
     QStringList::const_iterator it;
@@ -57,13 +63,13 @@ void QtMainWindow::loadImages(const QStringList &fileList) {
 
     // Update the image model
     delete imageModel;
-    imageModel = new irtkImageListModel(instance->GetImageList());
+    imageModel = new irtkImageListModel(instance->GetImageObjectList());
     imageListView->setModel(imageModel);
 }
 
 void QtMainWindow::createDockWindows() {
     // Create image list dock widget
-    QDockWidget *dock = new QDockWidget(tr("Image list"), this);
+    QDockWidget *dock = new QDockWidget(tr("Image List"), this);
     dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     imageListView = new QListView(dock);
     imageListView->setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -91,8 +97,8 @@ void QtMainWindow::createDockWindows() {
 
     irtkQtLookupTable::SetColorModeList();
     visualToolWidget->fillColorCombo(irtkQtLookupTable::GetColorModeList());
-    irtkQtBaseViewer::SetInterpolationModeList();
-    visualToolWidget->fillInterpolationCombo(irtkQtBaseViewer::GetInterpolationModeList());
+    irtkQtImageObject::SetInterpolationModeList();
+    visualToolWidget->fillInterpolationCombo(irtkQtImageObject::GetInterpolationModeList());
 
     QScrollArea *scrollArea = new QScrollArea;
     scrollArea->setWidget(visualToolWidget);
@@ -118,10 +124,15 @@ void QtMainWindow::createToolBar() {
 void QtMainWindow::createMenu() {
     fileMenu = menuBar()->addMenu(tr("&File"));
     fileMenu->addAction(openTargetAction);
+    fileMenu->addAction(clearImagesAction);
+    fileMenu->addSeparator();
     fileMenu->addAction(saveScreenshotAction);
+    fileMenu->addSeparator();
+    fileMenu->addAction(loadConfigurationAction);
+    fileMenu->addAction(saveConfigurationAction);
 
     viewMenu = menuBar()->addMenu(tr("&View"));
-    QMenu *addMenu = viewMenu->addMenu(tr("Add view"));
+    QMenu *addMenu = viewMenu->addMenu(tr("Add View"));
     addMenu->setIcon(QIcon(":/icons/add_view.png"));
     addMenu->addAction(viewOrthogonalAction);
     addMenu->addAction(viewAxialAction);
@@ -159,15 +170,24 @@ void QtMainWindow::createToolBarActions() {
 }
 
 void QtMainWindow::createMenuActions() {
-    openTargetAction = new QAction(tr("Open image file(s)..."), this);
+    openTargetAction = new QAction(tr("Add Image File(s)..."), this);
     openTargetAction->setStatusTip(tr("Load new image file(s)"));
     openTargetAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_O));
     openTargetAction->setIcon(QIcon(":/icons/add_file.png"));
     openTargetAction->setShortcutContext(Qt::ApplicationShortcut);
 
-    saveScreenshotAction = new QAction(tr("Save screenshot"), this);
-    saveScreenshotAction->setStatusTip((tr("Save screenshot")));
+    clearImagesAction = new QAction(tr("Clear Images"), this);
+    clearImagesAction->setStatusTip(tr("Clear all images"));
+
+    saveScreenshotAction = new QAction(tr("Save Screenshot"), this);
+    saveScreenshotAction->setStatusTip(tr("Save screenshot"));
     saveScreenshotAction->setIcon(QIcon(":/icons/screenshot.png"));
+
+    loadConfigurationAction = new QAction(tr("Load Configuration"), this);
+    loadConfigurationAction->setIcon(QIcon(":/icons/open_config.png"));
+
+    saveConfigurationAction = new QAction(tr("Save Configuration"), this);
+    saveConfigurationAction->setIcon(QIcon(":/icons/save_config.png"));
 
     viewAxialAction = new QAction(tr("Axial"), this);
     viewAxialAction->setStatusTip(tr("Add axial view"));
@@ -184,7 +204,7 @@ void QtMainWindow::createMenuActions() {
     view3DAction = new QAction(tr("3D"), this);
     view3DAction->setStatusTip(tr("Add 3D view"));
 
-    clearViewsAction = new QAction(tr("Clear all"), this);
+    clearViewsAction = new QAction(tr("Clear All"), this);
     clearViewsAction->setStatusTip(tr("Delete all views"));
     clearViewsAction->setIcon(QIcon(":/icons/delete_view.png"));
 }
@@ -208,7 +228,7 @@ void QtMainWindow::connectWindowSignals() {
 
     // Image menu signals
     connect(toggleVisibleAction, SIGNAL(triggered()), this, SLOT(toggleImageVisible()));
-    connect(deleteImageAction, SIGNAL(triggered()), this, SLOT(deleteImages()));
+    connect(deleteImageAction, SIGNAL(triggered()), this, SLOT(deleteSelectedImages()));
 
     // Toolbar signals
     connect(openImageToolbarAction, SIGNAL(triggered()), this, SLOT(openImage()));
@@ -220,7 +240,10 @@ void QtMainWindow::connectWindowSignals() {
 
     // Menu signals
     connect(openTargetAction, SIGNAL(triggered()), this, SLOT(openImage()));
+    connect(clearImagesAction, SIGNAL(triggered()), this, SLOT(clearImages()));
     connect(saveScreenshotAction, SIGNAL(triggered()), this, SLOT(saveScreenshot()));
+    connect(loadConfigurationAction, SIGNAL(triggered()), this, SLOT(loadConfigurationFile()));
+    connect(saveConfigurationAction, SIGNAL(triggered()), this, SLOT(saveConfigutationFile()));
     connect(viewAxialAction, SIGNAL(triggered()), this, SLOT(createAxialView()));
     connect(viewCoronalAction, SIGNAL(triggered()), this, SLOT(createCoronalView()));
     connect(viewSagittalAction, SIGNAL(triggered()), this, SLOT(createSagittalView()));
@@ -299,7 +322,7 @@ Qt2dViewerWidget* QtMainWindow::createTwoDimensionalView(irtkQtBaseViewer::irtkV
     irtkQtTwoDimensionalViewer* viewer;
     Qt2dViewerWidget *qtViewer;
 
-    viewer = irtkQtViewer::Instance()->CreateTwoDimensionalViewer(viewMode);
+    viewer = new irtkQtTwoDimensionalViewer(viewMode);
     viewers.push_back(viewer);
     qtViewer = new Qt2dViewerWidget();
     viewerWidgets.push_back(qtViewer);
@@ -314,9 +337,9 @@ Qt2dViewerWidget* QtMainWindow::createTwoDimensionalView(irtkQtBaseViewer::irtkV
     connect(qtViewer, SIGNAL(windowExpanded()), this, SLOT(showOnlyThisWidget()));
     connect(qtViewer, SIGNAL(windowDeleted()), this, SLOT(deleteThisWidget()));
 
-    viewer->SetBlendMixValue(visualToolWidget->getDisplayMix());
+    viewer->SetMixValue(visualToolWidget->getDisplayMix());
     viewer->SetBlendMode(visualToolWidget->getBlendingOption());
-    viewImage();
+    viewImages();
 
     return qtViewer;
 }
@@ -325,7 +348,7 @@ Qt3dViewerWidget* QtMainWindow::createThreeDimensionalView() {
     irtkQtThreeDimensionalViewer* viewer;
     Qt3dViewerWidget *qtViewer;
 
-    viewer = irtkQtViewer::Instance()->CreateThreeDimensionalViewer();
+    viewer = new irtkQtThreeDimensionalViewer();
     viewers.push_back(viewer);
     qtViewer = new Qt3dViewerWidget();
     viewerWidgets.push_back(qtViewer);
@@ -334,9 +357,9 @@ Qt3dViewerWidget* QtMainWindow::createThreeDimensionalView() {
     connect(qtViewer, SIGNAL(windowExpanded()), this, SLOT(showOnlyThisWidget()));
     connect(qtViewer, SIGNAL(windowDeleted()), this, SLOT(deleteThisWidget()));
 
-    viewer->SetBlendMixValue(visualToolWidget->getDisplayMix());
+    viewer->SetMixValue(visualToolWidget->getDisplayMix());
     viewer->SetBlendMode(visualToolWidget->getBlendingOption());
-    viewImage();
+    viewImages();
 
     return qtViewer;
 }
@@ -351,7 +374,7 @@ void QtMainWindow::clearLists() {
 }
 
 bool QtMainWindow::imageInList(const QString fileName) const {
-    QList<irtkQtImageObject*> list = irtkQtViewer::Instance()->GetImageList();
+    QList<irtkQtImageObject*> list = irtkQtConfiguration::Instance()->GetImageObjectList();
     QList<irtkQtImageObject*>::const_iterator it;
     for (it = list.constBegin(); it != list.constEnd(); it++) {
         if ((*it)->GetPath() == fileName) {
@@ -400,7 +423,7 @@ bool QtMainWindow::setDisplayedImages() {
 
     bool atLeastOneImageVisible = false;
 
-    QList<irtkQtImageObject*> imageList = irtkQtViewer::Instance()->GetImageList();
+    QList<irtkQtImageObject*> imageList = irtkQtConfiguration::Instance()->GetImageObjectList();
     QList<irtkQtImageObject*>::const_iterator it;
 
     viewer->SetDimensions(glWidget->customWidth(), glWidget->customHeight());
@@ -419,7 +442,7 @@ void QtMainWindow::displaySingleImage(int index) {
     irtkQtBaseViewer *viewer;
     QtViewerWidget *viewerWidget;
 
-    QList<irtkQtImageObject*> & imageList = irtkQtViewer::Instance()->GetImageList();
+    QList<irtkQtImageObject*> & imageList = irtkQtConfiguration::Instance()->GetImageObjectList();
 
     // Disconnect the viewers' signals
     disconnectViewerSignals();
@@ -458,6 +481,46 @@ void QtMainWindow::deleteSingleImage(int index) {
     visualToolWidget->setEnabled(false);
 }
 
+void QtMainWindow::deleteImages(QList<int> rowList) {
+     QList<irtkQtImageObject*> & list = irtkQtConfiguration::Instance()->GetImageObjectList();
+
+     // Start deleting images from bottom to top
+     for (int i = 0; i < rowList.size(); i++) {
+         currentImageIndex = rowList[i];
+         bool visible = list[currentImageIndex]->IsVisible();
+
+         if (visible) {
+             numDisplayedImages--;
+
+             if (numDisplayedImages == 0) {
+                 disableViewerWidgets();
+             }
+
+             deleteSingleImage(currentImageIndex);
+         }
+
+         // Delete item from the list
+         delete list.takeAt(currentImageIndex);
+
+         // Update the map keys of the images currently displayed
+         QList<irtkQtBaseViewer*>::iterator it;
+         for (it = viewers.begin(); it != viewers.end(); it++) {
+             (*it)->UpdateKeysAfterIndexDeleted(currentImageIndex);
+         }
+     }
+
+     setUpViewerWidgets();
+     visualToolWidget->onlyTwoImagesVisible(numDisplayedImages == 2);
+     if (numDisplayedImages == 2) {
+         updateDrawables();
+     }
+
+     // Update the model
+     delete imageModel;
+     imageModel = new irtkImageListModel(list);
+     imageListView->setModel(imageModel);
+}
+
 void QtMainWindow::setUpViewerWidgets() {
     // Update the viewers
     QtViewerWidget *viewerWidget;
@@ -486,6 +549,135 @@ void QtMainWindow::updateDrawables() {
     }
 }
 
+void QtMainWindow::createConfigurationViewerList() {
+    QList<irtkQtConfigurationViewer> viewerList;
+    bool is2D;
+
+    for (int i = 0; i < viewerWidgets.size(); i++) {
+        irtkQtConfigurationViewer viewer;
+        is2D = true;
+
+        irtkQtBaseViewer::irtkViewMode viewMode = viewers[i]->GetViewMode();
+        switch (viewMode) {
+        case irtkQtBaseViewer::VIEW_AXIAL:
+            viewer.type = "Axial";
+            break;
+        case irtkQtBaseViewer::VIEW_SAGITTAL:
+            viewer.type = "Sagittal";
+            break;
+        case irtkQtBaseViewer::VIEW_CORONAL:
+            viewer.type = "Coronal";
+            break;
+        case irtkQtBaseViewer::VIEW_3D:
+            viewer.type = "3D";
+            is2D = false;
+            break;
+        };
+
+        if (is2D) {
+            Qt2dViewerWidget *twoDWidget = dynamic_cast<Qt2dViewerWidget*>(viewerWidgets[i]);
+            viewer.labelsVisible = twoDWidget->labelsVisible();
+            viewer.cursorVisible = twoDWidget->cursorVisible();
+        }
+        else {
+            viewer.labelsVisible = viewer.cursorVisible = false;
+        }
+
+        viewer.fullScreen = singleViewerInScreen && viewerWidgets[i]->isVisible();
+        viewer.linked = viewerWidgets[i]->isLinked();
+
+        viewers[i]->GetOrigin(viewer.origin[0], viewer.origin[1], viewer.origin[2]);
+        viewers[i]->GetResolution(viewer.resolution[0], viewer.resolution[1], viewer.resolution[2]);
+
+        viewerList.push_back(viewer);
+    }
+
+    irtkQtConfiguration::Instance()->SetViewerList(viewerList);
+}
+
+void QtMainWindow::loadConfigurationImageList() {
+    QList<irtkQtConfigurationImage> imageList;
+    imageList = irtkQtConfiguration::Instance()->GetImageList();
+
+    QStringList fileList;
+    QList<irtkQtConfigurationImage>::iterator it;
+    for (it = imageList.begin(); it != imageList.end(); it++) {
+        fileList.push_back(it->fileName);
+    }
+
+    // Load list of images in imageListView
+    loadImages(fileList);
+
+    QStringList modeList = irtkQtLookupTable::GetColorModeList();
+    QStringList interpolationList = irtkQtImageObject::GetInterpolationModeList();
+
+    QList<irtkQtImageObject*> & list = irtkQtConfiguration::Instance()->GetImageObjectList();
+    for (int i = 0; i < list.size(); i++) {
+        if (imageList[i].visible) {
+            currentImageIndex = i;
+            toggleImageVisible();
+
+            int index = -1;
+            for (int j = 0; j < modeList.size(); j++) {
+                if (modeList[j] == imageList[i].colormap) {
+                    index = j;
+                    break;
+                }
+            }
+            visualToolWidget->setColormap(index);
+
+            index = -1;
+            for (int j = 0; j < interpolationList.size(); j++) {
+                if (interpolationList[j] == imageList[i].interpolation) {
+                    index = j;
+                    break;
+                }
+            }
+            visualToolWidget->setInterpolation(index);
+
+            visualToolWidget->setOpacity(imageList[i].opacity);
+            visualToolWidget->setDisplayMin(imageList[i].minDisplay);
+            visualToolWidget->setDisplayMax(imageList[i].maxDisplay);
+        }
+    }
+}
+
+void QtMainWindow::loadConfigurationViewerList() {
+    QList<irtkQtConfigurationViewer> viewerList;
+    viewerList = irtkQtConfiguration::Instance()->GetViewerList();
+
+    QList<irtkQtConfigurationViewer>::iterator it;
+    for (it = viewerList.begin(); it != viewerList.end(); it++) {
+        if (it->type == "3D") {
+            create3dView();
+        }
+        else {
+            if (it->type == "Axial") {
+                createAxialView();
+            }
+            else if (it->type == "Sagittal") {
+                createSagittalView();
+            }
+            else if (it->type == "Coronal") {
+                createCoronalView();
+            }
+
+            Qt2dViewerWidget *viewerWidget = dynamic_cast<Qt2dViewerWidget*>(viewerWidgets.back());
+            viewerWidget->setCursorVisible(it->cursorVisible);
+            viewerWidget->setLabelsVisible(it->labelsVisible);
+        }
+
+        viewerWidgets.back()->setLinked(it->linked);
+        if (it->fullScreen) viewerWidgets.back()->expandWindow();
+
+        viewers.back()->SetOrigin(it->origin[0], it->origin[1], it->origin[2]);
+        viewers.back()->SetResolution(it->resolution[0], it->resolution[1],
+                it->resolution[2]);
+    }
+
+    setUpViewerWidgets();
+}
+
 void QtMainWindow::openImage() {
 #ifdef Q_OS_MAC
     QString selfilter = tr("IMG (*.gipl *.z *.hdr *.gz *.nii)");
@@ -502,12 +694,24 @@ void QtMainWindow::openImage() {
     loadImages(fileNames);
 }
 
+void QtMainWindow::clearImages() {
+    if (imageModel) {
+        QList<int> rowList;
+
+        for (int i = 0; i < imageModel->rowCount(); i++) {
+            rowList.push_front(i);
+        }
+
+        deleteImages(rowList);
+    }
+}
+
 void QtMainWindow::saveScreenshot() {
     QList<QImage> images;
     QImage currentImage;
 
     int maxWidth = 0, maxHeight = 0;
-
+    // Get the maximum viewer width and height and store viewer images in list
     QList<QtViewerWidget*>::iterator it;
     for (it = viewerWidgets.begin(); it != viewerWidgets.end(); it++) {
         currentImage = (*it)->getGlWidget()->getDisplayedImage();
@@ -518,17 +722,19 @@ void QtMainWindow::saveScreenshot() {
 
     int width = maxWidth;
     int height = maxHeight;
-
+    // Specify the collage width and height
     if (viewerWidgets.size() > 1) {
         width = maxWidth * 2;
         height = maxHeight * ((int) (viewerWidgets.size()-1) / 2 + 1);
     }
 
+    // Initialize the collage image and fill it with black
     QImage collage(width, height, QImage::Format_RGB32);
     collage.fill(Qt::black);
     QPainter paint;
     paint.begin(&collage);
 
+    // Draw each individual image in the collage image
     for (int i = 0; i < images.size(); i++) {
         int x = (i % 2) * maxWidth;
         int y = (i / 2) * maxHeight;
@@ -540,6 +746,7 @@ void QtMainWindow::saveScreenshot() {
 
     paint.end();
 
+    // Save image in the specified file
     QString fileName = QFileDialog::getSaveFileName(
                 this,tr("Save screenshot as"),
                 "", tr("Images (*.png *.xpm *.jpg)"));
@@ -551,7 +758,7 @@ void QtMainWindow::saveScreenshot() {
     }
 }
 
-void QtMainWindow::viewImage() {
+void QtMainWindow::viewImages() {
     QtViewerWidget *viewerWidget = viewerWidgets[viewerWidgets.size()-1];
     irtkQtBaseViewer *viewer = viewers[viewers.size()-1];
 
@@ -567,7 +774,7 @@ void QtMainWindow::viewImage() {
     viewer->InitializeTransformation();
     viewer->CalculateOutputImages();
 
-    // Set up the viewer widgets
+    // Set up the viewer widget
     viewerWidget->setEnabled(true);
     viewerWidget->setInvertedAxes(viewer->GetAxisInverted());
     viewerWidget->setMaximumSlice(viewer->GetSliceNumber());
@@ -579,10 +786,9 @@ void QtMainWindow::viewImage() {
     connectViewerSignals();
 }
 
-void QtMainWindow::deleteImages() {
+void QtMainWindow::deleteSelectedImages() {
     qDebug("Deleting images");
 
-    QList<irtkQtImageObject*> & list = irtkQtViewer::Instance()->GetImageList();
     QModelIndexList indexList = imageListView->selectionModel()->selectedIndexes();
     QList<int> rowList;
 
@@ -594,45 +800,11 @@ void QtMainWindow::deleteImages() {
     // Sort the rows in descending order
     qSort(rowList.begin(), rowList.end(), qGreater<int>());
 
-    // Start deleting images from bottom to top
-    for (int i = 0; i < rowList.size(); i++) {
-        currentImageIndex = rowList[i];
-        bool visible = list[currentImageIndex]->IsVisible();
-
-        if (visible) {
-            numDisplayedImages--;
-
-            if (numDisplayedImages == 0) {
-                disableViewerWidgets();
-            }
-
-            deleteSingleImage(currentImageIndex);
-        }
-
-        // Delete item from the list
-        delete list.takeAt(currentImageIndex);
-
-        // Update the map keys of the images currently displayed
-        QList<irtkQtBaseViewer*>::iterator it;
-        for (it = viewers.begin(); it != viewers.end(); it++) {
-            (*it)->UpdateKeysAfterIndexDeleted(currentImageIndex);
-        }
-    }
-
-    setUpViewerWidgets();
-    visualToolWidget->onlyTwoImagesVisible(numDisplayedImages == 2);
-    if (numDisplayedImages == 2) {
-        updateDrawables();
-    }
-
-    // Update the model
-    delete imageModel;
-    imageModel = new irtkImageListModel(list);
-    imageListView->setModel(imageModel);
+    deleteImages(rowList);
 }
 
 void QtMainWindow::toggleImageVisible() {
-    QList<irtkQtImageObject*> & list = irtkQtViewer::Instance()->GetImageList();
+    QList<irtkQtImageObject*> & list = irtkQtConfiguration::Instance()->GetImageObjectList();
 
     bool visible = !list[currentImageIndex]->IsVisible();
     list[currentImageIndex]->SetVisible(visible);
@@ -683,18 +855,13 @@ void QtMainWindow::toggleImageVisible() {
     imageModel = new irtkImageListModel(list);
     imageListView->setModel(imageModel);
 
+    // Emulate click to show image information
     if (clickImage) {
         QModelIndex idx = imageModel->index(currentImageIndex, 0);
         imageListView->setCurrentIndex(idx);
         emit imageListView->clicked(idx);
     }
 
-}
-
-/// free function used to calculate the output images
-/// in parallel for the different viewers
-void CalculateOutputImage(irtkQtBaseViewer* viewer) {
-    viewer->CalculateOutputImages();
 }
 
 void QtMainWindow::zoomIn() {
@@ -726,17 +893,7 @@ void QtMainWindow::zoomIn() {
     }
 
     // Update the viewers
-    for (int i = 0; i < viewers.size(); i++) {
-        viewerWidget = dynamic_cast<Qt2dViewerWidget*>(viewerWidgets[i]);
-        viewer = viewers[i];
-
-        if (viewerWidget != 0) {
-            if (viewerWidget->getGlWidget()->isEnabled()) {
-                viewerWidget->getGlWidget()->updateDrawable(
-                            QVector<QRgb**>::fromStdVector(viewer->GetDrawable()));
-            }
-        }
-    }
+    updateDrawables();
 
     delete [] threads;
 }
@@ -770,17 +927,7 @@ void QtMainWindow::zoomOut() {
     }
 
     // Update the viewers
-    for (int i = 0; i < viewers.size(); i++) {
-        viewerWidget = dynamic_cast<Qt2dViewerWidget*>(viewerWidgets[i]);
-        viewer = viewers[i];
-
-        if (viewerWidget != 0) {
-            if (viewerWidget->getGlWidget()->isEnabled()) {
-                viewerWidget->getGlWidget()->updateDrawable(
-                            QVector<QRgb**>::fromStdVector(viewer->GetDrawable()));
-            }
-        }
-    }
+    updateDrawables();
 
     delete [] threads;
 }
@@ -920,7 +1067,7 @@ void QtMainWindow::minDisplayValueChanged(double value) {
     qDebug("Minimum display value changed to %s",
            qPrintable(QString::number(value)));
 
-    QList<irtkQtImageObject*> & list = irtkQtViewer::Instance()->GetImageList();
+    QList<irtkQtImageObject*> & list = irtkQtConfiguration::Instance()->GetImageObjectList();
     int index = imageListView->currentIndex().row();
     if (!list.empty() && index >= 0) {
         if (list[index]->IsVisible()) {
@@ -934,7 +1081,7 @@ void QtMainWindow::maxDisplayValueChanged(double value) {
     qDebug("Maximum display value changed to %s",
            qPrintable(QString::number(value)));
 
-    QList<irtkQtImageObject*> & list = irtkQtViewer::Instance()->GetImageList();
+    QList<irtkQtImageObject*> & list = irtkQtConfiguration::Instance()->GetImageObjectList();
     int index = imageListView->currentIndex().row();
     if (!list.empty() && index >= 0) {
         if (list[index]->IsVisible()) {
@@ -947,7 +1094,7 @@ void QtMainWindow::maxDisplayValueChanged(double value) {
 void QtMainWindow::colormapIndexChanged(int mode) {
     qDebug("Colormap changed");
 
-    QList<irtkQtImageObject*> & list = irtkQtViewer::Instance()->GetImageList();
+    QList<irtkQtImageObject*> & list = irtkQtConfiguration::Instance()->GetImageObjectList();
     int index = imageListView->currentIndex().row();
     if (!list.empty() && index >= 0) {
         if (list[index]->IsVisible()) {
@@ -960,7 +1107,7 @@ void QtMainWindow::colormapIndexChanged(int mode) {
 void QtMainWindow::interpolationIndexChanged(int mode) {
     qDebug("Interpolation changed");
 
-    QList<irtkQtImageObject*> & list = irtkQtViewer::Instance()->GetImageList();
+    QList<irtkQtImageObject*> & list = irtkQtConfiguration::Instance()->GetImageObjectList();
     irtkQtImageObject::irtkQtInterpolationMode md =
             static_cast<irtkQtImageObject::irtkQtInterpolationMode>(mode);
 
@@ -984,7 +1131,7 @@ void QtMainWindow::interpolationIndexChanged(int mode) {
 void QtMainWindow::opacityValueChanged(int value) {
     qDebug("Opacity value changed");
 
-    QList<irtkQtImageObject*> & list = irtkQtViewer::Instance()->GetImageList();
+    QList<irtkQtImageObject*> & list = irtkQtConfiguration::Instance()->GetImageObjectList();
     int index = imageListView->currentIndex().row();
     if (!list.empty() && index >= 0) {
         if (list[index]->IsVisible()) {
@@ -1002,7 +1149,7 @@ void QtMainWindow::listViewDoubleClicked(QModelIndex index) {
 
 void QtMainWindow::listViewClicked(QModelIndex index) {
     int i = index.row();
-    QList<irtkQtImageObject*> list = irtkQtViewer::Instance()->GetImageList();
+    QList<irtkQtImageObject*> list = irtkQtConfiguration::Instance()->GetImageObjectList();
     irtkQtImageObject* imageObject = list[i];
 
     visualToolWidget->blockSignals(true);
@@ -1040,7 +1187,7 @@ void QtMainWindow::listViewShowContextMenu(const QPoint &pos) {
         if ( selectedCount == 1) {
             currentImageIndex = imageListView->indexAt(pos).row();
             imageMenu.addAction(toggleVisibleAction);
-            if (irtkQtViewer::Instance()->GetImageList().at(currentImageIndex)->IsVisible()) {
+            if (irtkQtConfiguration::Instance()->GetImageObjectList().at(currentImageIndex)->IsVisible()) {
                 toggleVisibleAction->setChecked(true);
             }
             else {
@@ -1049,7 +1196,6 @@ void QtMainWindow::listViewShowContextMenu(const QPoint &pos) {
         }
         if ( selectedCount > 0 ) {
             imageMenu.addAction(deleteImageAction);
-            // Show the menu only if the current image index is valid
             imageMenu.exec( globalPos );
         }
     }
@@ -1058,7 +1204,7 @@ void QtMainWindow::listViewShowContextMenu(const QPoint &pos) {
 void QtMainWindow::moveImageUp() {
     qDebug("Moving image up");
 
-    QList<irtkQtImageObject*> & list = irtkQtViewer::Instance()->GetImageList();
+    QList<irtkQtImageObject*> & list = irtkQtConfiguration::Instance()->GetImageObjectList();
     int index = imageListView->currentIndex().row();
     if (!list.empty() && index > 0) {
         list.move(index, index-1);
@@ -1081,7 +1227,7 @@ void QtMainWindow::moveImageUp() {
 void QtMainWindow::moveImageDown() {
     qDebug("Moving image down");
 
-    QList<irtkQtImageObject*> & list = irtkQtViewer::Instance()->GetImageList();
+    QList<irtkQtImageObject*> & list = irtkQtConfiguration::Instance()->GetImageObjectList();
     int index = imageListView->currentIndex().row();
     if (!list.empty() && index >= 0 && (index < list.size() - 1)) {
         list.move(index, index+1);
@@ -1110,7 +1256,36 @@ void QtMainWindow::blendModeChanged(int mode) {
 
 void QtMainWindow::displayMixValueChanged(double value) {
     for (int i = 0; i < viewers.size(); i++) {
-        viewers[i]->SetBlendMixValue(value);
+        viewers[i]->SetMixValue(value);
     }
     updateDrawables();
+}
+
+void QtMainWindow::loadConfigurationFile() {
+    // Load configuration file
+    QString selfilter = tr("XML (*.xml)");
+    QString fileName = QFileDialog::getOpenFileName(this,
+                       tr("Open File"), QDir::homePath(),
+                       tr("All files (*.*);;XML (*.xml)" ),
+                       &selfilter);
+
+    if (irtkQtConfiguration::Instance()->Read(fileName)) {
+        clearImages();
+        clearViews();
+        loadConfigurationImageList();
+        loadConfigurationViewerList();
+    }
+    else {
+        createMessageBox("Could not read configuration file", QMessageBox::Critical);
+    }
+}
+
+void QtMainWindow::saveConfigutationFile() {
+    // Save image in the specified file
+    QString fileName = QFileDialog::getSaveFileName(
+                this,tr("Save screenshot as"),
+                "", tr("XML (*.xml)"));
+
+    createConfigurationViewerList();
+    irtkQtConfiguration::Instance()->Write(fileName);
 }

@@ -35,7 +35,7 @@ set(VIEWER_HEADERS
 ../include/QtInfoWidget.h
 ../../include/irtkImageListModel.h
 ../../include/irtkQtImageObject.h
-../../include/irtkQtViewer.h
+../../include/irtkQtConfiguration.h
 ../../include/irtkQtBaseViewer.h
 ../../include/irtkQtTwoDimensionalViewer.h
 ../../include/irtkQtThreeDimensionalViewer.h
@@ -54,7 +54,7 @@ QtToolWidget.cpp
 QtInfoWidget.cpp
 ../../src/irtkImageListModel.cpp
 ../../src/irtkQtImageObject.cpp
-../../src/irtkQtViewer.cpp
+../../src/irtkQtConfiguration.cpp
 ../../src/irtkQtBaseViewer.cpp
 ../../src/irtkQtTwoDimensionalViewer.cpp
 ../../src/irtkQtThreeDimensionalViewer.cpp

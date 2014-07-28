@@ -8,6 +8,9 @@
 
 #include <QString>
 
+/*
+ * Class storing all image information
+ */
 
 class irtkQtImageObject
 {
@@ -38,6 +41,9 @@ private:
     /// Corresponding interpolation mode
     irtkQtInterpolationMode _interpolation;
 
+    /// String list with names of color modes
+    static QStringList _interpolationStringList;
+
 public:
 
     /// Image object constructor
@@ -46,10 +52,16 @@ public:
     /// Image object destructor
     ~irtkQtImageObject();
 
+    /// Fill the values of _interpolationStringList
+    static void SetInterpolationModeList();
+
+    /// Get the values of _interpolationStringList
+    static QStringList GetInterpolationModeList();
+
     /// Check if image is visible
     bool IsVisible() const;
 
-    /// Set if image visible
+    /// Set if image is visible
     void SetVisible(bool visible);
 
     /// Get image filename
@@ -83,13 +95,13 @@ public:
     double GetMaxImageValue();
 
     /// Get minimum display value for the corresponding image
-    void SetMinDisplayValue(double min);
+    void SetMinDisplayValue(const double min);
 
     /// Get minimum display value for the corresponding image
     double GetMinDisplayValue() const;
 
     /// Set maximum display value for the corresponding image
-    void SetMaxDisplayValue(double max);
+    void SetMaxDisplayValue(const double max);
 
     /// Get maximum display value for the corresponding image
     double GetMaxDisplayValue() const;
@@ -170,7 +182,7 @@ inline double irtkQtImageObject::GetMaxImageValue() {
     return maxValue;
 }
 
-inline void irtkQtImageObject::SetMinDisplayValue(double min) {
+inline void irtkQtImageObject::SetMinDisplayValue(const double min) {
     if (_lookupTable) {
         _lookupTable->SetMinDisplayValue(min);
         _lookupTable->Initialize();
@@ -187,7 +199,7 @@ inline double irtkQtImageObject::GetMinDisplayValue() const {
     return minDisplay;
 }
 
-inline void irtkQtImageObject::SetMaxDisplayValue(double max) {
+inline void irtkQtImageObject::SetMaxDisplayValue(const double max) {
     if (_lookupTable) {
         _lookupTable->SetMaxDisplayValue(max);
         _lookupTable->Initialize();
@@ -226,7 +238,13 @@ inline void irtkQtImageObject::SetInterpolation(irtkQtImageObject::irtkQtInterpo
 }
 
 inline int irtkQtImageObject::GetInterpolation() const {
-    return _interpolation;
+    int interpolationIndex = -1;
+
+    if (_lookupTable) {
+        interpolationIndex = _interpolation;
+    }
+
+    return interpolationIndex;
 }
 
 #endif // IRTKQTIMAGEOBJECT_H

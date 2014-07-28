@@ -3,10 +3,15 @@
 
 #include <irtkImage.h>
 
-#include <QLineEdit>
-#include <QTextEdit>
-#include <QTableWidget>
+#include <QWidget>
 
+class QLineEdit;
+class QTextEdit;
+class QTableWidget;
+
+/*
+ * Widget displaying image information
+ */
 
 class QtInfoWidget : public QWidget
 {
@@ -42,6 +47,15 @@ public:
     void update();
 
 private:
+
+    /// Create component widgets
+    void createWidgets();
+
+    /// Create QLineEdit and set its parameters
+    void createLineEdit(QLineEdit** lineEdit);
+
+    /// Create QTableWidget and set its parameters
+    void createTableWidget(QTableWidget** tableWidget);
 
     /// Update basic image information
     void updateImageInfo();

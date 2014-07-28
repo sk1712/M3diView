@@ -1,11 +1,43 @@
 #include <Qt2dViewerWidget.h>
 
 #include <QGridLayout>
-
+#include <QLabel>
 
 Qt2dViewerWidget::Qt2dViewerWidget(QWidget *parent)
     : QtViewerWidget(parent)
 {
+    createWidgets();
+    createOptionsMenu();
+    connectSignals();
+    setEnabled(false);
+}
+
+bool Qt2dViewerWidget::labelsVisible() {
+    return showLabelsAction->isChecked();
+}
+
+void Qt2dViewerWidget::setLabelsVisible(const bool visible) {
+    showLabelsAction->setChecked(visible);
+}
+
+bool Qt2dViewerWidget::cursorVisible() {
+    return showCursorAction->isChecked();
+}
+
+void Qt2dViewerWidget::setCursorVisible(const bool visible) {
+    showCursorAction->setChecked(visible);
+}
+
+void Qt2dViewerWidget::updateLabel() {
+    sliceLabel->setText(QString::number(currentSlice) + " of " + QString::number(maximumSlice));
+}
+
+void Qt2dViewerWidget::initializeParameters() {
+    currentSlice = 0;
+    maximumSlice = 0;
+}
+
+void Qt2dViewerWidget::createWidgets() {
     QGridLayout *layout = dynamic_cast<QGridLayout*>(this->layout());
 
     glWidget = new QtTwoDimensionalGlWidget(this);
@@ -19,19 +51,6 @@ Qt2dViewerWidget::Qt2dViewerWidget(QWidget *parent)
 
     sliceLabel = new QLabel();
     layout->addWidget(sliceLabel, 1, 0, 1, 2, Qt::AlignRight);
-
-    createOptionsMenu();
-    connectSignals();
-    setEnabled(false);
-}
-
-void Qt2dViewerWidget::updateLabel() {
-    sliceLabel->setText(QString::number(currentSlice) + " of " + QString::number(maximumSlice));
-}
-
-void Qt2dViewerWidget::initializeParameters() {
-    currentSlice = 0;
-    maximumSlice = 0;
 }
 
 void Qt2dViewerWidget::connectSignals() {
@@ -40,16 +59,15 @@ void Qt2dViewerWidget::connectSignals() {
 
     connect(showLabelsAction, SIGNAL(toggled(bool)), this, SLOT(toggleLabelsVisible(bool)));
     connect(showCursorAction, SIGNAL(toggled(bool)), this, SLOT(toggleCursorVisible(bool)));
-
 }
 
 void Qt2dViewerWidget::createOptionsMenu() {
-    showLabelsAction = new QAction(tr("Show labels"), this);
+    showLabelsAction = new QAction(tr("Show Labels"), this);
     showLabelsAction->setCheckable(true);
     showLabelsAction->setChecked(true);
     settingsMenu->addAction(showLabelsAction);
 
-    showCursorAction = new QAction(tr("Show cursor"), this);
+    showCursorAction = new QAction(tr("Show Cursor"), this);
     showCursorAction->setCheckable(true);
     showCursorAction->setChecked(true);
     settingsMenu->addAction(showCursorAction);

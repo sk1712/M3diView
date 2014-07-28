@@ -1,8 +1,8 @@
 #ifndef QTMAINWINDOW_H
 #define QTMAINWINDOW_H
 
-#include <irtkQtViewer.h>
 #include <irtkImageListModel.h>
+#include <irtkQtConfiguration.h>
 
 #include <Qt2dViewerWidget.h>
 #include <Qt3dViewerWidget.h>
@@ -10,9 +10,10 @@
 #include <QtInfoWidget.h>
 
 #include <QMainWindow>
-#include <QListView>
-#include <QTabWidget>
 #include <QMessageBox>
+
+class QListView;
+class QTabWidget;
 
 
 class QtMainWindow : public QMainWindow
@@ -33,7 +34,10 @@ class QtMainWindow : public QMainWindow
 
     /// File actions
     QAction *openTargetAction;
+    QAction *clearImagesAction;
     QAction *saveScreenshotAction;
+    QAction *loadConfigurationAction;
+    QAction *saveConfigurationAction;
 
     /// View actions
     QAction *viewAxialAction;
@@ -152,8 +156,11 @@ private:
     /// Add single image to displayed images
     void displaySingleImage(int index);
 
-    /// Delete signle image from displayed images
+    /// Delete single image from displayed images
     void deleteSingleImage(int index);
+
+    /// Delete images with indices provided in the rowList
+    void deleteImages(QList<int> rowList);
 
     /// Set up viewer widgets
     void setUpViewerWidgets();
@@ -161,19 +168,31 @@ private:
     /// Update all drawables
     void updateDrawables();
 
+    /// Create configuration viewer list
+    void createConfigurationViewerList();
+
+    /// Load configuration image list
+    void loadConfigurationImageList();
+
+    /// Load configuration viewer list
+    void loadConfigurationViewerList();
+
 private slots:
 
     /// Callback function for openTargetAction
     void openImage();
 
+    /// Callback function for clearImagesAction
+    void clearImages();
+
     /// Callback function for saveScreenshotAction
     void saveScreenshot();
 
     /// Callback function for viewSelectedImageAction
-    void viewImage();
+    void viewImages();
 
     /// Callback function for deleteImageAction
-    void deleteImages();
+    void deleteSelectedImages();
 
     /// Callback function for toggleVisibleAction
     void toggleImageVisible();
@@ -246,6 +265,12 @@ private slots:
 
     /// Callback function for display mix value changed
     void displayMixValueChanged(double value);
+
+    /// Callback function for loading configuration file
+    void loadConfigurationFile();
+
+    /// Callback function for saving configuration file
+    void saveConfigutationFile();
 };
 
 #endif // QTMAINWINDOW_H

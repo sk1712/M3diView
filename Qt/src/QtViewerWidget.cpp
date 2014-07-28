@@ -1,27 +1,17 @@
 #include <QtViewerWidget.h>
 
+#include <QFileDialog>
 #include <QGridLayout>
 #include <QHBoxLayout>
-#include <QFileDialog>
 #include <QMessageBox>
-
+#include <QToolButton>
 
 QtViewerWidget::QtViewerWidget(QWidget *parent) : QWidget(parent) {
-    QGridLayout *layout = new QGridLayout();
-
-    toolWidget = new QWidget();
     createToolButtons();
     connectSignals();
 
-    QHBoxLayout *toolLayout = new QHBoxLayout();
-    toolLayout->addWidget(expandToolButton);
-    toolLayout->addWidget(linkToolButton);
-    toolLayout->addWidget(deleteToolButton);
-    toolLayout->addWidget(settingsToolButton);
-
-    toolWidget->setLayout(toolLayout);
+    QGridLayout *layout = new QGridLayout();
     layout->addWidget(toolWidget, 1, 0, 1, 2, Qt::AlignLeft);
-
     setLayout(layout);
 
     // By default link viewer to the rest of the viewers
@@ -29,48 +19,12 @@ QtViewerWidget::QtViewerWidget(QWidget *parent) : QWidget(parent) {
     expanded = false;
 }
 
+void QtViewerWidget::setLinked(const bool link) {
+    linkToolButton->setChecked(link);
+}
+
 void QtViewerWidget::setInvertedAxes(bool *) {
 
-}
-
-void QtViewerWidget::paintEvent(QPaintEvent *) {
-    toolWidget->raise();
-}
-
-void QtViewerWidget::createToolButtons() {
-    expandToolButton = new QToolButton();
-    expandToolButton->setIcon(QIcon(":/icons/expand.png"));
-    expandToolButton->setToolTip("Expand window");
-
-    linkToolButton = new QToolButton();
-    linkToolButton->setIcon(QIcon(":/icons/link.png"));
-    linkToolButton->setToolTip("Link to other viewers");
-    linkToolButton->setCheckable(true);
-    linkToolButton->setChecked(true);
-
-    deleteToolButton = new QToolButton();
-    deleteToolButton->setIcon(QIcon(":/icons/delete.png"));
-    deleteToolButton->setToolTip("Delete view");
-
-    settingsToolButton = new QToolButton();
-    settingsToolButton->setIcon(QIcon(":/icons/settings.png"));
-    settingsToolButton->setToolTip("Options");
-
-    settingsMenu = new QMenu();
-    settingsToolButton->setMenu(settingsMenu);
-    settingsToolButton->setPopupMode(QToolButton::InstantPopup);
-
-    saveScreenshotAction = new QAction(tr("Save image as..."), this);
-    saveScreenshotAction->setIcon(QIcon(":/icons/save.png"));
-    settingsMenu->addAction(saveScreenshotAction);
-}
-
-void QtViewerWidget::connectSignals() {
-    connect(expandToolButton, SIGNAL(clicked()), this, SLOT(expandWindow()));
-    connect(linkToolButton, SIGNAL(toggled(bool)), this, SLOT(changeLinked(bool)));
-    connect(deleteToolButton, SIGNAL(clicked()), this, SLOT(deleteWindow()));
-
-    connect(saveScreenshotAction, SIGNAL(triggered()), this, SLOT(saveScreenshot()));
 }
 
 void QtViewerWidget::expandWindow() {
@@ -86,6 +40,55 @@ void QtViewerWidget::expandWindow() {
     }
 
     emit windowExpanded();
+}
+
+void QtViewerWidget::paintEvent(QPaintEvent *) {
+    // Tool widget should not be hidden by other widgets
+    toolWidget->raise();
+}
+
+void QtViewerWidget::createToolButtons() {
+    toolWidget = new QWidget();
+    QHBoxLayout *toolLayout = new QHBoxLayout();
+    toolWidget->setLayout(toolLayout);
+
+    expandToolButton = new QToolButton();
+    expandToolButton->setIcon(QIcon(":/icons/expand.png"));
+    expandToolButton->setToolTip("Expand window");
+    toolLayout->addWidget(expandToolButton);
+
+    linkToolButton = new QToolButton();
+    linkToolButton->setIcon(QIcon(":/icons/link.png"));
+    linkToolButton->setToolTip("Link to other viewers");
+    linkToolButton->setCheckable(true);
+    linkToolButton->setChecked(true);
+    toolLayout->addWidget(linkToolButton);
+
+    deleteToolButton = new QToolButton();
+    deleteToolButton->setIcon(QIcon(":/icons/delete.png"));
+    deleteToolButton->setToolTip("Delete view");
+    toolLayout->addWidget(deleteToolButton);
+
+    settingsToolButton = new QToolButton();
+    settingsToolButton->setIcon(QIcon(":/icons/settings.png"));
+    settingsToolButton->setToolTip("Options");
+    toolLayout->addWidget(settingsToolButton);
+
+    settingsMenu = new QMenu();
+    settingsToolButton->setMenu(settingsMenu);
+    settingsToolButton->setPopupMode(QToolButton::InstantPopup);
+
+    saveScreenshotAction = new QAction(tr("Save Image As..."), this);
+    saveScreenshotAction->setIcon(QIcon(":/icons/save_as.png"));
+    settingsMenu->addAction(saveScreenshotAction);
+}
+
+void QtViewerWidget::connectSignals() {
+    connect(expandToolButton, SIGNAL(clicked()), this, SLOT(expandWindow()));
+    connect(linkToolButton, SIGNAL(toggled(bool)), this, SLOT(changeLinked(bool)));
+    connect(deleteToolButton, SIGNAL(clicked()), this, SLOT(deleteWindow()));
+
+    connect(saveScreenshotAction, SIGNAL(triggered()), this, SLOT(saveScreenshot()));
 }
 
 void QtViewerWidget::deleteWindow() {

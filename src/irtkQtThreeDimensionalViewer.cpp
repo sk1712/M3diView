@@ -99,15 +99,14 @@ QRgb** irtkQtThreeDimensionalViewer::GetHShutterDrawable() {
         {sliceNum[0], sliceNum[2]}
     };
 
+    map<int, irtkGreyImage **>::iterator it = _imageOutput.begin();
+    irtkQtLookupTable *targetTable = _lookupTable[it->first];
+    irtkQtLookupTable *sourceTable = _lookupTable[(++it)->first];
+
     for (int dim = 0; dim < 3; dim++) {
-        map<int, irtkGreyImage **>::iterator it = _imageOutput.begin();
-        drawable[dim] = new QRgb[it->second[dim]->GetNumberOfVoxels()];
-
+        drawable[dim] = new QRgb[(--it)->second[dim]->GetNumberOfVoxels()];
         irtkGreyPixel *target = it->second[dim]->GetPointerToVoxels();
-        irtkQtLookupTable *targetTable = _lookupTable[it->first];
-
         irtkGreyPixel *source = (++it)->second[dim]->GetPointerToVoxels();
-        irtkQtLookupTable *sourceTable = _lookupTable[it->first];
 
         QRgb *drawn = drawable[dim];
         int i, j;
@@ -153,15 +152,14 @@ QRgb** irtkQtThreeDimensionalViewer::GetVShutterDrawable() {
         {sliceNum[0], sliceNum[2]}
     };
 
+    map<int, irtkGreyImage **>::iterator it = _imageOutput.begin();
+    irtkQtLookupTable *targetTable = _lookupTable[it->first];
+    irtkQtLookupTable *sourceTable = _lookupTable[(++it)->first];
+
     for (int dim = 0; dim < 3; dim++) {
-        map<int, irtkGreyImage **>::iterator it = _imageOutput.begin();
-        drawable[dim] = new QRgb[it->second[dim]->GetNumberOfVoxels()];
-
+        drawable[dim] = new QRgb[(--it)->second[dim]->GetNumberOfVoxels()];
         irtkGreyPixel *target = it->second[dim]->GetPointerToVoxels();
-        irtkQtLookupTable *targetTable = _lookupTable[it->first];
-
         irtkGreyPixel *source = (++it)->second[dim]->GetPointerToVoxels();
-        irtkQtLookupTable *sourceTable = _lookupTable[it->first];
 
         QRgb *drawn = drawable[dim];
         int i, j;
@@ -231,7 +229,7 @@ QRgb** irtkQtThreeDimensionalViewer::GetSubtractionDrawable() {
         QRgb *drawn = drawable[dim];
         int i, j;
 
-        // Display target and source images with a vertical shutter
+        // Display the subtraction of target minus source image
         for (j = 0; j < dimensions[dim][1]; j++) {
             for (i = 0; i < dimensions[dim][0]; i++) {
                 if ((*target >= 0) && (*source >= 0)) {

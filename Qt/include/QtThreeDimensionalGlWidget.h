@@ -41,13 +41,13 @@ public:
     ~QtThreeDimensionalGlWidget();
 
     /// Set image dimensions (in image coordinates)
-    void setDimensions(int *dim);
+    void setDimensions(const int *dim);
 
     /// Set current slices
-    void setCurrentSlice(int *current);
+    void setCurrentSlice(const int *current);
 
     /// Set inverted axis flag
-    void setInvertedAxis(bool *inverted);
+    void setInvertedAxis(const bool *inverted);
 
     /// Update the images to be drawn
     void updateDrawable(QVector<QRgb**> drawable);
@@ -111,19 +111,19 @@ private slots:
 };
 
 
-inline void QtThreeDimensionalGlWidget::setDimensions(int *dim) {
+inline void QtThreeDimensionalGlWidget::setDimensions(const int *dim) {
     dimensions[0] = dim[0];
     dimensions[1] = dim[1];
     dimensions[2] = dim[2];
 }
 
-inline void QtThreeDimensionalGlWidget::setCurrentSlice(int *current) {
+inline void QtThreeDimensionalGlWidget::setCurrentSlice(const int *current) {
     currentSlice[0] = current[0];
     currentSlice[1] = current[1];
     currentSlice[2] = current[2];
 }
 
-inline void QtThreeDimensionalGlWidget::setInvertedAxis(bool *inverted) {
+inline void QtThreeDimensionalGlWidget::setInvertedAxis(const bool *inverted) {
     invertedAxis[0] = inverted[0];
     invertedAxis[1] = inverted[1];
     invertedAxis[2] = inverted[2];

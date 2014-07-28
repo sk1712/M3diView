@@ -1,12 +1,17 @@
 #ifndef QTTOOLWIDGET_H
 #define QTTOOLWIDGET_H
 
-#include <QComboBox>
-#include <QLabel>
-#include <QSlider>
-#include <QButtonGroup>
-#include <QPushButton>
+#include <QWidget>
 
+class QButtonGroup;
+class QComboBox;
+class QLabel;
+class QSlider;
+class QPushButton;
+
+/*
+ * Widget containing tools for image visualisation
+ */
 
 class QtToolWidget : public QWidget
 {
@@ -39,10 +44,10 @@ class QtToolWidget : public QWidget
                 *subtractButton, *blendButton;
 
     /// Label for mixing value
-    QLabel *blendMixLabel;
+    QLabel *mixLabel;
 
     /// Slider for mixing value
-    QSlider *blendMixSlider;
+    QSlider *mixSlider;
 
     /// Minimum, maximum display values
     int minDisplay, maxDisplay;
@@ -94,7 +99,7 @@ public:
 private:
 
     /// Create tool widgets
-    void addWidgetsToLayout();
+    void createWidgets();
 
     /// Create button group
     QWidget *createButtonGroup();

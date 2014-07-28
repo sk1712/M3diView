@@ -23,9 +23,7 @@ void QtTwoDimensionalGlWidget::setCursorVisible(bool visible) {
 }
 
 void QtTwoDimensionalGlWidget::updateDrawable(QVector<QRgb**> drawable) {
-    // QtGlWidget::updateDrawable(drawable);
-    deleteDrawable();
-    _drawable = drawable;
+    QtGlWidget::updateDrawable(drawable);
     updateGL();
 }
 
@@ -106,7 +104,6 @@ void QtTwoDimensionalGlWidget::deleteDrawable() {
         delete [] (*it)[0];
         delete it[0];
     }
-
 
     _drawable.clear();
 }

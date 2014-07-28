@@ -1,84 +1,17 @@
 #include <QtInfoWidget.h>
 
-#include <QHeaderView>
 #include <QFormLayout>
-#include <QVBoxLayout>
+#include <QHeaderView>
 #include <QLabel>
+#include <QLineEdit>
+#include <QTableWidget>
+#include <QTextEdit>
 #include <QTextStream>
-
+#include <QVBoxLayout>
 
 QtInfoWidget::QtInfoWidget(QWidget *parent) : QWidget(parent) {
     _image = NULL;
-
-    QFont font;
-    font.setFamily("Courier");
-    font.setStyleHint(QFont::Monospace);
-
-    QVBoxLayout *verticalLayout = new QVBoxLayout;
-    QFormLayout *formLayout = new QFormLayout;
-    formLayout->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
-
-    imageSizeEdit = new QLineEdit;
-    imageSizeEdit->setReadOnly(true);
-    imageSizeEdit->setFont(font);
-    imageSizeEdit->setAlignment(Qt::AlignRight);
-    formLayout->addRow(tr("Image size :"), imageSizeEdit);
-
-    voxelSizeEdit = new QLineEdit;
-    voxelSizeEdit->setReadOnly(true);
-    voxelSizeEdit->setFont(font);
-    voxelSizeEdit->setAlignment(Qt::AlignRight);
-    formLayout->addRow(tr("Voxel size :"), voxelSizeEdit);
-
-    imageOriginEdit = new QLineEdit;
-    imageOriginEdit->setReadOnly(true);
-    imageOriginEdit->setFont(font);
-    imageOriginEdit->setAlignment(Qt::AlignRight);
-    formLayout->addRow(tr("Image origin :"), imageOriginEdit);
-
-    xAxisEdit = new QLineEdit;
-    xAxisEdit->setReadOnly(true);
-    xAxisEdit->setFont(font);
-    xAxisEdit->setAlignment(Qt::AlignRight);
-    formLayout->addRow(tr("X-axis :"), xAxisEdit);
-
-    yAxisEdit = new QLineEdit;
-    yAxisEdit->setReadOnly(true);
-    yAxisEdit->setFont(font);
-    yAxisEdit->setAlignment(Qt::AlignRight);
-    formLayout->addRow(tr("Y-axis :"), yAxisEdit);
-
-    zAxisEdit = new QLineEdit;
-    zAxisEdit->setReadOnly(true);
-    zAxisEdit->setFont(font);
-    zAxisEdit->setAlignment(Qt::AlignRight);
-    formLayout->addRow(tr("Z-axis :"), zAxisEdit);
-
-    QWidget *basicInfoWidget = new QWidget;
-    basicInfoWidget->setLayout(formLayout);
-    verticalLayout->addWidget(basicInfoWidget);
-
-    QLabel *imagetoWorldLabel = new QLabel("Image to world matrix");
-    verticalLayout->addWidget(imagetoWorldLabel);
-    imageToWorldMatrix = new QTableWidget;
-    imageToWorldMatrix->setFont(font);
-    imageToWorldMatrix->verticalHeader()->hide();
-    imageToWorldMatrix->horizontalHeader()->hide();
-    verticalLayout->addWidget(imageToWorldMatrix);
-
-    QLabel *worldToImageLabel = new QLabel("World to image matrix");
-    verticalLayout->addWidget(worldToImageLabel);
-    worldToImageMatrix = new QTableWidget;
-    worldToImageMatrix->setFont(font);
-    worldToImageMatrix->verticalHeader()->hide();
-    worldToImageMatrix->horizontalHeader()->hide();
-    verticalLayout->addWidget(worldToImageMatrix);
-
-    QSpacerItem* spacer = new QSpacerItem( 20, 20, QSizePolicy::Minimum,
-    QSizePolicy::Expanding );
-    verticalLayout->addItem( spacer );
-
-    setLayout(verticalLayout);
+    createWidgets();
 }
 
 QSize QtInfoWidget::sizeHint() const {
@@ -107,6 +40,68 @@ void QtInfoWidget::update() {
         imageToWorldMatrix->clear();
         worldToImageMatrix->clear();
     }
+}
+
+void QtInfoWidget::createWidgets() {
+    QVBoxLayout *verticalLayout = new QVBoxLayout;
+    QFormLayout *formLayout = new QFormLayout;
+    formLayout->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
+
+    createLineEdit(&imageSizeEdit);
+    createLineEdit(&voxelSizeEdit);
+    createLineEdit(&imageOriginEdit);
+    createLineEdit(&xAxisEdit);
+    createLineEdit(&yAxisEdit);
+    createLineEdit(&zAxisEdit);
+
+    formLayout->addRow(tr("Image size :"), imageSizeEdit);
+    formLayout->addRow(tr("Voxel size :"), voxelSizeEdit);
+    formLayout->addRow(tr("Image origin :"), imageOriginEdit);
+    formLayout->addRow(tr("X-axis :"), xAxisEdit);
+    formLayout->addRow(tr("Y-axis :"), yAxisEdit);
+    formLayout->addRow(tr("Z-axis :"), zAxisEdit);
+
+    QWidget *basicInfoWidget = new QWidget;
+    basicInfoWidget->setLayout(formLayout);
+    verticalLayout->addWidget(basicInfoWidget);
+
+    QLabel *imagetoWorldLabel = new QLabel("Image to world matrix");
+    createTableWidget(&imageToWorldMatrix);
+    verticalLayout->addWidget(imagetoWorldLabel);
+    verticalLayout->addWidget(imageToWorldMatrix);
+
+    QLabel *worldToImageLabel = new QLabel("World to image matrix");
+    createTableWidget(&worldToImageMatrix);
+    verticalLayout->addWidget(worldToImageLabel);
+    verticalLayout->addWidget(worldToImageMatrix);
+
+    QSpacerItem* spacer = new QSpacerItem( 20, 20, QSizePolicy::Minimum,
+    QSizePolicy::Expanding );
+    verticalLayout->addItem( spacer );
+
+    setLayout(verticalLayout);
+}
+
+void QtInfoWidget::createLineEdit(QLineEdit **lineEdit) {
+    QFont font;
+    font.setFamily("Courier");
+    font.setStyleHint(QFont::Monospace);
+
+    *lineEdit = new QLineEdit;
+    (*lineEdit)->setReadOnly(true);
+    (*lineEdit)->setFont(font);
+    (*lineEdit)->setAlignment(Qt::AlignRight);
+}
+
+void QtInfoWidget::createTableWidget(QTableWidget **tableWidget) {
+    QFont font;
+    font.setFamily("Courier");
+    font.setStyleHint(QFont::Monospace);
+
+    *tableWidget = new QTableWidget;
+    (*tableWidget)->setFont(font);
+    (*tableWidget)->verticalHeader()->hide();
+    (*tableWidget)->horizontalHeader()->hide();
 }
 
 void QtInfoWidget::updateImageInfo() {

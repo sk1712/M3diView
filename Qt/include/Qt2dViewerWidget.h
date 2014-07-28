@@ -4,8 +4,8 @@
 #include <QtViewerWidget.h>
 #include <QtTwoDimensionalGlWidget.h>
 
-#include <QLabel>
 
+class QLabel;
 
 class Qt2dViewerWidget : public QtViewerWidget
 {
@@ -25,7 +25,6 @@ class Qt2dViewerWidget : public QtViewerWidget
 
     /// Show cursor action
     QAction *showCursorAction;
-
 
     /// Slice currently shown
     int currentSlice;
@@ -56,6 +55,18 @@ public:
     /// Set object name (used for styling the widgets
     void setObjectName(QString objectName);
 
+    /// Get whether labels are visible
+    bool labelsVisible();
+
+    /// Set whether labels are visible
+    void setLabelsVisible(const bool visible);
+
+    /// Get whether cursor is visible
+    bool cursorVisible();
+
+    /// Set whether cursor is visible
+    void setCursorVisible(const bool visible);
+
 protected:
 
     /// Update slice label
@@ -65,6 +76,9 @@ private:
 
     /// Initialize current and maximum slice
     void initializeParameters();
+
+    /// Create component widgets
+    void createWidgets();
 
     /// Connect signals
     void connectSignals();

@@ -1,13 +1,16 @@
 #include <irtkQtBaseViewer.h>
 
-
-QStringList irtkQtBaseViewer::_interpolationStringList;
-
+// Initialize static subtraction lookup table to null
 irtkQtLookupTable *irtkQtBaseViewer::subtractionLookupTable = NULL;
 
 irtkQtBaseViewer::irtkQtBaseViewer() {
+    // Set default blend mode
     _blendMode = VIEW_BLEND;
+
+    // Set default display mix
     _viewMix = 0.5;
+
+    // Set target image to null
     _targetImage = NULL;
 }
 
@@ -15,18 +18,6 @@ irtkQtBaseViewer::~irtkQtBaseViewer() {
     delete [] sliceNum;
     delete [] inverted;
     delete subtractionLookupTable;
-}
-
-void irtkQtBaseViewer::SetInterpolationModeList() {
-    _interpolationStringList << "Nearest-neighbor"
-                             << "Linear"
-                             << "C-spline"
-                             << "B-spline"
-                             << "Sinc";
-}
-
-QStringList irtkQtBaseViewer::GetInterpolationModeList() {
-    return _interpolationStringList;
 }
 
 vector<QRgb**> irtkQtBaseViewer::GetDrawable() {
@@ -87,10 +78,6 @@ void irtkQtBaseViewer::AddToDisplayedImages(irtkQtImageObject *imageObject, int 
         InitializeOrientation();
         CalculateOutputImages();
         /// check whether image dimensions agree
-//        if (!(_targetImage->GetImageAttributes() == newImage->GetImageAttributes())) {
-//            delete newImage;
-//            return;
-//        }
     }
 
     // If everything is fine add to maps
@@ -113,7 +100,6 @@ void irtkQtBaseViewer::DeleteSingleImage(int index) {
 void irtkQtBaseViewer::MoveImage(int, int) {
     // Always make first image in the map the target image
     if (_targetImage != _image.begin()->second) {
-
         SetTarget(_image.begin()->second);
         UpdateCurrentSlice();
 
@@ -165,6 +151,7 @@ void irtkQtBaseViewer::InitializeOrigin() {
 void irtkQtBaseViewer::InitializeDimensions() {
     int iaxis, jaxis, kaxis;
 
+    // Get original axis orientation
     _targetImage->Orientation(iaxis, jaxis, kaxis);
 
     switch (_viewMode) {
@@ -274,6 +261,9 @@ void irtkQtBaseViewer::InitializeDimensions() {
         }
         break;
     case VIEW_3D:
+        // sliceNum[0] = sagittal slices
+        // sliceNum[1] = coronal slices
+        // sliceNum[2] = axial slices
         switch (iaxis) {
         case IRTK_L2R:
             inverted[0] = true;
@@ -369,7 +359,7 @@ void irtkQtBaseViewer::InitializeDimensions() {
 void irtkQtBaseViewer::InitializeOrientation() {
     double x[3], y[3], z[3];
 
-    // Get original image orientation
+    // Get neurological image orientation
     GetNeurologicalOrientation(x, y, z);
 
     switch (_viewMode) {
@@ -507,14 +497,17 @@ void irtkQtBaseViewer::GetNeurologicalOrientation(double *x, double *y, double *
 }
 
 void irtkQtBaseViewer::SetOrientation(const double * xaxis, const double * yaxis, const double * zaxis) {
+    // Set x-axis
     _axisX[0] = xaxis[0];
     _axisX[1] = xaxis[1];
     _axisX[2] = xaxis[2];
 
+    // Set y-axis
     _axisY[0] = yaxis[0];
     _axisY[1] = yaxis[1];
     _axisY[2] = yaxis[2];
 
+    // Set z-axis
     _axisZ[0] = zaxis[0];
     _axisZ[1] = zaxis[1];
     _axisZ[2] = zaxis[2];

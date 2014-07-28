@@ -1,8 +1,9 @@
 #include <irtkQtImageObject.h>
 
 #include <QFileInfo>
-#include <QDebug>
 
+// Initialize static interpolation string list
+QStringList irtkQtImageObject::_interpolationStringList;
 
 irtkQtImageObject::irtkQtImageObject(const QString &path)
     : _path(path)
@@ -21,6 +22,18 @@ irtkQtImageObject::~irtkQtImageObject() {
     delete _lookupTable;
 }
 
+void irtkQtImageObject::SetInterpolationModeList() {
+    _interpolationStringList << "Nearest-neighbor"
+                             << "Linear"
+                             << "C-spline"
+                             << "B-spline"
+                             << "Sinc";
+}
+
+QStringList irtkQtImageObject::GetInterpolationModeList() {
+    return _interpolationStringList;
+}
+
 void irtkQtImageObject::CreateImage() {
     // Check if image object can be constructed from the file
     try {
@@ -36,7 +49,7 @@ void irtkQtImageObject::CreateImage() {
     double imageMin, imageMax;
     _image->GetMinMaxAsDouble(&imageMin, &imageMax);
 
-    // If image is corrupted the throw irtkException
+    // If image is corrupted, then throw irtkException
     if ( (imageMin == 0) && (imageMax == 0) ) {
         delete _image;
         qCritical("Invalid image file '%s'", qPrintable(_path));
@@ -50,6 +63,7 @@ void irtkQtImageObject::CreateImage() {
     _lookupTable->SetMinMaxDisplayValues(imageMin, imageMax);
     _lookupTable->Initialize();
 
+    // Nearest neighbor interpolation by default
     _interpolation = INTERPOLATION_NN;
 }
 

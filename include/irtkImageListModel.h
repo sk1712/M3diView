@@ -5,14 +5,19 @@
 
 #include <QAbstractListModel>
 
+/*
+ * Class used as a model for the image QListView
+ */
 
 class irtkImageListModel : public QAbstractListModel
 {
     Q_OBJECT
 
+    /// List of all images loaded on the application
     QList<irtkQtImageObject*> _imageList;
 
 public:
+
     /// Model for list view
     irtkImageListModel(QObject *parent = 0);
 

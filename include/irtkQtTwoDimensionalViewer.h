@@ -3,8 +3,6 @@
 
 #include <irtkQtBaseViewer.h>
 
-#include <QtConcurrentMap>
-
 
 class irtkQtTwoDimensionalViewer : public irtkQtBaseViewer
 {
@@ -30,32 +28,37 @@ public:
     /// Class destructor
     ~irtkQtTwoDimensionalViewer();
 
-    /// Get the array of RGB values to be drawn on the screen
+    /// If two images are visible, view only the first one
     QRgb** GetOnlyADrawable();
 
+    /// If two images are visible, view only the second one
     QRgb** GetOnlyBDrawable();
 
+    /// If two images are visible, view both of them with a horizontal shutter
     QRgb** GetHShutterDrawable();
 
+    /// If two images are visible, view both of them with a vertical shutter
     QRgb** GetVShutterDrawable();
 
+    /// If two images are visible, view the result of their subtraction
     QRgb** GetSubtractionDrawable();
 
+    /// Blend the images using their opacity values
     vector<QRgb**> GetBlendDrawable();
 
     /// Set interpolation method
     void SetInterpolationMethod(int index, irtkQtImageObject::irtkQtInterpolationMode mode);
 
-    /// Calculate the output image from the transformation
+    /// Calculate the output images from the transformations
     void CalculateOutputImages();
 
-    /// Calculate single output image from the transformation
+    /// Calculate a single output image from a transformation
     void CalculateCurrentOutput();
 
-    /// Initialize the transformation from the input to the output image
+    /// Initialize the transformations from the input to the output images
     void InitializeTransformation();
 
-    /// Initialize single transformation from the input to the output image
+    /// Initialize a single transformation from the input to the output image
     void InitializeCurrentTransformation();
 
     /// Move image with key previousKey to newKey
@@ -67,7 +70,7 @@ public:
     /// Get the labels displayed on the screen
     void GetLabels(char &top, char &bottom, char &left, char &right);
 
-    /// Get the object name for the corresponding view (useful for the styling)
+    /// Get the object name for the corresponding view (used for styling)
     string GetObjectName();
 
     /// Delete all map elements and clear maps
