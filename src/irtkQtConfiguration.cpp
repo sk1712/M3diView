@@ -67,6 +67,7 @@ void irtkQtConfiguration::ReadViewers(QXmlStreamReader &xmlReader) {
                 _viewerList.back().linked = (attr.value("linked").toString() == "true");
                 _viewerList.back().labelsVisible = (attr.value("labelsVisible").toString() == "true");
                 _viewerList.back().cursorVisible = (attr.value("cursorVisible").toString() == "true");
+                _viewerList.back().imageOriginVisible = (attr.value("originVisible").toString() == "true");
             }
             else if (xmlReader.name() == "type") {
                 _viewerList.back().type = xmlReader.readElementText();
@@ -137,6 +138,8 @@ void irtkQtConfiguration::WriteViewers(QXmlStreamWriter &xmlWriter) {
                                  (v_it->labelsVisible) ? "true" : "false");
         xmlWriter.writeAttribute("cursorVisible",
                                  (v_it->cursorVisible) ? "true" : "false");
+        xmlWriter.writeAttribute("originVisible",
+                                 (v_it->imageOriginVisible) ? "true" : "false");
         xmlWriter.writeAttribute("linked",
                                  (v_it->linked) ? "true" : "false");
 

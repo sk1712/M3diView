@@ -21,6 +21,7 @@ struct irtkQtConfigurationViewer {
     QString type;
     bool cursorVisible;
     bool labelsVisible;
+    bool imageOriginVisible;
     bool fullScreen;
     bool linked;
     double origin[3];

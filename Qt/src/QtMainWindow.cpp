@@ -588,6 +588,7 @@ void QtMainWindow::createConfigurationViewerList() {
         }
 
         viewer.fullScreen = singleViewerInScreen && viewerWidgets[i]->isVisible();
+        viewer.imageOriginVisible = viewerWidgets[i]->imageOriginVisible();
         viewer.linked = viewerWidgets[i]->isLinked();
 
         viewers[i]->GetOrigin(viewer.origin[0], viewer.origin[1], viewer.origin[2]);
@@ -671,6 +672,7 @@ void QtMainWindow::loadConfigurationViewerList() {
             viewerWidget->setLabelsVisible(it->labelsVisible);
         }
 
+        viewerWidgets.back()->setImageOriginVisible(it->imageOriginVisible);
         viewerWidgets.back()->setLinked(it->linked);
         if (it->fullScreen) viewerWidgets.back()->expandWindow();
 
