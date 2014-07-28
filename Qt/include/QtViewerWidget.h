@@ -40,6 +40,9 @@ protected:
     /// Save screenshot action
     QAction *saveScreenshotAction;
 
+    /// Show image origin action
+    QAction *showImageOriginAction;
+
     /// Flag for window expanded
     bool expanded;
 
@@ -69,11 +72,14 @@ public:
     /// Set viewer's flags for inverted axes
     virtual void setInvertedAxes(bool* inverted);
 
-    /// Set world origin to display
-    void setWorldOrigin(double x, double y, double z);
-
     /// Set viewer enabled
     virtual void setEnabled(bool enabled) = 0;
+
+    /// Get whether origin is visible
+    bool imageOriginVisible() const;
+
+    /// Set whether image origin is visible
+    void setImageOriginVisible(const bool visible);
 
 public slots:
 
@@ -101,6 +107,9 @@ protected slots:
 
     /// Save screenshot of current viewer
     void saveScreenshot();
+
+    /// Toggle image origin visible
+    void toggleImageOriginVisible(bool checked);
 
 signals:
 

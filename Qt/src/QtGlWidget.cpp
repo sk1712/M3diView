@@ -3,12 +3,15 @@
 #include <QMouseEvent>
 #include <QWheelEvent>
 #include <QKeyEvent>
-
+#include <iostream>
 
 QtGlWidget::QtGlWidget(QWidget *parent)
     : QGLWidget(parent) {
     setAttribute(Qt::WA_AcceptTouchEvents);
     pixelRatio = windowHandle()->devicePixelRatio();
+
+    imageWorldOrigin = "";
+    imageOriginVisible = true;
 }
 
 QSize QtGlWidget::sizeHint() const {
@@ -33,9 +36,28 @@ QImage QtGlWidget::getDisplayedImage() {
     return this->grabFrameBuffer();
 }
 
+void QtGlWidget::setWorldOrigin(const double x, const double y, const double z) {
+    imageWorldOrigin = "World : " + QString::number(x) +
+                             ", " + QString::number(y) +
+                             ", " + QString::number(z);
+}
+
+void QtGlWidget::setImageOriginVisible(const bool visible) {
+    imageOriginVisible = visible;
+    update();
+}
+
 void QtGlWidget::updateDrawable(QVector<QRgb**> drawable) {
     deleteDrawable();
     _drawable = drawable;
+}
+
+void QtGlWidget::drawImageOrigin() {
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+    qglColor(Qt::green);
+    QFont arialFont("Arial", 10, QFont::Bold, false);
+
+    renderText(5, 10, imageWorldOrigin, arialFont);
 }
 
 void QtGlWidget::mousePressEvent(QMouseEvent *event) {

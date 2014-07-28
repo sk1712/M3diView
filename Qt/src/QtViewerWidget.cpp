@@ -28,6 +28,14 @@ void QtViewerWidget::setInvertedAxes(bool *) {
 
 }
 
+bool QtViewerWidget::imageOriginVisible() const {
+    return showImageOriginAction->isChecked();
+}
+
+void QtViewerWidget::setImageOriginVisible(const bool visible) {
+    showImageOriginAction->setChecked(visible);
+}
+
 void QtViewerWidget::expandWindow() {
     expanded = !expanded;
 
@@ -41,12 +49,6 @@ void QtViewerWidget::expandWindow() {
     }
 
     emit windowExpanded();
-}
-
-void QtViewerWidget::setWorldOrigin(double x, double y, double z) {
-    originLabel->setText("World : " + QString::number(x) +
-                         ", " + QString::number(y) +
-                         ", " + QString::number(z));
 }
 
 void QtViewerWidget::paintEvent(QPaintEvent *) {
@@ -88,6 +90,11 @@ void QtViewerWidget::createToolButtons() {
     saveScreenshotAction = new QAction(tr("Save Image As..."), this);
     saveScreenshotAction->setIcon(QIcon(":/icons/save_as.png"));
     settingsMenu->addAction(saveScreenshotAction);
+
+    showImageOriginAction = new QAction(tr("Show Image Origin"), this);
+    showImageOriginAction->setCheckable(true);
+    showImageOriginAction->setChecked(true);
+    settingsMenu->addAction(showImageOriginAction);
 }
 
 void QtViewerWidget::connectSignals() {
@@ -96,6 +103,7 @@ void QtViewerWidget::connectSignals() {
     connect(deleteToolButton, SIGNAL(clicked()), this, SLOT(deleteWindow()));
 
     connect(saveScreenshotAction, SIGNAL(triggered()), this, SLOT(saveScreenshot()));
+    connect(showImageOriginAction, SIGNAL(toggled(bool)), this, SLOT(toggleImageOriginVisible(bool)));
 }
 
 void QtViewerWidget::deleteWindow() {
@@ -119,4 +127,8 @@ void QtViewerWidget::saveScreenshot() {
     else {
         qCritical("Could not save screenshot in %s", qPrintable(fileName));
     }
+}
+
+void QtViewerWidget::toggleImageOriginVisible(bool checked) {
+    getGlWidget()->setImageOriginVisible(checked);
 }

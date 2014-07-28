@@ -58,6 +58,7 @@ void QtTwoDimensionalGlWidget::paintGL() {
     if (!_drawable.empty()) drawImage();
     if (cursorVisible) drawCursor();
     if (labelsVisible) drawLabels();
+    if (imageOriginVisible && !_drawable.empty()) drawImageOrigin();
 }
 
 void QtTwoDimensionalGlWidget::drawImage() const {

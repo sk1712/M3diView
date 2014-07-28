@@ -29,6 +29,12 @@ protected:
     /// Device pixel ratio (=2 for retina display)
     int pixelRatio;
 
+    /// Image origin in world coordinates string
+    QString imageWorldOrigin;
+
+    /// Image origin visible flag
+    bool imageOriginVisible;
+
 public:
 
     /// Class constructor
@@ -49,6 +55,12 @@ public:
     /// Get image displayed in widget as QImage
     QImage getDisplayedImage();
 
+    /// Set world origin to display
+    void setWorldOrigin(const double x, const double y, const double z);
+
+    /// Set image origin visible
+    void setImageOriginVisible(const bool);
+
     /// Function to be implemented by all derived classes
     virtual void drawImage() const = 0;
 
@@ -61,6 +73,9 @@ protected:
 
     /// Delete the drawable
     virtual void deleteDrawable() = 0;
+
+    /// Draw image origin on screen
+    void drawImageOrigin();
 
     /// Function handling mouse press events
     void mousePressEvent(QMouseEvent *event);

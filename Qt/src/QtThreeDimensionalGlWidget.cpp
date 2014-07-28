@@ -86,6 +86,8 @@ void QtThreeDimensionalGlWidget::paintGL() {
         drawImage();
         drawBorders();
     }
+
+    if (imageOriginVisible && !_drawable.empty()) drawImageOrigin();
 }
 
 void QtThreeDimensionalGlWidget::rotate() {

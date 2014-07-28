@@ -536,6 +536,10 @@ void QtMainWindow::setUpViewerWidgets() {
         viewerWidget->setMaximumSlice(viewer->GetSliceNumber());
         viewerWidget->setInvertedAxes(viewer->GetAxisInverted());
         viewerWidget->setCurrentSlice(viewer->GetCurrentSlice());
+
+        double originX, originY, originZ;
+        viewer->GetOrigin(originX, originY, originZ);
+        viewerWidget->getGlWidget()->setWorldOrigin(originX, originY, originZ);
     }
 
     // Re-register the viewers' signals
@@ -779,6 +783,10 @@ void QtMainWindow::viewImages() {
     viewerWidget->setInvertedAxes(viewer->GetAxisInverted());
     viewerWidget->setMaximumSlice(viewer->GetSliceNumber());
     viewerWidget->setCurrentSlice(viewer->GetCurrentSlice());
+
+    double originX, originY, originZ;
+    viewer->GetOrigin(originX, originY, originZ);
+    viewerWidget->getGlWidget()->setWorldOrigin(originX, originY, originZ);
     viewerWidget->getGlWidget()->updateDrawable(
                 QVector<QRgb**>::fromStdVector(viewer->GetDrawable()));
 
@@ -1052,13 +1060,10 @@ void QtMainWindow::updateOrigin(double x, double y, double z) {
 
         if ( viewerWidget->getGlWidget()->isEnabled() &&
              ( (isSenderLinked && viewerWidget->isLinked()) || (viewer == senderViewer) ) ) {
+            viewerWidget->getGlWidget()->setWorldOrigin(x, y, z);
             viewerWidget->setCurrentSlice(viewer->GetCurrentSlice());
             viewerWidget->getGlWidget()->updateDrawable(
                         QVector<QRgb**>::fromStdVector(viewer->GetDrawable()));
-
-            double originX, originY, originZ;
-            viewer->GetOrigin(originX, originY, originZ);
-            viewerWidget->setWorldOrigin(originX, originY, originZ);
         }
     }
 
