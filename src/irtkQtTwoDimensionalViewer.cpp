@@ -290,7 +290,7 @@ void irtkQtTwoDimensionalViewer::CalculateOutputImages() {
     irtkImageAttributes attr = InitializeAttributes();
 
     map<int, irtkGreyImage *>::iterator it;
-    for (it = _imageOutput.begin(); it != _imageOutput.end(); it++) {
+    for (it = _imageOutput.begin(); it != _imageOutput.end(); ++it) {
         it->second->Initialize(attr);
     }
 
@@ -299,7 +299,7 @@ void irtkQtTwoDimensionalViewer::CalculateOutputImages() {
 
     irtkImageTransformation* transformFilter;
     map<int, irtkImageTransformation *>::iterator trit;
-    for (trit = _transformFilter.begin(); trit != _transformFilter.end(); trit++) {
+    for (trit = _transformFilter.begin(); trit != _transformFilter.end(); ++trit) {
         transformFilter = trit->second;
         threads[t_index] = QtConcurrent::run(CalculateSingleTransform, transformFilter);
         t_index++;
@@ -322,7 +322,7 @@ void irtkQtTwoDimensionalViewer::CalculateCurrentOutput() {
 
 void irtkQtTwoDimensionalViewer::InitializeTransformation() {
     map<int, irtkImage*>::iterator it;
-    for (it = _image.begin(); it != _image.end(); it++) {
+    for (it = _image.begin(); it != _image.end(); ++it) {
         currentIndex = it->first;
         InitializeCurrentTransformation();
     }

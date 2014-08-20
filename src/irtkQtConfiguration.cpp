@@ -98,7 +98,7 @@ void irtkQtConfiguration::WriteImages(QXmlStreamWriter &xmlWriter) {
     xmlWriter.writeStartElement("images");
 
     QList<irtkQtImageObject*>::iterator it;
-    for (it = _imageObjectList.begin(); it != _imageObjectList.end(); it++) {
+    for (it = _imageObjectList.begin(); it != _imageObjectList.end(); ++it) {
         xmlWriter.writeStartElement("image");
 
         if ((*it)->IsVisible()) {
@@ -129,7 +129,7 @@ void irtkQtConfiguration::WriteViewers(QXmlStreamWriter &xmlWriter) {
     xmlWriter.writeStartElement("viewers");
 
     QList<irtkQtConfigurationViewer>::iterator v_it;
-    for (v_it = _viewerList.begin(); v_it != _viewerList.end(); v_it++) {
+    for (v_it = _viewerList.begin(); v_it != _viewerList.end(); ++v_it) {
         xmlWriter.writeStartElement("viewer");
 
         xmlWriter.writeAttribute("fullScreen",

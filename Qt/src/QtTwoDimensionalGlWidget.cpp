@@ -66,7 +66,7 @@ void QtTwoDimensionalGlWidget::drawImage() const {
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     // Draw last image in the list first and the others on top of it
-    for (rit = _drawable.constEnd()-1; rit >= _drawable.constBegin(); rit--) {
+    for (rit = _drawable.constEnd()-1; rit >= _drawable.constBegin(); --rit) {
         // Set raster position
         glRasterPos2f(0, 0);
         // Draw pixelmap

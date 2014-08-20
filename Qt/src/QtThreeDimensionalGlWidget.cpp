@@ -99,7 +99,7 @@ void QtThreeDimensionalGlWidget::rotate() {
 void QtThreeDimensionalGlWidget::deleteDrawable() {
     QVector<QRgb**>::iterator it;
 
-    for (it = _drawable.begin(); it != _drawable.end(); it++) {
+    for (it = _drawable.begin(); it != _drawable.end(); ++it) {
         for (int i = 0; i < 3; i++)
             delete [] (*it)[i];
         delete [] (*it);

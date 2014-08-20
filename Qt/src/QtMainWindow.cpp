@@ -54,7 +54,7 @@ void QtMainWindow::loadImages(const QStringList &fileList) {
 
     // Create an irtkImageObject for each new image
     QStringList::const_iterator it;
-    for (it = fileList.constBegin(); it != fileList.constEnd(); it++) {
+    for (it = fileList.constBegin(); it != fileList.constEnd(); ++it) {
         if ( !imageInList(*it) ) {
             qDebug("Creating image for file %s", qPrintable((*it)));
             instance->CreateImage((*it));
@@ -313,7 +313,7 @@ void QtMainWindow::connectViewerSignals() {
 
 void QtMainWindow::disableViewerWidgets() {
     QList<QtViewerWidget*>::iterator it;
-    for (it = viewerWidgets.begin(); it != viewerWidgets.end(); it++) {
+    for (it = viewerWidgets.begin(); it != viewerWidgets.end(); ++it) {
         (*it)->setEnabled(false);
     }
 }
@@ -376,7 +376,7 @@ void QtMainWindow::clearLists() {
 bool QtMainWindow::imageInList(const QString fileName) const {
     QList<irtkQtImageObject*> list = irtkQtConfiguration::Instance()->GetImageObjectList();
     QList<irtkQtImageObject*>::const_iterator it;
-    for (it = list.constBegin(); it != list.constEnd(); it++) {
+    for (it = list.constBegin(); it != list.constEnd(); ++it) {
         if ((*it)->GetPath() == fileName) {
             // Image has already been loaded
             qDebug() << "Image " << fileName << " already in the list";
@@ -428,7 +428,7 @@ bool QtMainWindow::setDisplayedImages() {
 
     viewer->SetDimensions(glWidget->customWidth(), glWidget->customHeight());
 
-    for (it = imageList.constBegin(); it != imageList.constEnd(); it++) {
+    for (it = imageList.constBegin(); it != imageList.constEnd(); ++it) {
         if ((*it)->IsVisible()) {
             viewer->AddToDisplayedImages(*it, imageList.indexOf(*it));
             atLeastOneImageVisible = true;
@@ -469,7 +469,7 @@ void QtMainWindow::deleteSingleImage(int index) {
     disconnectViewerSignals();
 
     QList<irtkQtBaseViewer*>::iterator it;
-    for (it = viewers.begin(); it != viewers.end(); it++) {
+    for (it = viewers.begin(); it != viewers.end(); ++it) {
         (*it)->DeleteSingleImage(index);
     }
 
@@ -504,7 +504,7 @@ void QtMainWindow::deleteImages(QList<int> rowList) {
 
          // Update the map keys of the images currently displayed
          QList<irtkQtBaseViewer*>::iterator it;
-         for (it = viewers.begin(); it != viewers.end(); it++) {
+         for (it = viewers.begin(); it != viewers.end(); ++it) {
              (*it)->UpdateKeysAfterIndexDeleted(currentImageIndex);
          }
      }
@@ -606,7 +606,7 @@ void QtMainWindow::loadConfigurationImageList() {
 
     QStringList fileList;
     QList<irtkQtConfigurationImage>::iterator it;
-    for (it = imageList.begin(); it != imageList.end(); it++) {
+    for (it = imageList.begin(); it != imageList.end(); ++it) {
         fileList.push_back(it->fileName);
     }
 
@@ -652,7 +652,7 @@ void QtMainWindow::loadConfigurationViewerList() {
     viewerList = irtkQtConfiguration::Instance()->GetViewerList();
 
     QList<irtkQtConfigurationViewer>::iterator it;
-    for (it = viewerList.begin(); it != viewerList.end(); it++) {
+    for (it = viewerList.begin(); it != viewerList.end(); ++it) {
         if (it->type == "3D") {
             create3dView();
         }
@@ -719,7 +719,7 @@ void QtMainWindow::saveScreenshot() {
     int maxWidth = 0, maxHeight = 0;
     // Get the maximum viewer width and height and store viewer images in list
     QList<QtViewerWidget*>::iterator it;
-    for (it = viewerWidgets.begin(); it != viewerWidgets.end(); it++) {
+    for (it = viewerWidgets.begin(); it != viewerWidgets.end(); ++it) {
         currentImage = (*it)->getGlWidget()->getDisplayedImage();
         images.push_back(currentImage);
         if (currentImage.width() > maxWidth) maxWidth = currentImage.width();
@@ -835,7 +835,7 @@ void QtMainWindow::toggleImageVisible() {
             createMessageBox("Invalid image file " + list[currentImageIndex]->GetPath(), QMessageBox::Critical);
             list.removeAt(currentImageIndex);
             QList<irtkQtBaseViewer*>::iterator it;
-            for (it = viewers.begin(); it != viewers.end(); it++) {
+            for (it = viewers.begin(); it != viewers.end(); ++it) {
                 (*it)->UpdateKeysAfterIndexDeleted(currentImageIndex);
             }
             clickImage = false;
@@ -1130,7 +1130,7 @@ void QtMainWindow::interpolationIndexChanged(int mode) {
 
             // Update the interpolation method in the viewers
             QList<irtkQtBaseViewer*>::iterator it;
-            for (it = viewers.begin(); it != viewers.end(); it++) {
+            for (it = viewers.begin(); it != viewers.end(); ++it) {
                 (*it)->SetInterpolationMethod(index, md);
             }
 

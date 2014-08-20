@@ -290,7 +290,7 @@ vector<QRgb**> irtkQtThreeDimensionalViewer::GetBlendDrawable() {
 
 void irtkQtThreeDimensionalViewer::InitializeTransformation() {
     map<int, irtkImage*>::iterator it;
-    for (it = _image.begin(); it != _image.end(); it++) {
+    for (it = _image.begin(); it != _image.end(); ++it) {
         currentIndex = it->first;
         InitializeCurrentTransformation();
     }
@@ -376,7 +376,7 @@ void irtkQtThreeDimensionalViewer::CalculateOutputImages() {
         attr[i] = InitializeAttributes();
 
         map<int, irtkGreyImage **>::iterator image_it;
-        for (image_it = _imageOutput.begin(); image_it != _imageOutput.end(); image_it++) {
+        for (image_it = _imageOutput.begin(); image_it != _imageOutput.end(); ++image_it) {
             image_it->second[i]->Initialize(attr[i]);
         }
     }
@@ -387,7 +387,7 @@ void irtkQtThreeDimensionalViewer::CalculateOutputImages() {
 
     irtkImageTransformation** transformFilter;
     map<int, irtkImageTransformation **>::iterator trans_it;
-    for (trans_it = _transformFilter.begin(); trans_it != _transformFilter.end(); trans_it++) {
+    for (trans_it = _transformFilter.begin(); trans_it != _transformFilter.end(); ++trans_it) {
         transformFilter = trans_it->second;
         threads[t_index] = QtConcurrent::run(CalculateSingleTransform, transformFilter);
         t_index++;

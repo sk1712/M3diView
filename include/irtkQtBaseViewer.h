@@ -316,7 +316,7 @@ void irtkQtBaseViewer::MoveImageUp(map<int, T> & mymap, int previousKey, int new
     int key;
     T value;
 
-    for (it = mymap.begin(); it != mymap.end(); it++) {
+    for (it = mymap.begin(); it != mymap.end(); ++it) {
         key = it->first;
         value = it->second;
 
@@ -346,7 +346,7 @@ void irtkQtBaseViewer::MoveImageDown(map<int, T> & mymap, int previousKey, int n
     int key;
     T value;
 
-    for (it = mymap.begin(); it != mymap.end(); it++) {
+    for (it = mymap.begin(); it != mymap.end(); ++it) {
         key = it->first;
         value = it->second;
 
@@ -376,7 +376,7 @@ void irtkQtBaseViewer::UpdateKeysAfterIndexDeleted(map<int, T> & mymap, int inde
     int key;
     T value;
 
-    for (it = mymap.begin(); it != mymap.end(); it++) {
+    for (it = mymap.begin(); it != mymap.end(); ++it) {
         key = it->first;
         value = it->second;
 
