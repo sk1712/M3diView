@@ -4,11 +4,11 @@
 #include <QDockWidget>
 #include <QFileDialog>
 #include <QGridLayout>
-#include <QListView>
 #include <QMenuBar>
 #include <QScrollArea>
 #include <QTabWidget>
 #include <QToolBar>
+#include <QTreeView>
 #include <QVBoxLayout>
 
 /// free function used to calculate the output images
@@ -63,19 +63,35 @@ void QtMainWindow::loadImages(const QStringList &fileList) {
 
     // Update the image model
     delete imageModel;
-    imageModel = new irtkImageListModel(instance->GetImageObjectList());
-    imageListView->setModel(imageModel);
+    QList<irtkQtImageObject*> imageList = instance->GetImageObjectList();
+    imageModel = new irtkQtTreeModel;
+
+    if (!imageModel->insertRows(0, imageList.size()))
+        return;
+
+    for (int i = 0; i < imageList.size(); ++i) {
+        QModelIndex child = imageModel->index(i, 0);
+        createMessageBox("inserted data for index " + i);
+        QVariant value;
+        value.setValue(*imageList[i]);
+        if (!imageModel->setData(child, value, Qt::EditRole))
+            createMessageBox("something went wrong");
+    }
+
+    createMessageBox("set model data");
+
+    imageTreeView->setModel(imageModel);
 }
 
 void QtMainWindow::createDockWindows() {
     // Create image list dock widget
     QDockWidget *dock = new QDockWidget(tr("Image List"), this);
     dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    imageListView = new QListView(dock);
-    imageListView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    imageTreeView = new QTreeView(dock);
+    imageTreeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
     // Show a menu on list view right click
-    imageListView->setContextMenuPolicy(Qt::CustomContextMenu);
-    dock->setWidget(imageListView);
+    imageTreeView->setContextMenuPolicy(Qt::CustomContextMenu);
+    dock->setWidget(imageTreeView);
     addDockWidget(Qt::LeftDockWidgetArea, dock);
     viewMenu->addAction(dock->toggleViewAction());
 
@@ -219,11 +235,11 @@ void QtMainWindow::createImageMenuActions() {
 
 void QtMainWindow::connectWindowSignals() {
     // List view signals
-    connect(imageListView, SIGNAL(doubleClicked(QModelIndex)),
+    connect(imageTreeView, SIGNAL(doubleClicked(QModelIndex)),
             this, SLOT(listViewDoubleClicked(QModelIndex)));
-    connect(imageListView, SIGNAL(clicked(QModelIndex)),
+    connect(imageTreeView, SIGNAL(clicked(QModelIndex)),
             this, SLOT(listViewClicked(QModelIndex)));
-    connect(imageListView, SIGNAL(customContextMenuRequested(QPoint)),
+    connect(imageTreeView, SIGNAL(customContextMenuRequested(QPoint)),
             this, SLOT(listViewShowContextMenu(QPoint)));
 
     // Image menu signals
@@ -507,6 +523,9 @@ void QtMainWindow::deleteImages(QList<int> rowList) {
          for (it = viewers.begin(); it != viewers.end(); ++it) {
              (*it)->UpdateKeysAfterIndexDeleted(currentImageIndex);
          }
+
+         // Update the model
+         imageModel->removeRows(rowList[i], 1);
      }
 
      setUpViewerWidgets();
@@ -514,11 +533,6 @@ void QtMainWindow::deleteImages(QList<int> rowList) {
      if (numDisplayedImages == 2) {
          updateDrawables();
      }
-
-     // Update the model
-     delete imageModel;
-     imageModel = new irtkImageListModel(list);
-     imageListView->setModel(imageModel);
 }
 
 void QtMainWindow::setUpViewerWidgets() {
@@ -799,7 +813,7 @@ void QtMainWindow::viewImages() {
 void QtMainWindow::deleteSelectedImages() {
     qDebug("Deleting images");
 
-    QModelIndexList indexList = imageListView->selectionModel()->selectedIndexes();
+    QModelIndexList indexList = imageTreeView->selectionModel()->selectedIndexes();
     QList<int> rowList;
 
     // Create list with rows to be deleted
@@ -861,15 +875,11 @@ void QtMainWindow::toggleImageVisible() {
         updateDrawables();
     }
 
-    delete imageModel;
-    imageModel = new irtkImageListModel(list);
-    imageListView->setModel(imageModel);
-
     // Emulate click to show image information
     if (clickImage) {
         QModelIndex idx = imageModel->index(currentImageIndex, 0);
-        imageListView->setCurrentIndex(idx);
-        emit imageListView->clicked(idx);
+        imageTreeView->setCurrentIndex(idx);
+        emit imageTreeView->clicked(idx);
     }
 
 }
@@ -1079,7 +1089,7 @@ void QtMainWindow::minDisplayValueChanged(double value) {
            qPrintable(QString::number(value)));
 
     QList<irtkQtImageObject*> & list = irtkQtConfiguration::Instance()->GetImageObjectList();
-    int index = imageListView->currentIndex().row();
+    int index = imageTreeView->currentIndex().row();
     if (!list.empty() && index >= 0) {
         if (list[index]->IsVisible()) {
             list[index]->SetMinDisplayValue(value);
@@ -1093,7 +1103,7 @@ void QtMainWindow::maxDisplayValueChanged(double value) {
            qPrintable(QString::number(value)));
 
     QList<irtkQtImageObject*> & list = irtkQtConfiguration::Instance()->GetImageObjectList();
-    int index = imageListView->currentIndex().row();
+    int index = imageTreeView->currentIndex().row();
     if (!list.empty() && index >= 0) {
         if (list[index]->IsVisible()) {
             list[index]->SetMaxDisplayValue(value);
@@ -1106,7 +1116,7 @@ void QtMainWindow::colormapIndexChanged(int mode) {
     qDebug("Colormap changed");
 
     QList<irtkQtImageObject*> & list = irtkQtConfiguration::Instance()->GetImageObjectList();
-    int index = imageListView->currentIndex().row();
+    int index = imageTreeView->currentIndex().row();
     if (!list.empty() && index >= 0) {
         if (list[index]->IsVisible()) {
             list[index]->SetColormap(static_cast<irtkQtLookupTable::irtkColorMode>(mode));
@@ -1122,7 +1132,7 @@ void QtMainWindow::interpolationIndexChanged(int mode) {
     irtkQtImageObject::irtkQtInterpolationMode md =
             static_cast<irtkQtImageObject::irtkQtInterpolationMode>(mode);
 
-    int index = imageListView->currentIndex().row();
+    int index = imageTreeView->currentIndex().row();
     if (!list.empty() && index >= 0) {
         if (list[index]->IsVisible()) {
             // Update interpolation info in irtkQtImageObject
@@ -1143,7 +1153,7 @@ void QtMainWindow::opacityValueChanged(int value) {
     qDebug("Opacity value changed");
 
     QList<irtkQtImageObject*> & list = irtkQtConfiguration::Instance()->GetImageObjectList();
-    int index = imageListView->currentIndex().row();
+    int index = imageTreeView->currentIndex().row();
     if (!list.empty() && index >= 0) {
         if (list[index]->IsVisible()) {
             list[index]->SetOpacity(value);
@@ -1188,15 +1198,15 @@ void QtMainWindow::listViewClicked(QModelIndex index) {
 void QtMainWindow::listViewShowContextMenu(const QPoint &pos) {
     if (imageModel) {
         QMenu imageMenu;
-        QPoint globalPos = imageListView->mapToGlobal(pos);
+        QPoint globalPos = imageTreeView->mapToGlobal(pos);
 
-        int selectedCount = imageListView->selectionModel()->selectedIndexes().size();
+        int selectedCount = imageTreeView->selectionModel()->selectedIndexes().size();
 
         if ( selectedCount < 1 ) {
             return;
         }
         if ( selectedCount == 1) {
-            currentImageIndex = imageListView->indexAt(pos).row();
+            currentImageIndex = imageTreeView->indexAt(pos).row();
             imageMenu.addAction(toggleVisibleAction);
             if (irtkQtConfiguration::Instance()->GetImageObjectList().at(currentImageIndex)->IsVisible()) {
                 toggleVisibleAction->setChecked(true);
@@ -1216,15 +1226,15 @@ void QtMainWindow::moveImageUp() {
     qDebug("Moving image up");
 
     QList<irtkQtImageObject*> & list = irtkQtConfiguration::Instance()->GetImageObjectList();
-    int index = imageListView->currentIndex().row();
+    int index = imageTreeView->currentIndex().row();
     if (!list.empty() && index > 0) {
         list.move(index, index-1);
 
         delete imageModel;
-        imageModel = new irtkImageListModel(list);
-        imageListView->setModel(imageModel);
+        imageModel = new irtkQtTreeModel();
+        imageTreeView->setModel(imageModel);
 
-        imageListView->setCurrentIndex(imageModel->index(index-1, 0));
+        imageTreeView->setCurrentIndex(imageModel->index(index-1, 0));
 
         for (int i = 0; i < viewers.size(); i++) {
             viewers[i]->MoveImage(index, index-1);
@@ -1239,15 +1249,15 @@ void QtMainWindow::moveImageDown() {
     qDebug("Moving image down");
 
     QList<irtkQtImageObject*> & list = irtkQtConfiguration::Instance()->GetImageObjectList();
-    int index = imageListView->currentIndex().row();
+    int index = imageTreeView->currentIndex().row();
     if (!list.empty() && index >= 0 && (index < list.size() - 1)) {
         list.move(index, index+1);
 
         delete imageModel;
-        imageModel = new irtkImageListModel(list);
-        imageListView->setModel(imageModel);
+        imageModel = new irtkQtTreeModel();
+        imageTreeView->setModel(imageModel);
 
-        imageListView->setCurrentIndex(imageModel->index(index+1, 0));
+        imageTreeView->setCurrentIndex(imageModel->index(index+1, 0));
 
         for (int i = 0; i < viewers.size(); i++) {
             viewers[i]->MoveImage(index, index+1);

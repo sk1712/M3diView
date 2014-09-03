@@ -33,7 +33,8 @@ set(VIEWER_HEADERS
 ../include/QtMainWindow.h
 ../include/QtToolWidget.h
 ../include/QtInfoWidget.h
-../../include/irtkImageListModel.h
+../../include/irtkQtTreeItem.h
+../../include/irtkQtTreeModel.h
 ../../include/irtkQtImageObject.h
 ../../include/irtkQtConfiguration.h
 ../../include/irtkQtBaseViewer.h
@@ -52,7 +53,8 @@ Qt3dViewerWidget.cpp
 QtMainWindow.cpp
 QtToolWidget.cpp
 QtInfoWidget.cpp
-../../src/irtkImageListModel.cpp
+../../src/irtkQtTreeItem.cpp
+../../src/irtkQtTreeModel.cpp
 ../../src/irtkQtImageObject.cpp
 ../../src/irtkQtConfiguration.cpp
 ../../src/irtkQtBaseViewer.cpp

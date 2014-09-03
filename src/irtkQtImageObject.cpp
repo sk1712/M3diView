@@ -5,21 +5,19 @@
 // Initialize static interpolation string list
 QStringList irtkQtImageObject::_interpolationStringList;
 
-irtkQtImageObject::irtkQtImageObject(const QString &path)
-    : _path(path)
-{
-    QFileInfo file(path);
-    _fileName = file.fileName();
-
-    _visible = false;
-
-    _image = NULL;
-    _lookupTable = NULL;
-}
+irtkQtImageObject::irtkQtImageObject()
+    : _visible(false), _image(NULL), _lookupTable(NULL)
+{}
 
 irtkQtImageObject::~irtkQtImageObject() {
     delete _image;
     delete _lookupTable;
+}
+
+void irtkQtImageObject::setImagePath(const QString &path) {
+    _path = path;
+    QFileInfo file(path);
+    _fileName = file.fileName();
 }
 
 void irtkQtImageObject::SetInterpolationModeList() {

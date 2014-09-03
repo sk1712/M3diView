@@ -1,7 +1,7 @@
 #ifndef QTMAINWINDOW_H
 #define QTMAINWINDOW_H
 
-#include <irtkImageListModel.h>
+#include <irtkQtTreeModel.h>
 #include <irtkQtConfiguration.h>
 
 #include <Qt2dViewerWidget.h>
@@ -12,7 +12,7 @@
 #include <QMainWindow>
 #include <QMessageBox>
 
-class QListView;
+class QTreeView;
 class QTabWidget;
 
 
@@ -21,7 +21,7 @@ class QtMainWindow : public QMainWindow
     Q_OBJECT
 
     /// Main window widgets
-    QListView *imageListView;
+    QTreeView *imageTreeView;
     QTabWidget *toolsTabWidget;
     QWidget *mainViewWidget;
 
@@ -72,7 +72,7 @@ class QtMainWindow : public QMainWindow
     QList<irtkQtBaseViewer*> viewers;
 
     /// Model for list view
-    irtkImageListModel *imageModel;
+    irtkQtTreeModel *imageModel;
 
     /// Flag for only one viewer visible
     bool singleViewerInScreen;

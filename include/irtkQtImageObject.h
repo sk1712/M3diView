@@ -6,6 +6,7 @@
 
 #include <irtkQtLookupTable.h>
 
+#include <QMetaType>
 #include <QString>
 
 /*
@@ -14,6 +15,7 @@
 
 class irtkQtImageObject
 {
+
 public:
 
     /// Interpolation modes
@@ -47,10 +49,13 @@ private:
 public:
 
     /// Image object constructor
-    irtkQtImageObject(const QString &path);
+    irtkQtImageObject();
 
     /// Image object destructor
     ~irtkQtImageObject();
+
+    /// Set image path
+    void setImagePath(const QString &path);
 
     /// Fill the values of _interpolationStringList
     static void SetInterpolationModeList();
@@ -120,6 +125,7 @@ public:
 
 };
 
+Q_DECLARE_METATYPE(irtkQtImageObject)
 
 inline bool irtkQtImageObject::IsVisible() const {
     return _visible;
