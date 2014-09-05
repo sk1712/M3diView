@@ -125,7 +125,7 @@ public:
 
 };
 
-Q_DECLARE_METATYPE(irtkQtImageObject)
+Q_DECLARE_METATYPE(irtkQtImageObject*)
 
 inline bool irtkQtImageObject::IsVisible() const {
     return _visible;

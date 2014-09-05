@@ -1,12 +1,12 @@
 #include <irtkQtTreeItem.h>
 
-irtkQtTreeItem::irtkQtTreeItem(QVector<QVariant> &data, irtkQtTreeItem *parent) {
-    parentItem = parent;
-    itemData = data;
-}
+irtkQtTreeItem::irtkQtTreeItem(irtkQtImageObject * const data, irtkQtTreeItem *parent)
+    : itemData(data), parentItem(parent)
+{}
 
 irtkQtTreeItem::~irtkQtTreeItem() {
     qDeleteAll(childItems);
+    delete itemData;
 }
 
 void irtkQtTreeItem::appendChild(irtkQtTreeItem *item) {
@@ -22,11 +22,11 @@ int irtkQtTreeItem::childCount() const {
 }
 
 int irtkQtTreeItem::columnCount() const {
-    return itemData.count();
+    return 1;
 }
 
-QVariant irtkQtTreeItem::data(int column) const {
-    return itemData.value(column);
+irtkQtImageObject* irtkQtTreeItem::data(int /*column*/) const {
+    return itemData;
 }
 
 int irtkQtTreeItem::childIndex() const {
@@ -40,12 +40,12 @@ irtkQtTreeItem* irtkQtTreeItem::parent() {
     return parentItem;
 }
 
-bool irtkQtTreeItem::insertChildren(int position, int count, int columns) {
+bool irtkQtTreeItem::insertChildren(int position, int count, int /*columns*/) {
     if (position < 0 || position > childItems.size())
         return false;
 
     for (int row = 0; row < count; ++row) {
-        QVector<QVariant> data;
+        irtkQtImageObject* data = NULL;
         irtkQtTreeItem *item = new irtkQtTreeItem(data, this);
         childItems.insert(position, item);
     }
@@ -63,11 +63,11 @@ bool irtkQtTreeItem::removeChildren(int position, int count) {
     return true;
 }
 
-bool irtkQtTreeItem::setData(int column, const QVariant &value) {
-    if (column < 0 || column > itemData.size()) {
+bool irtkQtTreeItem::setData(int column, irtkQtImageObject * const value) {
+    if (column != 0) {
         return false;
     }
 
-    itemData[column] = value;
+    itemData = value;
     return true;
 }

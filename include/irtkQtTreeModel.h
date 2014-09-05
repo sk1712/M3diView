@@ -11,6 +11,8 @@ class irtkQtTreeModel : public QAbstractItemModel
 
     irtkQtTreeItem *rootItem;
 
+    QVector<QString> header;
+
 public:
 
     irtkQtTreeModel(QObject *parent = 0);
@@ -32,7 +34,7 @@ public:
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
-    bool setData(const QModelIndex &index, const QVariant &value, int role);
+    bool setData(const QModelIndex &index, irtkQtImageObject * const value, int role);
 
     bool insertRows(int row, int count,
                     const QModelIndex &parent = QModelIndex());

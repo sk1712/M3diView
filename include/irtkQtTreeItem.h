@@ -5,19 +5,19 @@
 
 #include <QList>
 #include <QVariant>
-#include <QVector>
+
 
 class irtkQtTreeItem {
 
     QList<irtkQtTreeItem*> childItems;
 
-    QVector<QVariant> itemData;
+    irtkQtImageObject *itemData;
 
     irtkQtTreeItem *parentItem;
 
 public:
 
-    irtkQtTreeItem(QVector<QVariant> &data, irtkQtTreeItem *parent = 0);
+    irtkQtTreeItem(irtkQtImageObject * const data, irtkQtTreeItem *parent = 0);
 
     ~irtkQtTreeItem();
 
@@ -29,7 +29,7 @@ public:
 
     int columnCount() const;
 
-    QVariant data(int column) const;
+    irtkQtImageObject* data(int column = 0) const;
 
     int childIndex() const;
 
@@ -39,7 +39,7 @@ public:
 
     bool removeChildren(int position, int count);
 
-    bool setData(int column, const QVariant &value);
+    bool setData(int column, irtkQtImageObject * const value);
 };
 
 #endif // IRTKQTTREEITEM_H

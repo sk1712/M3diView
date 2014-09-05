@@ -70,15 +70,11 @@ void QtMainWindow::loadImages(const QStringList &fileList) {
         return;
 
     for (int i = 0; i < imageList.size(); ++i) {
-        QModelIndex child = imageModel->index(i, 0);
-        createMessageBox("inserted data for index " + i);
-        QVariant value;
-        value.setValue(*imageList[i]);
-        if (!imageModel->setData(child, value, Qt::EditRole))
-            createMessageBox("something went wrong");
+        QModelIndex child = imageModel->index(i, 0, QModelIndex());
+        if (!imageModel->setData(child, imageList[i], Qt::EditRole))
+            qCritical("Could not add image %s to list",
+                      qPrintable(imageList[i]->GetPath()));
     }
-
-    createMessageBox("set model data");
 
     imageTreeView->setModel(imageModel);
 }
@@ -515,17 +511,17 @@ void QtMainWindow::deleteImages(QList<int> rowList) {
              deleteSingleImage(currentImageIndex);
          }
 
-         // Delete item from the list
-         delete list.takeAt(currentImageIndex);
+         // Update the model
+         imageModel->removeRows(rowList[i], 1);
+
+         // Remove item from the list
+         list.removeAt(currentImageIndex);
 
          // Update the map keys of the images currently displayed
          QList<irtkQtBaseViewer*>::iterator it;
          for (it = viewers.begin(); it != viewers.end(); ++it) {
              (*it)->UpdateKeysAfterIndexDeleted(currentImageIndex);
          }
-
-         // Update the model
-         imageModel->removeRows(rowList[i], 1);
      }
 
      setUpViewerWidgets();

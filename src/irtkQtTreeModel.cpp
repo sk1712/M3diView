@@ -5,9 +5,9 @@
 irtkQtTreeModel::irtkQtTreeModel(QObject *parent)
     :QAbstractItemModel(parent)
 {
-    QVector<QVariant> rootData;
-    rootData << "File";
+    irtkQtImageObject *rootData = NULL;
     rootItem = new irtkQtTreeItem(rootData);
+    header << "File";
 }
 
 irtkQtTreeModel::~irtkQtTreeModel() {
@@ -19,11 +19,14 @@ QVariant irtkQtTreeModel::data(const QModelIndex &index, int role) const {
         return QVariant();
 
     irtkQtTreeItem *item = static_cast<irtkQtTreeItem*>(index.internalPointer());
-    irtkQtImageObject object = item->data(index.column()).value<irtkQtImageObject>();
+    irtkQtImageObject *object = item->data(index.column());
 
     switch (role) {
     case Qt::DisplayRole:
-        if (object.IsVisible())
+        return object->GetFileName();
+        break;
+    case Qt::DecorationRole:
+        if (object->IsVisible())
             return QIcon(":/icons/eye.png");
         else {
             QPixmap pixmap(25, 25);
@@ -33,7 +36,8 @@ QVariant irtkQtTreeModel::data(const QModelIndex &index, int role) const {
         }
         break;
     case Qt::ToolTipRole:
-        return object.GetPath();
+        return object->GetPath();
+        break;
     }
 
     return QVariant();
@@ -48,7 +52,7 @@ Qt::ItemFlags irtkQtTreeModel::flags(const QModelIndex &index) const {
 
 QVariant irtkQtTreeModel::headerData(int section, Qt::Orientation orientation, int role) const {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
-        return rootItem->data(section);
+        return header[section];
 
     return QVariant();
 }
@@ -96,22 +100,16 @@ int irtkQtTreeModel::rowCount(const QModelIndex &parent) const {
     return parentItem->childCount();
 }
 
-int irtkQtTreeModel::columnCount(const QModelIndex &parent) const {
-    if (parent.isValid())
-        return static_cast<irtkQtTreeItem*>(parent.internalPointer())->columnCount();
-    else
-        return rootItem->columnCount();
+int irtkQtTreeModel::columnCount(const QModelIndex & /* parent */) const {
+    return rootItem->columnCount();
 }
 
-bool irtkQtTreeModel::setData(const QModelIndex &index, const QVariant &value, int role) {
+bool irtkQtTreeModel::setData(const QModelIndex &index, irtkQtImageObject * const value, int role) {
     if (role != Qt::EditRole)
         return false;
 
-    cout << "about to set item" << endl;
     irtkQtTreeItem *item = getItem(index);
-    cout << "got item " << item->columnCount() << endl;
     bool result = item->setData(index.column(), value);
-    cout << "set result" << endl;
 
     return result;
 }

@@ -245,13 +245,13 @@ private slots:
     /// Callback function for opacity slider changing value
     void opacityValueChanged(int value);
 
-    /// Callback function for list view double clicked
+    /// Callback function for tree view double clicked
     void listViewDoubleClicked(QModelIndex index);
 
-    /// Callback function for list view cliked
+    /// Callback function for tree view cliked
     void listViewClicked(QModelIndex index);
 
-    /// Callback function for list view right click
+    /// Callback function for tree view right click
     void listViewShowContextMenu(const QPoint& pos);
 
     /// Callback function for moving image up in the list
