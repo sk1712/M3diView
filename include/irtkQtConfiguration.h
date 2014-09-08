@@ -55,9 +55,6 @@ class irtkQtConfiguration
     /// Assignment operator
     irtkQtConfiguration& operator=(irtkQtConfiguration const&);
 
-    /// Delete all image objects
-    void DestroyImages();
-
     /// Read image list from configuration file
     void ReadImages(QXmlStreamReader& xmlReader);
 

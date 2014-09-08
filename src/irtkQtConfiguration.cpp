@@ -11,11 +11,6 @@ irtkQtConfiguration::irtkQtConfiguration() {
     _imageObjectList.clear();
 }
 
-void irtkQtConfiguration::DestroyImages() {
-    while (!_imageObjectList.isEmpty())
-        delete _imageObjectList.takeFirst();
-}
-
 void irtkQtConfiguration::ReadImages(QXmlStreamReader &xmlReader) {
     _imageList.clear();
 
@@ -170,9 +165,7 @@ irtkQtConfiguration* irtkQtConfiguration::Instance() {
 void irtkQtConfiguration::Destroy() {
     // If there is a view instance
     if (viewInstance) {
-        // Delete all images in the list
-        viewInstance->DestroyImages();
-        // And then delete the instance itself
+        // Delete the instance
         delete viewInstance;
     }
 }

@@ -42,6 +42,9 @@ public:
     bool removeRows(int row, int count,
                     const QModelIndex &parent = QModelIndex());
 
+    bool moveRow(const QModelIndex &sourceParent, int sourceRow,
+                 const QModelIndex &destinationParent, int destinationChild);
+
 private:
 
     irtkQtTreeItem *getItem(const QModelIndex &index) const;

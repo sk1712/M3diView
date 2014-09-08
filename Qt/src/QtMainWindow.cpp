@@ -36,7 +36,7 @@ QtMainWindow::QtMainWindow() {
     singleViewerInScreen = false;
     numDisplayedImages = 0;
     currentImageIndex = -1;
-    imageModel = NULL;
+    imageModel = new irtkQtTreeModel;
 
     // By default add orthogonal and 3D view
     createOrthogonalView();
@@ -47,10 +47,14 @@ QtMainWindow::QtMainWindow() {
 QtMainWindow::~QtMainWindow() {
     clearLists();
     irtkQtConfiguration::Destroy();
+    delete imageModel;
 }
 
 void QtMainWindow::loadImages(const QStringList &fileList) {
     irtkQtConfiguration* instance = irtkQtConfiguration::Instance();
+    QList<irtkQtImageObject*> & imageList = instance->GetImageObjectList();
+
+    int imageCount = imageList.size();
 
     // Create an irtkImageObject for each new image
     QStringList::const_iterator it;
@@ -62,14 +66,10 @@ void QtMainWindow::loadImages(const QStringList &fileList) {
     }
 
     // Update the image model
-    delete imageModel;
-    QList<irtkQtImageObject*> imageList = instance->GetImageObjectList();
-    imageModel = new irtkQtTreeModel;
-
-    if (!imageModel->insertRows(0, imageList.size()))
+    if (!imageModel->insertRows(imageCount, imageList.size() - imageCount))
         return;
 
-    for (int i = 0; i < imageList.size(); ++i) {
+    for (int i = imageCount; i < imageList.size(); ++i) {
         QModelIndex child = imageModel->index(i, 0, QModelIndex());
         if (!imageModel->setData(child, imageList[i], Qt::EditRole))
             qCritical("Could not add image %s to list",
@@ -829,6 +829,10 @@ void QtMainWindow::toggleImageVisible() {
     bool visible = !list[currentImageIndex]->IsVisible();
     list[currentImageIndex]->SetVisible(visible);
 
+    QModelIndex modelIndex = imageModel->index(currentImageIndex, 0);
+    // Emit signal to update the visible icon in TreeView
+    emit imageModel->dataChanged(modelIndex, modelIndex);
+
     bool clickImage = false;
 
     // If image becomes visible display it
@@ -1226,10 +1230,7 @@ void QtMainWindow::moveImageUp() {
     if (!list.empty() && index > 0) {
         list.move(index, index-1);
 
-        delete imageModel;
-        imageModel = new irtkQtTreeModel();
-        imageTreeView->setModel(imageModel);
-
+        imageModel->moveRow(QModelIndex(), index, QModelIndex(), index - 1);
         imageTreeView->setCurrentIndex(imageModel->index(index-1, 0));
 
         for (int i = 0; i < viewers.size(); i++) {
@@ -1249,10 +1250,7 @@ void QtMainWindow::moveImageDown() {
     if (!list.empty() && index >= 0 && (index < list.size() - 1)) {
         list.move(index, index+1);
 
-        delete imageModel;
-        imageModel = new irtkQtTreeModel();
-        imageTreeView->setModel(imageModel);
-
+        imageModel->moveRow(QModelIndex(), index + 1, QModelIndex(), index);
         imageTreeView->setCurrentIndex(imageModel->index(index+1, 0));
 
         for (int i = 0; i < viewers.size(); i++) {
@@ -1297,7 +1295,7 @@ void QtMainWindow::loadConfigurationFile() {
     }
 }
 
-void QtMainWindow::saveConfigutationFile() {
+void QtMainWindow::saveConfigurationFile() {
     // Save image in the specified file
     QString fileName = QFileDialog::getSaveFileName(
                 this,tr("Save screenshot as"),

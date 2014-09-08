@@ -136,6 +136,22 @@ bool irtkQtTreeModel::removeRows(int position, int rows, const QModelIndex &pare
     return success;
 }
 
+bool irtkQtTreeModel::moveRow(const QModelIndex &sourceParent, int sourceRow,
+                              const QModelIndex &destinationParent, int destinationChild) {
+    irtkQtTreeItem *sourceItem = getItem(sourceParent);
+    irtkQtTreeItem *destinationItem = getItem(destinationParent);
+
+    bool success = false;
+
+    beginMoveRows(sourceParent, sourceRow, sourceRow + 1, destinationParent,
+                  destinationChild);
+    irtkQtTreeItem *item = sourceItem->takeChildAt(sourceRow);
+    success = destinationItem->insertChildAt(destinationChild, item);
+    endMoveRows();
+
+    return success;
+}
+
 irtkQtTreeItem *irtkQtTreeModel::getItem(const QModelIndex &index) const {
     if (index.isValid()) {
         irtkQtTreeItem *item = static_cast<irtkQtTreeItem*>(index.internalPointer());

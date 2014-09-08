@@ -35,11 +35,15 @@ public:
 
     irtkQtTreeItem *parent();
 
-    bool insertChildren(int position, int count, int columns);
+    bool insertChildren(int position, int count, int columns = 1);
 
     bool removeChildren(int position, int count);
 
     bool setData(int column, irtkQtImageObject * const value);
+
+    irtkQtTreeItem *takeChildAt(int row);
+
+    bool insertChildAt(int row, irtkQtTreeItem *childItem);
 };
 
 #endif // IRTKQTTREEITEM_H

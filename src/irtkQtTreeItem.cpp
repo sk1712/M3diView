@@ -71,3 +71,18 @@ bool irtkQtTreeItem::setData(int column, irtkQtImageObject * const value) {
     itemData = value;
     return true;
 }
+
+irtkQtTreeItem * irtkQtTreeItem::takeChildAt(int row) {
+    if (row < 0 || row > childItems.size())
+        return NULL;
+
+    return childItems.takeAt(row);
+}
+
+bool irtkQtTreeItem::insertChildAt(int row, irtkQtTreeItem *childItem) {
+    if (row < 0 || row > childItems.size())
+        return false;
+
+    childItems.insert(row, childItem);
+    return true;
+}

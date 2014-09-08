@@ -270,7 +270,7 @@ private slots:
     void loadConfigurationFile();
 
     /// Callback function for saving configuration file
-    void saveConfigutationFile();
+    void saveConfigurationFile();
 };
 
 #endif // QTMAINWINDOW_H
