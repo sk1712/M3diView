@@ -155,13 +155,13 @@ private:
     bool setDisplayedImages();
 
     /// Add single image to displayed images
-    void displaySingleImage(int index);
+    void displaySingleImage(QModelIndex index);
 
     /// Delete single image from displayed images
     void deleteSingleImage(int index);
 
     /// Delete images with indices provided in the rowList
-    void deleteImages(QList<int> rowList);
+    void deleteImages(QModelIndexList rowList);
 
     /// Set up viewer widgets
     void setUpViewerWidgets();

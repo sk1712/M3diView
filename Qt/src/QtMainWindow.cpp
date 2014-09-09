@@ -51,29 +51,27 @@ QtMainWindow::~QtMainWindow() {
 }
 
 void QtMainWindow::loadImages(const QStringList &fileList) {
-    irtkQtConfiguration* instance = irtkQtConfiguration::Instance();
-    QList<irtkQtImageObject*> & imageList = instance->GetImageObjectList();
-
-    int imageCount = imageList.size();
+    int imageCount = imageModel->rowCount(QModelIndex());
+    irtkQtImageObject *image = NULL;
 
     // Create an irtkImageObject for each new image
     QStringList::const_iterator it;
     for (it = fileList.constBegin(); it != fileList.constEnd(); ++it) {
         if ( !imageInList(*it) ) {
             qDebug("Creating image for file %s", qPrintable((*it)));
-            instance->CreateImage((*it));
+
+            image = new irtkQtImageObject();
+            image->setImagePath(*it);
+
+            // Update the image model
+            if ( !imageModel->insertRows(imageCount, 1) )
+                continue;
+
+            QModelIndex child = imageModel->index(imageCount++, 0, QModelIndex());
+            if ( !imageModel->setData(child, image, Qt::EditRole) )
+                qCritical("Could not add image %s to list",
+                          qPrintable(image->GetPath()));
         }
-    }
-
-    // Update the image model
-    if (!imageModel->insertRows(imageCount, imageList.size() - imageCount))
-        return;
-
-    for (int i = imageCount; i < imageList.size(); ++i) {
-        QModelIndex child = imageModel->index(i, 0, QModelIndex());
-        if (!imageModel->setData(child, imageList[i], Qt::EditRole))
-            qCritical("Could not add image %s to list",
-                      qPrintable(imageList[i]->GetPath()));
     }
 
     imageTreeView->setModel(imageModel);
@@ -130,7 +128,7 @@ void QtMainWindow::createToolBar() {
     toolbar->addSeparator();
 
     toolbar->addAction(moveUpAction);
-    toolbar->addAction(moveDownAction);    
+    toolbar->addAction(moveDownAction);
 }
 
 void QtMainWindow::createMenu() {
@@ -310,18 +308,18 @@ void QtMainWindow::connectViewerSignals() {
         viewer = viewers[i];
 
         connect(viewerWidget, SIGNAL(sliderValueChanged(int*)),
-                   viewer, SLOT(ChangeSlice(int*)));
+                viewer, SLOT(ChangeSlice(int*)));
         connect(viewer, SIGNAL(OriginChanged(double, double, double)),
-                   this, SLOT(updateOrigin(double, double, double)));
+                this, SLOT(updateOrigin(double, double, double)));
 
         // The following do smth only for the 2D viewer
         connect(viewerWidget->getGlWidget(), SIGNAL(resized(int, int)),
-                   viewer, SLOT(ResizeImage(int, int)));
+                viewer, SLOT(ResizeImage(int, int)));
         connect(viewer, SIGNAL(ImageResized(QVector<QRgb**>)),
-                   viewerWidget->getGlWidget(), SLOT(updateDrawable(QVector<QRgb**>)));
+                viewerWidget->getGlWidget(), SLOT(updateDrawable(QVector<QRgb**>)));
 
         connect(viewerWidget->getGlWidget(), SIGNAL(leftButtonPressed(int, int)),
-                   viewer, SLOT(ChangeOrigin(int, int)));
+                viewer, SLOT(ChangeOrigin(int, int)));
     }
 }
 
@@ -388,15 +386,16 @@ void QtMainWindow::clearLists() {
 }
 
 bool QtMainWindow::imageInList(const QString fileName) const {
-    QList<irtkQtImageObject*> list = irtkQtConfiguration::Instance()->GetImageObjectList();
-    QList<irtkQtImageObject*>::const_iterator it;
-    for (it = list.constBegin(); it != list.constEnd(); ++it) {
-        if ((*it)->GetPath() == fileName) {
+    int imageCount = imageModel->rowCount(QModelIndex());
+    for (int i = 0; i < imageCount; ++i) {
+        QModelIndex currentIdx = imageModel->index(i, 0, QModelIndex());
+        if (imageModel->data(currentIdx, Qt::ToolTipRole) == fileName) {
             // Image has already been loaded
             qDebug() << "Image " << fileName << " already in the list";
             return true;
         }
     }
+
     return false;
 }
 
@@ -437,14 +436,14 @@ bool QtMainWindow::setDisplayedImages() {
 
     bool atLeastOneImageVisible = false;
 
-    QList<irtkQtImageObject*> imageList = irtkQtConfiguration::Instance()->GetImageObjectList();
-    QList<irtkQtImageObject*>::const_iterator it;
-
+    int imageCount = imageModel->rowCount(QModelIndex());
     viewer->SetDimensions(glWidget->customWidth(), glWidget->customHeight());
 
-    for (it = imageList.constBegin(); it != imageList.constEnd(); ++it) {
-        if ((*it)->IsVisible()) {
-            viewer->AddToDisplayedImages(*it, imageList.indexOf(*it));
+    for (int i = 0; i < imageCount; ++i) {
+        irtkQtTreeItem *item = imageModel->getItem(
+                    imageModel->index(i, 0, QModelIndex()));
+        if (item->data()->IsVisible()) {
+            viewer->AddToDisplayedImages(item->data(), i);
             atLeastOneImageVisible = true;
         }
     }
@@ -452,11 +451,9 @@ bool QtMainWindow::setDisplayedImages() {
     return atLeastOneImageVisible;
 }
 
-void QtMainWindow::displaySingleImage(int index) {
+void QtMainWindow::displaySingleImage(QModelIndex index) {
     irtkQtBaseViewer *viewer;
     QtViewerWidget *viewerWidget;
-
-    QList<irtkQtImageObject*> & imageList = irtkQtConfiguration::Instance()->GetImageObjectList();
 
     // Disconnect the viewers' signals
     disconnectViewerSignals();
@@ -465,7 +462,7 @@ void QtMainWindow::displaySingleImage(int index) {
         viewer = viewers[i];
         viewerWidget = viewerWidgets[i];
 
-        viewer->AddToDisplayedImages(imageList[index], index);
+        viewer->AddToDisplayedImages(imageModel->getItem(index)->data(), index.row());
         viewerWidget->setEnabled(true);
         viewer->SetDimensions(viewerWidget->getGlWidget()->customWidth(),
                               viewerWidget->getGlWidget()->customHeight());
@@ -495,42 +492,42 @@ void QtMainWindow::deleteSingleImage(int index) {
     visualToolWidget->setEnabled(false);
 }
 
-void QtMainWindow::deleteImages(QList<int> rowList) {
-     QList<irtkQtImageObject*> & list = irtkQtConfiguration::Instance()->GetImageObjectList();
+void QtMainWindow::deleteImages(QModelIndexList rowList) {
+    int deleteCount = rowList.size();
 
-     // Start deleting images from bottom to top
-     for (int i = 0; i < rowList.size(); i++) {
-         currentImageIndex = rowList[i];
-         bool visible = list[currentImageIndex]->IsVisible();
+    // Start deleting images from bottom to top
+    for (int i = 0; i < deleteCount; i++) {
+        currentImageIndex = rowList.back().row();
+        bool visible = imageModel->getItem(rowList.back())->data()->IsVisible();
 
-         if (visible) {
-             numDisplayedImages--;
+        if (visible) {
+            numDisplayedImages--;
 
-             if (numDisplayedImages == 0) {
-                 disableViewerWidgets();
-             }
+            if (numDisplayedImages == 0) {
+                disableViewerWidgets();
+            }
 
-             deleteSingleImage(currentImageIndex);
-         }
+            deleteSingleImage(currentImageIndex);
+        }
 
-         // Update the model
-         imageModel->removeRows(rowList[i], 1);
+        // Update the model
+        imageModel->removeRows(currentImageIndex, 1, QModelIndex());
 
-         // Remove item from the list
-         list.removeAt(currentImageIndex);
+        // Update the map keys of the images currently displayed
+        QList<irtkQtBaseViewer*>::iterator it;
+        for (it = viewers.begin(); it != viewers.end(); ++it) {
+            (*it)->UpdateKeysAfterIndexDeleted(currentImageIndex);
+        }
 
-         // Update the map keys of the images currently displayed
-         QList<irtkQtBaseViewer*>::iterator it;
-         for (it = viewers.begin(); it != viewers.end(); ++it) {
-             (*it)->UpdateKeysAfterIndexDeleted(currentImageIndex);
-         }
-     }
+        rowList.pop_back();
+    }
 
-     setUpViewerWidgets();
-     visualToolWidget->onlyTwoImagesVisible(numDisplayedImages == 2);
-     if (numDisplayedImages == 2) {
-         updateDrawables();
-     }
+    setUpViewerWidgets();
+
+    visualToolWidget->onlyTwoImagesVisible(numDisplayedImages == 2);
+    if (numDisplayedImages == 2) {
+        updateDrawables();
+    }
 }
 
 void QtMainWindow::setUpViewerWidgets() {
@@ -628,9 +625,11 @@ void QtMainWindow::loadConfigurationImageList() {
     QStringList modeList = irtkQtLookupTable::GetColorModeList();
     QStringList interpolationList = irtkQtImageObject::GetInterpolationModeList();
 
-    QList<irtkQtImageObject*> & list = irtkQtConfiguration::Instance()->GetImageObjectList();
-    for (int i = 0; i < list.size(); i++) {
-        if (imageList[i].visible) {
+    int imageCount = imageModel->rowCount();
+    for (int i = 0; i < imageCount; i++) {
+        irtkQtImageObject *image = imageModel->getItem(
+                    imageModel->index(i, 0))->data();
+        if (image->IsVisible()) {
             currentImageIndex = i;
             toggleImageVisible();
 
@@ -714,10 +713,10 @@ void QtMainWindow::openImage() {
 
 void QtMainWindow::clearImages() {
     if (imageModel) {
-        QList<int> rowList;
+        QModelIndexList rowList;
 
         for (int i = 0; i < imageModel->rowCount(); i++) {
-            rowList.push_front(i);
+            rowList.push_back(imageModel->index(i, 0, QModelIndex()));
         }
 
         deleteImages(rowList);
@@ -811,27 +810,18 @@ void QtMainWindow::viewImages() {
 void QtMainWindow::deleteSelectedImages() {
     qDebug("Deleting images");
 
-    QModelIndexList indexList = imageTreeView->selectionModel()->selectedIndexes();
-    QList<int> rowList;
-
     // Create list with rows to be deleted
-    for (int i = 0; i < indexList.size(); i++) {
-        rowList.push_back(indexList[i].row());
-    }
+    QModelIndexList indexList = imageTreeView->selectionModel()->selectedIndexes();
 
-    // Sort the rows in descending order
-    qSort(rowList.begin(), rowList.end(), qGreater<int>());
-
-    deleteImages(rowList);
+    deleteImages(indexList);
 }
 
 void QtMainWindow::toggleImageVisible() {
-    QList<irtkQtImageObject*> & list = irtkQtConfiguration::Instance()->GetImageObjectList();
-
-    bool visible = !list[currentImageIndex]->IsVisible();
-    list[currentImageIndex]->SetVisible(visible);
-
     QModelIndex modelIndex = imageModel->index(currentImageIndex, 0);
+    irtkQtTreeItem *item = imageModel->getItem(modelIndex);
+    bool visible = !item->data()->IsVisible();
+    item->data()->SetVisible(visible);
+
     // Emit signal to update the visible icon in TreeView
     emit imageModel->dataChanged(modelIndex, modelIndex);
 
@@ -842,14 +832,14 @@ void QtMainWindow::toggleImageVisible() {
         qDebug("Making image visible");
 
         try {
-            list[currentImageIndex]->CreateImage();
-            displaySingleImage(currentImageIndex);
+            item->data()->CreateImage();
+            displaySingleImage(modelIndex);
             numDisplayedImages++;
             clickImage = true;
         }
         catch (irtkException) {
-            createMessageBox("Invalid image file " + list[currentImageIndex]->GetPath(), QMessageBox::Critical);
-            list.removeAt(currentImageIndex);
+            createMessageBox("Invalid image file " + item->data()->GetPath(), QMessageBox::Critical);
+            imageModel->removeRows(currentImageIndex, 1, QModelIndex());
             QList<irtkQtBaseViewer*>::iterator it;
             for (it = viewers.begin(); it != viewers.end(); ++it) {
                 (*it)->UpdateKeysAfterIndexDeleted(currentImageIndex);
@@ -867,7 +857,7 @@ void QtMainWindow::toggleImageVisible() {
             disableViewerWidgets();
         }
 
-        list[currentImageIndex]->DeleteImage();
+        item->data()->DeleteImage();
         deleteSingleImage(currentImageIndex);
     }
 
@@ -879,9 +869,8 @@ void QtMainWindow::toggleImageVisible() {
 
     // Emulate click to show image information
     if (clickImage) {
-        QModelIndex idx = imageModel->index(currentImageIndex, 0);
-        imageTreeView->setCurrentIndex(idx);
-        emit imageTreeView->clicked(idx);
+        imageTreeView->setCurrentIndex(modelIndex);
+        emit imageTreeView->clicked(modelIndex);
     }
 
 }
@@ -1090,11 +1079,11 @@ void QtMainWindow::minDisplayValueChanged(double value) {
     qDebug("Minimum display value changed to %s",
            qPrintable(QString::number(value)));
 
-    QList<irtkQtImageObject*> & list = irtkQtConfiguration::Instance()->GetImageObjectList();
-    int index = imageTreeView->currentIndex().row();
-    if (!list.empty() && index >= 0) {
-        if (list[index]->IsVisible()) {
-            list[index]->SetMinDisplayValue(value);
+    QModelIndex index = imageTreeView->currentIndex();
+    irtkQtImageObject *item = imageModel->getItem(index)->data();
+    if ( index.isValid() && (item != NULL) ) {
+        if (item->IsVisible()) {
+            item->SetMinDisplayValue(value);
             updateDrawables();
         }
     }
@@ -1104,11 +1093,11 @@ void QtMainWindow::maxDisplayValueChanged(double value) {
     qDebug("Maximum display value changed to %s",
            qPrintable(QString::number(value)));
 
-    QList<irtkQtImageObject*> & list = irtkQtConfiguration::Instance()->GetImageObjectList();
-    int index = imageTreeView->currentIndex().row();
-    if (!list.empty() && index >= 0) {
-        if (list[index]->IsVisible()) {
-            list[index]->SetMaxDisplayValue(value);
+    QModelIndex index = imageTreeView->currentIndex();
+    irtkQtImageObject *item = imageModel->getItem(index)->data();
+    if ( index.isValid() && (item != NULL) ) {
+        if (item->IsVisible()) {
+            item->SetMaxDisplayValue(value);
             updateDrawables();
         }
     }
@@ -1117,11 +1106,11 @@ void QtMainWindow::maxDisplayValueChanged(double value) {
 void QtMainWindow::colormapIndexChanged(int mode) {
     qDebug("Colormap changed");
 
-    QList<irtkQtImageObject*> & list = irtkQtConfiguration::Instance()->GetImageObjectList();
-    int index = imageTreeView->currentIndex().row();
-    if (!list.empty() && index >= 0) {
-        if (list[index]->IsVisible()) {
-            list[index]->SetColormap(static_cast<irtkQtLookupTable::irtkColorMode>(mode));
+    QModelIndex index = imageTreeView->currentIndex();
+    irtkQtImageObject *item = imageModel->getItem(index)->data();
+    if ( index.isValid() && (item != NULL) ) {
+        if (item->IsVisible()) {
+            item->SetColormap(static_cast<irtkQtLookupTable::irtkColorMode>(mode));
             updateDrawables();
         }
     }
@@ -1130,20 +1119,20 @@ void QtMainWindow::colormapIndexChanged(int mode) {
 void QtMainWindow::interpolationIndexChanged(int mode) {
     qDebug("Interpolation changed");
 
-    QList<irtkQtImageObject*> & list = irtkQtConfiguration::Instance()->GetImageObjectList();
     irtkQtImageObject::irtkQtInterpolationMode md =
             static_cast<irtkQtImageObject::irtkQtInterpolationMode>(mode);
 
-    int index = imageTreeView->currentIndex().row();
-    if (!list.empty() && index >= 0) {
-        if (list[index]->IsVisible()) {
+    QModelIndex index = imageTreeView->currentIndex();
+    irtkQtImageObject *item = imageModel->getItem(index)->data();
+    if ( index.isValid() && (item != NULL) ) {
+        if (item->IsVisible()) {
             // Update interpolation info in irtkQtImageObject
-            list[index]->SetInterpolation(md);
+            item->SetInterpolation(md);
 
             // Update the interpolation method in the viewers
             QList<irtkQtBaseViewer*>::iterator it;
             for (it = viewers.begin(); it != viewers.end(); ++it) {
-                (*it)->SetInterpolationMethod(index, md);
+                (*it)->SetInterpolationMethod(index.row(), md);
             }
 
             updateDrawables();
@@ -1154,11 +1143,11 @@ void QtMainWindow::interpolationIndexChanged(int mode) {
 void QtMainWindow::opacityValueChanged(int value) {
     qDebug("Opacity value changed");
 
-    QList<irtkQtImageObject*> & list = irtkQtConfiguration::Instance()->GetImageObjectList();
-    int index = imageTreeView->currentIndex().row();
-    if (!list.empty() && index >= 0) {
-        if (list[index]->IsVisible()) {
-            list[index]->SetOpacity(value);
+    QModelIndex index = imageTreeView->currentIndex();
+    irtkQtImageObject *item = imageModel->getItem(index)->data();
+    if ( index.isValid() && (item != NULL) ) {
+        if (item->IsVisible()) {
+            item->SetOpacity(value);
             updateDrawables();
         }
     }
@@ -1171,9 +1160,7 @@ void QtMainWindow::listViewDoubleClicked(QModelIndex index) {
 }
 
 void QtMainWindow::listViewClicked(QModelIndex index) {
-    int i = index.row();
-    QList<irtkQtImageObject*> list = irtkQtConfiguration::Instance()->GetImageObjectList();
-    irtkQtImageObject* imageObject = list[i];
+    irtkQtImageObject* imageObject = imageModel->getItem(index)->data();
 
     visualToolWidget->blockSignals(true);
 
@@ -1210,7 +1197,7 @@ void QtMainWindow::listViewShowContextMenu(const QPoint &pos) {
         if ( selectedCount == 1) {
             currentImageIndex = imageTreeView->indexAt(pos).row();
             imageMenu.addAction(toggleVisibleAction);
-            if (irtkQtConfiguration::Instance()->GetImageObjectList().at(currentImageIndex)->IsVisible()) {
+            if (imageModel->getItem(imageTreeView->indexAt(pos))->data()->IsVisible()) {
                 toggleVisibleAction->setChecked(true);
             }
             else {
@@ -1227,11 +1214,8 @@ void QtMainWindow::listViewShowContextMenu(const QPoint &pos) {
 void QtMainWindow::moveImageUp() {
     qDebug("Moving image up");
 
-    QList<irtkQtImageObject*> & list = irtkQtConfiguration::Instance()->GetImageObjectList();
     int index = imageTreeView->currentIndex().row();
-    if (!list.empty() && index > 0) {
-        list.move(index, index-1);
-
+    if (imageModel && index > 0) {
         imageModel->moveRow(QModelIndex(), index, QModelIndex(), index - 1);
         imageTreeView->setCurrentIndex(imageModel->index(index-1, 0));
 
@@ -1247,11 +1231,8 @@ void QtMainWindow::moveImageUp() {
 void QtMainWindow::moveImageDown() {
     qDebug("Moving image down");
 
-    QList<irtkQtImageObject*> & list = irtkQtConfiguration::Instance()->GetImageObjectList();
     int index = imageTreeView->currentIndex().row();
-    if (!list.empty() && index >= 0 && (index < list.size() - 1)) {
-        list.move(index, index+1);
-
+    if (imageModel && index >= 0 && (index < imageModel->rowCount() - 1)) {
         imageModel->moveRow(QModelIndex(), index + 1, QModelIndex(), index);
         imageTreeView->setCurrentIndex(imageModel->index(index+1, 0));
 
@@ -1282,9 +1263,9 @@ void QtMainWindow::loadConfigurationFile() {
     // Load configuration file
     QString selfilter = tr("XML (*.xml)");
     QString fileName = QFileDialog::getOpenFileName(this,
-                       tr("Open File"), QDir::homePath(),
-                       tr("All files (*.*);;XML (*.xml)" ),
-                       &selfilter);
+                                                    tr("Open File"), QDir::homePath(),
+                                                    tr("All files (*.*);;XML (*.xml)" ),
+                                                    &selfilter);
 
     if (irtkQtConfiguration::Instance()->Read(fileName)) {
         clearImages();

@@ -75,12 +75,6 @@ public:
     /// Delete instance of class
     static void Destroy();
 
-    /// Create image object from the given file name
-    void CreateImage(QString imageFileName);
-
-    /// Get reference to image list
-    QList<irtkQtImageObject*> & GetImageObjectList();
-
     /// Read configuration file
     bool Read(const QString fileName);
 
@@ -97,10 +91,6 @@ public:
     QList<irtkQtConfigurationViewer> GetViewerList() const;
 };
 
-
-inline QList<irtkQtImageObject*> & irtkQtConfiguration::GetImageObjectList() {
-    return _imageObjectList;
-}
 
 inline void irtkQtConfiguration::SetViewerList(QList<irtkQtConfigurationViewer> const &viewerList) {
     _viewerList = viewerList;
