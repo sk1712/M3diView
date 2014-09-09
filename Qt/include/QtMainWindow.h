@@ -57,6 +57,7 @@ class QtMainWindow : public QMainWindow
 
     /// Image actions
     QAction *toggleVisibleAction;
+    QAction *loadSegmentationAction;
     QAction *deleteImageAction;
 
     /// Visualisation tool widget

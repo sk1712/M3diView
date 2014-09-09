@@ -225,6 +225,8 @@ void QtMainWindow::createImageMenuActions() {
     toggleVisibleAction = new QAction(tr("Visible"), this);
     toggleVisibleAction->setCheckable(true);
 
+    loadSegmentationAction = new QAction(tr("Load segmentation"), this);
+
     deleteImageAction = new QAction(tr("Remove from list"), this);
     deleteImageAction->setIcon(QIcon(":/icons/erase.png"));
 }
