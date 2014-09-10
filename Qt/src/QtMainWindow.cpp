@@ -37,6 +37,7 @@ QtMainWindow::QtMainWindow() {
     numDisplayedImages = 0;
     currentImageIndex = -1;
     imageModel = new irtkQtTreeModel;
+    imageTreeView->setModel(imageModel);
 
     // By default add orthogonal and 3D view
     createOrthogonalView();
@@ -73,8 +74,6 @@ void QtMainWindow::loadImages(const QStringList &fileList) {
                           qPrintable(image->GetPath()));
         }
     }
-
-    imageTreeView->setModel(imageModel);
 }
 
 void QtMainWindow::createDockWindows() {
