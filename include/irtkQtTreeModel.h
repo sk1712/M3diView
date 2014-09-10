@@ -45,8 +45,6 @@ public:
     bool moveRow(const QModelIndex &sourceParent, int sourceRow,
                  const QModelIndex &destinationParent, int destinationChild);
 
-private:
-
     irtkQtTreeItem *getItem(const QModelIndex &index) const;
 };
 

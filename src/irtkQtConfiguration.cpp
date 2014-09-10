@@ -170,15 +170,6 @@ void irtkQtConfiguration::Destroy() {
     }
 }
 
-void irtkQtConfiguration::CreateImage(QString imageFileName) {
-    irtkQtImageObject* newImage = NULL;
-
-    // Create a new irtkQtImageObject and add it to the list
-    newImage = new irtkQtImageObject();
-    newImage->setImagePath(imageFileName);
-    _imageObjectList.append(newImage);
-}
-
 bool irtkQtConfiguration::Read(const QString fileName) {
     QFile inFile(fileName);
 
