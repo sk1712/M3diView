@@ -70,6 +70,9 @@ protected:
     /// Image lookup table map
     map<int, irtkQtLookupTable *> _lookupTable;
 
+    /// Image segmentation map
+    map<int, irtkImage*> _segmentation;
+
     /// The lookup table used for subtraction
     static irtkQtLookupTable *subtractionLookupTable;
 
@@ -166,8 +169,14 @@ public:
     /// Add image object to the maps of images to be displayed
     virtual void AddToDisplayedImages(irtkQtImageObject *imageObject, int index);
 
+    /// Add to segmentation maps
+    virtual void AddToDisplayedSegmentations(irtkQtImageObject *segmentation, int index);
+
     /// Delete single image
     virtual void DeleteSingleImage(int index);
+
+    /// Delete single segmentation
+    virtual void DeleteSingleSegmentation(int index);
 
     /// Move image with key previousKey to newKey
     virtual void MoveImage(int previousKey, int newKey);

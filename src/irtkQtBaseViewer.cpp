@@ -85,6 +85,11 @@ void irtkQtBaseViewer::AddToDisplayedImages(irtkQtImageObject *imageObject, int 
     _lookupTable.insert(pair<int, irtkQtLookupTable*> ( index, imageObject->GetLookupTable() ));
 }
 
+void irtkQtBaseViewer::AddToDisplayedSegmentations(irtkQtImageObject *segmentation, int index) {
+    irtkImage* image = segmentation->GetImage();
+    _segmentation.insert(pair<int, irtkImage*> ( index, image ));
+}
+
 void irtkQtBaseViewer::DeleteSingleImage(int index) {
     // When an image is deleted update the target image
     if (index < _image.begin()->first) {
@@ -95,6 +100,10 @@ void irtkQtBaseViewer::DeleteSingleImage(int index) {
         InitializeOrientation();
         CalculateOutputImages();
     }
+}
+
+void irtkQtBaseViewer::DeleteSingleSegmentation(int index) {
+    _segmentation.erase(index);
 }
 
 void irtkQtBaseViewer::MoveImage(int, int) {
