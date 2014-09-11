@@ -97,6 +97,9 @@ public:
 
 private:
 
+    /// Load list of segmentation files
+    void loadSegmentations(const QStringList & segmentationList);
+
     /// Create dock windows
     void createDockWindows();
 
@@ -141,6 +144,9 @@ private:
 
     /// Check if image is already loaded
     bool imageInList(const QString fileName) const;
+
+    /// Check if segmentation is already loaded
+    bool segmentationInList(const QString fileName) const;
 
     /// Add widget to mainViewWidget
     void addToViewWidget(QWidget *widget);
@@ -198,6 +204,9 @@ private slots:
     /// Callback function for toggleVisibleAction
     void toggleImageVisible();
 
+    /// Callback function for loadSegmentationAction
+    void openSegmentation();
+
     /// Callback function for zoomInAction
     void zoomIn();
 
@@ -247,13 +256,13 @@ private slots:
     void opacityValueChanged(int value);
 
     /// Callback function for tree view double clicked
-    void listViewDoubleClicked(QModelIndex index);
+    void treeViewDoubleClicked(QModelIndex index);
 
     /// Callback function for tree view cliked
-    void listViewClicked(QModelIndex index);
+    void treeViewClicked(QModelIndex index);
 
     /// Callback function for tree view right click
-    void listViewShowContextMenu(const QPoint& pos);
+    void treeViewShowContextMenu(const QPoint& pos);
 
     /// Callback function for moving image up in the list
     void moveImageUp();

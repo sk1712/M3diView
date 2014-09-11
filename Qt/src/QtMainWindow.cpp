@@ -59,30 +59,63 @@ void QtMainWindow::loadImages(const QStringList &fileList) {
     QStringList::const_iterator it;
     for (it = fileList.constBegin(); it != fileList.constEnd(); ++it) {
         if ( !imageInList(*it) ) {
-            qDebug("Creating image for file %s", qPrintable((*it)));
+            qDebug("Creating image for file %s", qPrintable(*it));
 
             image = new irtkQtImageObject();
             image->setImagePath(*it);
 
             // Update the image model
-            if ( !imageModel->insertRows(imageCount, 1) )
+            if ( !imageModel->insertRows(imageCount, 1) ) {
+                delete image;
                 continue;
+            }
 
             QModelIndex child = imageModel->index(imageCount++, 0, QModelIndex());
-            if ( !imageModel->setData(child, image, Qt::EditRole) )
+            if ( !imageModel->setData(child, image, Qt::EditRole) ) {
+                delete image;
                 qCritical("Could not add image %s to list",
                           qPrintable(image->GetPath()));
+            }
+        }
+    }
+}
+
+void QtMainWindow::loadSegmentations(const QStringList &segmentationList) {
+    QModelIndex currentIndex = imageTreeView->currentIndex();
+    int imageCount = imageModel->rowCount(currentIndex);
+    irtkQtImageObject *segmentation = NULL;
+
+    QStringList::const_iterator it;
+    for (it = segmentationList.constBegin(); it != segmentationList.constEnd(); ++it) {
+        if ( !segmentationInList(*it) ) {
+            qDebug("Creating segmentation for file %s", qPrintable(*it));
+
+            segmentation = new irtkQtImageObject();
+            segmentation->setImagePath(*it);
+
+            if ( !imageModel->insertRows(imageCount, 1, currentIndex)) {
+                delete segmentation;
+                continue;
+            }
+
+            QModelIndex child = imageModel->index(imageCount++, 0, currentIndex);
+            if ( !imageModel->setData(child, segmentation, Qt::EditRole) ) {
+                delete segmentation;
+                qCritical("Could not add segmentation %s to list",
+                          qPrintable(segmentation->GetPath()));
+            }
         }
     }
 }
 
 void QtMainWindow::createDockWindows() {
-    // Create image list dock widget
+    // Create image tree dock widget
     QDockWidget *dock = new QDockWidget(tr("Image List"), this);
     dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     imageTreeView = new QTreeView(dock);
     imageTreeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    // Show a menu on list view right click
+    imageTreeView->setExpandsOnDoubleClick(false);
+    // Show a menu on tree view right click
     imageTreeView->setContextMenuPolicy(Qt::CustomContextMenu);
     dock->setWidget(imageTreeView);
     addDockWidget(Qt::LeftDockWidgetArea, dock);
@@ -223,6 +256,7 @@ void QtMainWindow::createImageMenuActions() {
     toggleVisibleAction->setCheckable(true);
 
     loadSegmentationAction = new QAction(tr("Load segmentation"), this);
+    loadSegmentationAction->setIcon(QIcon(":/icons/add_file.png"));
 
     deleteImageAction = new QAction(tr("Remove from list"), this);
     deleteImageAction->setIcon(QIcon(":/icons/erase.png"));
@@ -231,14 +265,15 @@ void QtMainWindow::createImageMenuActions() {
 void QtMainWindow::connectWindowSignals() {
     // List view signals
     connect(imageTreeView, SIGNAL(doubleClicked(QModelIndex)),
-            this, SLOT(listViewDoubleClicked(QModelIndex)));
+            this, SLOT(treeViewDoubleClicked(QModelIndex)));
     connect(imageTreeView, SIGNAL(clicked(QModelIndex)),
-            this, SLOT(listViewClicked(QModelIndex)));
+            this, SLOT(treeViewClicked(QModelIndex)));
     connect(imageTreeView, SIGNAL(customContextMenuRequested(QPoint)),
-            this, SLOT(listViewShowContextMenu(QPoint)));
+            this, SLOT(treeViewShowContextMenu(QPoint)));
 
     // Image menu signals
     connect(toggleVisibleAction, SIGNAL(triggered()), this, SLOT(toggleImageVisible()));
+    connect(loadSegmentationAction, SIGNAL(triggered()), this, SLOT(openSegmentation()));
     connect(deleteImageAction, SIGNAL(triggered()), this, SLOT(deleteSelectedImages()));
 
     // Toolbar signals
@@ -398,6 +433,20 @@ bool QtMainWindow::imageInList(const QString fileName) const {
     return false;
 }
 
+bool QtMainWindow::segmentationInList(const QString fileName) const {
+    int segCount = imageModel->rowCount(imageTreeView->currentIndex());
+    for (int i = 0; i < segCount; ++i) {
+        QModelIndex currentIdx = imageModel->index(i, 0, imageTreeView->currentIndex());
+        if (imageModel->data(currentIdx, Qt::ToolTipRole) == fileName) {
+            // Segmentation has already brrn loaded
+            qDebug() << "Segmentation " << fileName << " already in the list";
+            return true;
+        }
+    }
+
+    return false;
+}
+
 void QtMainWindow::addToViewWidget(QWidget *widget) {
     QGridLayout *layout = dynamic_cast<QGridLayout*>(mainViewWidget->layout());
 
@@ -499,23 +548,29 @@ void QtMainWindow::deleteImages(QModelIndexList rowList) {
         currentImageIndex = rowList.back().row();
         bool visible = imageModel->getItem(rowList.back())->data()->IsVisible();
 
-        if (visible) {
-            numDisplayedImages--;
+        if (imageModel->getItem(rowList.back())->parent()->parent() == 0) {
+            if (visible) {
+                numDisplayedImages--;
 
-            if (numDisplayedImages == 0) {
-                disableViewerWidgets();
+                if (numDisplayedImages == 0) {
+                    disableViewerWidgets();
+                }
+
+                deleteSingleImage(currentImageIndex);
             }
 
-            deleteSingleImage(currentImageIndex);
+            // Update the model
+            imageModel->removeRows(currentImageIndex, 1, QModelIndex());
+
+            // Update the map keys of the images currently displayed
+            QList<irtkQtBaseViewer*>::iterator it;
+            for (it = viewers.begin(); it != viewers.end(); ++it) {
+                (*it)->UpdateKeysAfterIndexDeleted(currentImageIndex);
+            }
         }
-
-        // Update the model
-        imageModel->removeRows(currentImageIndex, 1, QModelIndex());
-
-        // Update the map keys of the images currently displayed
-        QList<irtkQtBaseViewer*>::iterator it;
-        for (it = viewers.begin(); it != viewers.end(); ++it) {
-            (*it)->UpdateKeysAfterIndexDeleted(currentImageIndex);
+        else {
+            imageModel->removeRows(currentImageIndex, 1,
+                                   imageModel->parent(rowList.back()));
         }
 
         rowList.pop_back();
@@ -874,6 +929,23 @@ void QtMainWindow::toggleImageVisible() {
 
 }
 
+void QtMainWindow::openSegmentation() {
+#ifdef Q_OS_MAC
+    QString selfilter = tr("IMG (*.gipl *.z *.hdr *.gz *.nii *.vtk)");
+    QStringList fileNames = QFileDialog::getOpenFileNames(this, tr("Open File"), QDir::homePath(),
+                                                          tr("All files (*.*);; SEG(*.gipl *.z *.hdr *.gz *.nii *.vtk)"),
+                                                          &selfilter);
+#else
+    QString selfilter = tr("IMG (*.gipl *.gipl.z *.hdr *.hdr.gz *.nii *.nii.gz *.vtk");
+    QString selfilter = tr("IMG (*.gipl *.gipl.z *.hdr *.hdr.gz *.nii *.nii.gz)");
+    QStringList fileNames = QFileDialog::getOpenFileNames(this, tr("Open File"), QDir::homePath(),
+                                                          tr("All files (*.*);;IMG (*.gipl *.gipl.z *.hdr *.hdr.gz *.nii *.nii.gz *.vtk)" ),
+                                                          &selfilter);
+#endif
+
+    loadSegmentations(fileNames);
+}
+
 void QtMainWindow::zoomIn() {
     qDebug("Zooming in");
 
@@ -1152,13 +1224,13 @@ void QtMainWindow::opacityValueChanged(int value) {
     }
 }
 
-void QtMainWindow::listViewDoubleClicked(QModelIndex index) {
+void QtMainWindow::treeViewDoubleClicked(QModelIndex index) {
     qDebug("List view double clicked");
     currentImageIndex = index.row();
     toggleImageVisible();
 }
 
-void QtMainWindow::listViewClicked(QModelIndex index) {
+void QtMainWindow::treeViewClicked(QModelIndex index) {
     irtkQtImageObject* imageObject = imageModel->getItem(index)->data();
 
     visualToolWidget->blockSignals(true);
@@ -1181,9 +1253,13 @@ void QtMainWindow::listViewClicked(QModelIndex index) {
 
     infoWidget->setImage(imageObject->GetImage());
     infoWidget->update();
+
+    bool isImage = (imageModel->getItem(imageTreeView->currentIndex())->parent()->parent() == 0);
+    moveUpAction->setEnabled(isImage);
+    moveDownAction->setEnabled(isImage);
 }
 
-void QtMainWindow::listViewShowContextMenu(const QPoint &pos) {
+void QtMainWindow::treeViewShowContextMenu(const QPoint &pos) {
     if (imageModel) {
         QMenu imageMenu;
         QPoint globalPos = imageTreeView->mapToGlobal(pos);
@@ -1195,12 +1271,18 @@ void QtMainWindow::listViewShowContextMenu(const QPoint &pos) {
         }
         if ( selectedCount == 1) {
             currentImageIndex = imageTreeView->indexAt(pos).row();
+
             imageMenu.addAction(toggleVisibleAction);
             if (imageModel->getItem(imageTreeView->indexAt(pos))->data()->IsVisible()) {
                 toggleVisibleAction->setChecked(true);
             }
             else {
                 toggleVisibleAction->setChecked(false);
+            }
+
+            // Add loadSegmentationAction if the parent of the item is the root
+            if (imageModel->getItem(imageTreeView->indexAt(pos))->parent()->parent() == 0) {
+                imageMenu.addAction(loadSegmentationAction);
             }
         }
         if ( selectedCount > 0 ) {
