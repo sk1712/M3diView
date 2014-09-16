@@ -173,6 +173,9 @@ private:
     /// Delete single image from displayed images
     void deleteSingleImage(int index);
 
+    /// Delete single segmentation from displayed segmentations
+    void deleteSingleSegmentation(const QModelIndex& index);
+
     /// Delete images with indices provided in the rowList
     void deleteImages(QModelIndexList rowList);
 

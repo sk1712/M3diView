@@ -473,6 +473,7 @@ void QtMainWindow::toggleSegmentationVisible() {
             item->data()->CreateImage();
             displaySingleSegmentation(index);
             clickImage = true;
+                createMessageBox("set up viewer widgets after showing segmentation");
         }
         catch (irtkException) {
             createMessageBox("Invalid image file " + item->data()->GetPath(), QMessageBox::Critical);
@@ -484,10 +485,11 @@ void QtMainWindow::toggleSegmentationVisible() {
     else {
         qDebug("Making image invisible");
         item->data()->DeleteImage();
-        deleteSingleImage(currentImageIndex);
+        deleteSingleSegmentation(index);
     }
 
     setUpViewerWidgets();
+    updateDrawables();
 
     // Emulate click to show image information
     if (clickImage) {
@@ -608,6 +610,23 @@ void QtMainWindow::deleteSingleImage(int index) {
     visualToolWidget->setEnabled(false);
 }
 
+void QtMainWindow::deleteSingleSegmentation(const QModelIndex &index) {
+    // Unregister the viewers' signals
+    disconnectViewerSignals();
+
+    QList<irtkQtBaseViewer*>::iterator it;
+    for (it = viewers.begin(); it != viewers.end(); ++it) {
+        (*it)->DeleteSingleSegmentation(imageModel->parent(index).row(), index.row());
+    }
+
+    // Re-register the viewers' signals
+    connectViewerSignals();
+
+    infoWidget->setImage(NULL);
+    infoWidget->update();
+    visualToolWidget->setEnabled(false);
+}
+
 void QtMainWindow::deleteImages(QModelIndexList rowList) {
     int deleteCount = rowList.size();
 
@@ -637,6 +656,9 @@ void QtMainWindow::deleteImages(QModelIndexList rowList) {
             }
         }
         else {
+            if (visible) {
+                deleteSingleSegmentation(rowList.back());
+            }
             imageModel->removeRows(currentImageIndex, 1,
                                    imageModel->parent(rowList.back()));
         }
@@ -682,10 +704,10 @@ void QtMainWindow::updateDrawables() {
     QList<irtkQtBaseViewer*>::iterator bit;
 
     for (bit = viewers.begin(); bit != viewers.end(); ++bit, ++wit) {
-        (*wit)->getGlWidget()->updateDrawable(
-                    QVector<QRgb**>::fromStdVector( (*bit)->GetDrawable() ) );
         (*wit)->getGlWidget()->updateSegmentation(
                     QVector<QRgb*>::fromStdVector( (*bit)->GetSegmentationDrawable()) );
+        (*wit)->getGlWidget()->updateDrawable(
+                    QVector<QRgb**>::fromStdVector( (*bit)->GetDrawable() ) );
     }
 }
 
@@ -1029,7 +1051,18 @@ void QtMainWindow::changeLabelColor() {
     QColor selectedColor = QColorDialog::getColor(item->data()->GetLabelColor(), this,
                                                   "Choose label color",
                                                   QColorDialog::ShowAlphaChannel);
+
     item->data()->SetLabelColor(selectedColor);
+
+    if (item->data()->IsVisible()) {
+        QList<irtkQtBaseViewer*>::iterator it;
+        for (it = viewers.begin(); it != viewers.end(); ++it) {
+            (*it)->SetLabelColor(imageModel->parent(imageTreeView->currentIndex()).row(),
+                                 imageTreeView->currentIndex().row(), selectedColor);
+        }
+
+        updateDrawables();
+    }
 }
 
 void QtMainWindow::zoomIn() {
@@ -1222,10 +1255,10 @@ void QtMainWindow::updateOrigin(double x, double y, double z) {
              ( (isSenderLinked && viewerWidget->isLinked()) || (viewer == senderViewer) ) ) {
             viewerWidget->getGlWidget()->setWorldOrigin(x, y, z);
             viewerWidget->setCurrentSlice(viewer->GetCurrentSlice());
-            viewerWidget->getGlWidget()->updateDrawable(
-                        QVector<QRgb**>::fromStdVector(viewer->GetDrawable()));
             viewerWidget->getGlWidget()->updateSegmentation(
                         QVector<QRgb*>::fromStdVector(viewer->GetSegmentationDrawable()));
+            viewerWidget->getGlWidget()->updateDrawable(
+                        QVector<QRgb**>::fromStdVector(viewer->GetDrawable()));
         }
     }
 

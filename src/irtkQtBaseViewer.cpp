@@ -20,6 +20,11 @@ irtkQtBaseViewer::~irtkQtBaseViewer() {
     delete subtractionLookupTable;
 }
 
+void irtkQtBaseViewer::SetLabelColor(int parentIndex, int index, const QColor &color) {
+    SegKey key = make_pair(parentIndex, index);
+    _labelColor[key] = color;
+}
+
 vector<QRgb**> irtkQtBaseViewer::GetDrawable() {
     vector<QRgb**> allDrawables;
 

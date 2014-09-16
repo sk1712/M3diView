@@ -134,6 +134,9 @@ public:
     /// Get flags for inverted axes
     bool* GetAxisInverted() const;
 
+    /// Set label color
+    void SetLabelColor(int parentIndex, int index, const QColor& color);
+
     /// Get the array of RGB values to be drawn on the screen
     vector<QRgb**> GetDrawable();
 
