@@ -29,7 +29,7 @@ public:
 
     int columnCount() const;
 
-    irtkQtImageObject* data(int column = 0) const;
+    irtkQtImageObject* data() const;
 
     int childIndex() const;
 
