@@ -73,6 +73,18 @@ void QtTwoDimensionalGlWidget::drawImage() const {
         glDrawPixels(_width, _height, GL_BGRA, GL_UNSIGNED_BYTE,
                      (*rit)[0]);
     }
+
+    QVector<QRgb*>::const_iterator sit;
+
+    // Draw last segmentation in the list first and the others on top of it
+    for (sit = _segmentationDrawable.constEnd()-1;
+         sit >= _segmentationDrawable.constBegin(); --sit) {
+        // Set raster position
+        glRasterPos2f(0, 0);
+        // Draw pixelmap
+        glDrawPixels(_width, _height, GL_BGRA, GL_UNSIGNED_BYTE,
+                     (*sit));
+    }
 }
 
 void QtTwoDimensionalGlWidget::drawCursor() const {
@@ -101,7 +113,7 @@ void QtTwoDimensionalGlWidget::drawLabels() {
 void QtTwoDimensionalGlWidget::deleteDrawable() {
     QVector<QRgb**>::iterator it;
 
-    for (it = _drawable.begin(); it != _drawable.end(); it++) {
+    for (it = _drawable.begin(); it != _drawable.end(); ++it) {
         delete [] (*it)[0];
         delete it[0];
     }

@@ -20,6 +20,18 @@ class irtkQtTwoDimensionalViewer : public irtkQtBaseViewer
     /// Image transformaton filter map
     map<int, irtkImageTransformation *> _transformFilter;
 
+    /// Segmentation output map
+    map<SegKey, irtkGreyImage *> _segmentationOutput;
+
+    /// Segmentation trasform map
+    map<SegKey, irtkTransformation *> _segTransform;
+
+    /// Segmentation interpolator map
+    map<SegKey, irtkImageFunction *> _segInterpolator;
+
+    /// Segmentation transformation filter map
+    map<SegKey, irtkImageTransformation *> _segTransformFilter;
+
 public:
 
     /// Class constructor
@@ -46,6 +58,9 @@ public:
     /// Blend the images using their opacity values
     vector<QRgb**> GetBlendDrawable();
 
+    /// Get the array of RGB values for the labels drawn on the screen
+    vector<QRgb*> GetSegmentationDrawable();
+
     /// Set interpolation method
     void SetInterpolationMethod(int index, irtkQtImageObject::irtkQtInterpolationMode mode);
 
@@ -60,6 +75,18 @@ public:
 
     /// Initialize a single transformation from the input to the output image
     void InitializeCurrentTransformation();
+
+    /// Calculate the output images from the transformations
+    void CalculateSegmentationOutput();
+
+    /// Calculate a single output image from a transformation
+    void CalculateCurrentSegmentationOutput();
+
+    /// Initialize the transformations from the input to the output images
+    void InitializeSegmentationTransformations();
+
+    /// Initialize single transformation from the input to the output image
+    void InitializeCurrentSegmentationTransformation();
 
     /// Move image with key previousKey to newKey
     void MoveImage(int previousKey, int newKey);
@@ -82,6 +109,9 @@ public:
     /// Delete single image
     void DeleteSingleImage(int index);
 
+    /// Delete single segmentation
+    void DeleteSingleSegmentation(int parentIndex, int index);
+
 public slots:
 
     /// Callback function when image is resized to (width, height)
@@ -100,6 +130,10 @@ protected:
 
     /// Add new image and corresponding tools to maps
     void AddToMaps(irtkImage* newImage, int index);
+
+    /// Add new segmentation and corresponding tools to maps
+    void AddToSegmentationMaps(irtkImage *newSegmentation, SegKey key,
+                               QColor label);
 
     /// Delete all elements of a map first and then clear
     template<class T>

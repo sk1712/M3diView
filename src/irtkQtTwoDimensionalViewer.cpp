@@ -245,6 +245,40 @@ vector<QRgb**> irtkQtTwoDimensionalViewer::GetBlendDrawable() {
     return allDrawables;
 }
 
+vector<QRgb*> irtkQtTwoDimensionalViewer::GetSegmentationDrawable() {
+    vector<QRgb*> allDrawables;
+
+    // Set background color to transparent white
+    QRgb _backgroundColor = qRgba(255, 255, 255, 0);
+    map<SegKey, irtkGreyImage *>::iterator it;
+    map<SegKey, QColor>::iterator label_it = _labelColor.begin();
+
+    for (it = _segmentationOutput.begin(); it != _segmentationOutput.end(); ++it, ++label_it) {
+        QRgb* drawable = new QRgb[it->second->GetNumberOfVoxels()];
+        irtkGreyPixel *original = it->second->GetPointerToVoxels();
+        QRgb *drawn = drawable;
+
+        int i, j;
+
+        // Create a drawable for all images
+        for (j = 0; j < _height; j++) {
+            for (i = 0; i < _width; i++) {
+                if (*original > 0) {
+                    *drawn = (label_it->second).rgba();
+                } else {
+                    *drawn = _backgroundColor;
+                }
+                original++;
+                drawn++;
+            }
+        }
+
+        allDrawables.push_back(drawable);
+    }
+
+    return allDrawables;
+}
+
 void irtkQtTwoDimensionalViewer::SetInterpolationMethod(int index, irtkQtImageObject::irtkQtInterpolationMode mode) {
     delete _interpolator[index];
 
@@ -305,7 +339,7 @@ void irtkQtTwoDimensionalViewer::CalculateOutputImages() {
         t_index++;
     }
 
-    for (int i = 0; i < t_index; i++) {
+    for (int i = 0; i < t_index; ++i) {
         threads[i].waitForFinished();
     }
     delete [] threads;
@@ -337,6 +371,59 @@ void irtkQtTwoDimensionalViewer::InitializeCurrentTransformation() {
     transformFilter->SetInput(_image[currentIndex]);
     transformFilter->PutScaleFactorAndOffset(255.0 / (_targetMax
         - _targetMin), -_targetMin * 255.0 / (_targetMax - _targetMin));
+}
+
+void irtkQtTwoDimensionalViewer::CalculateSegmentationOutput() {
+    irtkImageAttributes attr = InitializeAttributes();
+
+    map<SegKey, irtkGreyImage *>::iterator it;
+    for (it = _segmentationOutput.begin(); it != _segmentationOutput.end(); ++it) {
+        it->second->Initialize(attr);
+    }
+
+    QFuture<void> *threads = new QFuture<void>[_segTransformFilter.size()];
+    int t_index = 0;
+
+    irtkImageTransformation* transformFilter;
+    map<SegKey, irtkImageTransformation *>::iterator trit;
+    for (trit = _segTransformFilter.begin(); trit != _segTransformFilter.end(); ++trit) {
+        transformFilter = trit->second;
+        threads[t_index] = QtConcurrent::run(CalculateSingleTransform, transformFilter);
+        t_index++;
+    }
+
+    for (int i = 0; i < t_index; ++i) {
+        threads[i].waitForFinished();
+    }
+
+    delete [] threads;
+}
+
+void irtkQtTwoDimensionalViewer::CalculateCurrentSegmentationOutput() {
+    irtkImageAttributes attr = InitializeAttributes();
+    _segmentationOutput[currentKey]->Initialize(attr);
+
+    irtkImageTransformation* transformFilter = _segTransformFilter[currentKey];
+    transformFilter->PutSourcePaddingValue(-1);
+    transformFilter->Run();
+}
+
+void irtkQtTwoDimensionalViewer::InitializeSegmentationTransformations() {
+    map<SegKey, irtkImage*>::iterator it;
+    for (it = _segmentation.begin(); it != _segmentation.end(); ++it) {
+        currentKey = it->first;
+        InitializeCurrentSegmentationTransformation();
+    }
+}
+
+void irtkQtTwoDimensionalViewer::InitializeCurrentSegmentationTransformation() {
+    double imageMin, imageMax;
+    _segmentation[currentKey]->GetMinMaxAsDouble(&imageMin, &imageMax);
+
+    irtkImageTransformation* transformFilter = _segTransformFilter[currentKey];
+    transformFilter->SetInput(_segmentation[currentKey]);
+    transformFilter->PutScaleFactorAndOffset(255.0 / (imageMax - imageMin),
+                                             -imageMin * 255.0 / (imageMax - imageMin));
 }
 
 void irtkQtTwoDimensionalViewer::MoveImage(int previousKey, int newKey) {
@@ -439,6 +526,24 @@ void irtkQtTwoDimensionalViewer::DeleteSingleImage(int index) {
     _transformFilter.erase(index);
 
     irtkQtBaseViewer::DeleteSingleImage(index);
+}
+
+void irtkQtTwoDimensionalViewer::DeleteSingleSegmentation(int parentIndex, int index) {
+    SegKey key = make_pair(parentIndex, index);
+
+    delete _segmentationOutput[key];
+    _segmentationOutput.erase(key);
+
+    delete _segTransform[key];
+    _segTransform.erase(key);
+
+    delete _segInterpolator[key];
+    _segInterpolator.erase(key);
+
+    delete _segTransformFilter[key];
+    _segTransformFilter.erase(key);
+
+    irtkQtBaseViewer::DeleteSingleSegmentation(parentIndex, index);
 }
 
 void irtkQtTwoDimensionalViewer::ResizeImage(int width, int height) {
@@ -590,4 +695,20 @@ void irtkQtTwoDimensionalViewer::AddToMaps(irtkImage* newImage, int index) {
     transformation->PutInterpolator(_interpolator[index]);
     transformation->PutSourcePaddingValue(0);
     _transformFilter.insert(pair<int, irtkImageTransformation *> (index, transformation));
+}
+
+void irtkQtTwoDimensionalViewer::AddToSegmentationMaps(irtkImage *newSegmentation,
+                                                       SegKey key, QColor label) {
+    _segmentation.insert(pair<SegKey, irtkImage *> (key, newSegmentation));
+    _segmentationOutput.insert(pair<SegKey, irtkGreyImage *> (key, new irtkGreyImage));
+    _segTransform.insert(pair<SegKey, irtkTransformation *> (key, new irtkAffineTransformation));
+    _segInterpolator.insert(pair<SegKey, irtkImageFunction *> (key, new irtkNearestNeighborInterpolateImageFunction));
+    _labelColor.insert(pair<SegKey, QColor> (key, label));
+
+    irtkImageTransformation *segTransformation = new irtkImageTransformation;
+    segTransformation->SetOutput(_segmentationOutput[key]);
+    segTransformation->SetTransformation(_segTransform[key]);
+    segTransformation->PutInterpolator(_segInterpolator[key]);
+    segTransformation->PutSourcePaddingValue(0);
+    _segTransformFilter.insert(pair<SegKey, irtkImageTransformation *> (key, segTransformation));
 }

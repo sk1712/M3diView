@@ -20,8 +20,11 @@ class QtGlWidget : public QGLWidget
 
 protected:
 
-    /// Values to be drawn on the screen
+    /// Images to be drawn on the screen
     QVector<QRgb**> _drawable;
+
+    /// Segmentations to be drawn on the screen
+    QVector<QRgb*> _segmentationDrawable;
 
     /// Width and height in physical pixels
     int _width, _height;
@@ -64,6 +67,9 @@ public:
     /// Function to be implemented by all derived classes
     virtual void drawImage() const = 0;
 
+    /// Update segmentation drawable
+    void updateSegmentation(QVector<QRgb*> drawable);
+
 public slots:
 
     /// Callback function to update drawable
@@ -73,6 +79,9 @@ protected:
 
     /// Delete the drawable
     virtual void deleteDrawable() = 0;
+
+    /// Selete the segmentation drawable
+    virtual void deleteSegmentationDrawable();
 
     /// Draw image origin on screen
     void drawImageOrigin();

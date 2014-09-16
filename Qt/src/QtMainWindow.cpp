@@ -5,6 +5,7 @@
 #include <QFileDialog>
 #include <QGridLayout>
 #include <QMenuBar>
+#include <QColorDialog>
 #include <QScrollArea>
 #include <QTabWidget>
 #include <QToolBar>
@@ -15,6 +16,7 @@
 /// in parallel for the different viewers
 void CalculateOutputImage(irtkQtBaseViewer* viewer) {
     viewer->CalculateOutputImages();
+    viewer->CalculateSegmentationOutput();
 }
 
 QtMainWindow::QtMainWindow() {
@@ -258,6 +260,9 @@ void QtMainWindow::createImageMenuActions() {
     loadSegmentationAction = new QAction(tr("Load segmentation"), this);
     loadSegmentationAction->setIcon(QIcon(":/icons/add_file.png"));
 
+    changeLabelAction = new QAction(tr("Change label color"), this);
+    changeLabelAction->setIcon(QIcon(":/icons/paint_palette.png"));
+
     deleteImageAction = new QAction(tr("Remove from list"), this);
     deleteImageAction->setIcon(QIcon(":/icons/erase.png"));
 }
@@ -274,6 +279,7 @@ void QtMainWindow::connectWindowSignals() {
     // Image menu signals
     connect(toggleVisibleAction, SIGNAL(triggered()), this, SLOT(toggleImageVisible()));
     connect(loadSegmentationAction, SIGNAL(triggered()), this, SLOT(openSegmentation()));
+    connect(changeLabelAction, SIGNAL(triggered()), this, SLOT(changeLabelColor()));
     connect(deleteImageAction, SIGNAL(triggered()), this, SLOT(deleteSelectedImages()));
 
     // Toolbar signals
@@ -438,13 +444,56 @@ bool QtMainWindow::segmentationInList(const QString fileName) const {
     for (int i = 0; i < segCount; ++i) {
         QModelIndex currentIdx = imageModel->index(i, 0, imageTreeView->currentIndex());
         if (imageModel->data(currentIdx, Qt::ToolTipRole) == fileName) {
-            // Segmentation has already brrn loaded
+            // Segmentation has already been loaded
             qDebug() << "Segmentation " << fileName << " already in the list";
             return true;
         }
     }
 
     return false;
+}
+
+void QtMainWindow::toggleSegmentationVisible() {
+    QModelIndex index = imageTreeView->currentIndex();
+    irtkQtTreeItem *item = imageModel->getItem(index);
+
+    bool visible = !item->data()->IsVisible();
+    item->data()->SetVisible(visible);
+
+    // Emit signal to update the visible icon in TreeView
+    emit imageModel->dataChanged(index, index);
+
+    bool clickImage = false;
+
+    // If image becomes visible display it
+    if (visible) {
+        qDebug("Making image visible");
+
+        try {
+            item->data()->CreateImage();
+            displaySingleSegmentation(index);
+            clickImage = true;
+        }
+        catch (irtkException) {
+            createMessageBox("Invalid image file " + item->data()->GetPath(), QMessageBox::Critical);
+            imageModel->removeRows(currentImageIndex, 1, imageModel->parent(index));
+            clickImage = false;
+        }
+    }
+    // Otherwise delete it and decrease the number of visible images
+    else {
+        qDebug("Making image invisible");
+        item->data()->DeleteImage();
+        deleteSingleImage(currentImageIndex);
+    }
+
+    setUpViewerWidgets();
+
+    // Emulate click to show image information
+    if (clickImage) {
+        imageTreeView->setCurrentIndex(index);
+        emit imageTreeView->clicked(index);
+    }
 }
 
 void QtMainWindow::addToViewWidget(QWidget *widget) {
@@ -517,6 +566,25 @@ void QtMainWindow::displaySingleImage(QModelIndex index) {
 
         viewer->InitializeCurrentTransformation();
         viewer->CalculateCurrentOutput();
+    }
+
+    // Re-register the viewers' signals
+    connectViewerSignals();
+}
+
+void QtMainWindow::displaySingleSegmentation(QModelIndex index) {
+    irtkQtBaseViewer *viewer;
+
+    // Disconnect the viewers' signals
+    disconnectViewerSignals();
+
+    QList<irtkQtBaseViewer*>::iterator it;
+    for (it = viewers.begin(); it != viewers.end(); ++it) {
+        viewer = *it;
+        viewer->AddToDisplayedSegmentations(imageModel->getItem(index)->data(),
+                                            imageModel->parent(index).row(), index.row());
+        viewer->InitializeCurrentSegmentationTransformation();
+        viewer->CalculateCurrentSegmentationOutput();
     }
 
     // Re-register the viewers' signals
@@ -610,9 +678,14 @@ void QtMainWindow::setUpViewerWidgets() {
 }
 
 void QtMainWindow::updateDrawables() {
-    for (int i = 0; i < viewers.size(); i++) {
-        viewerWidgets[i]->getGlWidget()->updateDrawable(
-                    QVector<QRgb**>::fromStdVector(viewers[i]->GetDrawable()));
+    QList<QtViewerWidget*>::iterator wit = viewerWidgets.begin();
+    QList<irtkQtBaseViewer*>::iterator bit;
+
+    for (bit = viewers.begin(); bit != viewers.end(); ++bit, ++wit) {
+        (*wit)->getGlWidget()->updateDrawable(
+                    QVector<QRgb**>::fromStdVector( (*bit)->GetDrawable() ) );
+        (*wit)->getGlWidget()->updateSegmentation(
+                    QVector<QRgb*>::fromStdVector( (*bit)->GetSegmentationDrawable()) );
     }
 }
 
@@ -871,6 +944,11 @@ void QtMainWindow::deleteSelectedImages() {
 }
 
 void QtMainWindow::toggleImageVisible() {
+    if (imageModel->getItem(imageTreeView->currentIndex())->parent()->parent() != 0) {
+        toggleSegmentationVisible();
+        return;
+    }
+
     QModelIndex modelIndex = imageModel->index(currentImageIndex, 0);
     irtkQtTreeItem *item = imageModel->getItem(modelIndex);
     bool visible = !item->data()->IsVisible();
@@ -937,13 +1015,21 @@ void QtMainWindow::openSegmentation() {
                                                           &selfilter);
 #else
     QString selfilter = tr("IMG (*.gipl *.gipl.z *.hdr *.hdr.gz *.nii *.nii.gz *.vtk");
-    QString selfilter = tr("IMG (*.gipl *.gipl.z *.hdr *.hdr.gz *.nii *.nii.gz)");
     QStringList fileNames = QFileDialog::getOpenFileNames(this, tr("Open File"), QDir::homePath(),
                                                           tr("All files (*.*);;IMG (*.gipl *.gipl.z *.hdr *.hdr.gz *.nii *.nii.gz *.vtk)" ),
                                                           &selfilter);
 #endif
 
     loadSegmentations(fileNames);
+}
+
+void QtMainWindow::changeLabelColor() {
+    irtkQtTreeItem *item = imageModel->getItem(imageTreeView->currentIndex());
+
+    QColor selectedColor = QColorDialog::getColor(item->data()->GetLabelColor(), this,
+                                                  "Choose label color",
+                                                  QColorDialog::ShowAlphaChannel);
+    item->data()->SetLabelColor(selectedColor);
 }
 
 void QtMainWindow::zoomIn() {
@@ -1138,6 +1224,8 @@ void QtMainWindow::updateOrigin(double x, double y, double z) {
             viewerWidget->setCurrentSlice(viewer->GetCurrentSlice());
             viewerWidget->getGlWidget()->updateDrawable(
                         QVector<QRgb**>::fromStdVector(viewer->GetDrawable()));
+            viewerWidget->getGlWidget()->updateSegmentation(
+                        QVector<QRgb*>::fromStdVector(viewer->GetSegmentationDrawable()));
         }
     }
 
@@ -1232,10 +1320,11 @@ void QtMainWindow::treeViewDoubleClicked(QModelIndex index) {
 
 void QtMainWindow::treeViewClicked(QModelIndex index) {
     irtkQtImageObject* imageObject = imageModel->getItem(index)->data();
+    bool isImage = (imageModel->getItem(imageTreeView->currentIndex())->parent()->parent() == 0);
 
     visualToolWidget->blockSignals(true);
 
-    if (imageObject->IsVisible()) {
+    if (imageObject->IsVisible() && isImage) {
         visualToolWidget->setEnabled(true);
         visualToolWidget->setColormap(imageObject->GetColormap());
         visualToolWidget->setInterpolation(imageObject->GetInterpolation());
@@ -1254,7 +1343,6 @@ void QtMainWindow::treeViewClicked(QModelIndex index) {
     infoWidget->setImage(imageObject->GetImage());
     infoWidget->update();
 
-    bool isImage = (imageModel->getItem(imageTreeView->currentIndex())->parent()->parent() == 0);
     moveUpAction->setEnabled(isImage);
     moveDownAction->setEnabled(isImage);
 }
@@ -1283,6 +1371,10 @@ void QtMainWindow::treeViewShowContextMenu(const QPoint &pos) {
             // Add loadSegmentationAction if the parent of the item is the root
             if (imageModel->getItem(imageTreeView->indexAt(pos))->parent()->parent() == 0) {
                 imageMenu.addAction(loadSegmentationAction);
+            }
+            // Else add the option to change the label color
+            else {
+                imageMenu.addAction(changeLabelAction);
             }
         }
         if ( selectedCount > 0 ) {

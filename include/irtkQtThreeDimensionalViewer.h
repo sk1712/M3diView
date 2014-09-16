@@ -61,6 +61,18 @@ public:
     /// Calculate a single output image from the transformation
     void CalculateCurrentOutput();
 
+    /// Calculate the output images from the transformations
+    void CalculateSegmentationOutput();
+
+    /// Calculate a single output image from a transformation
+    void CalculateCurrentSegmentationOutput();
+
+    /// Initialize the transformations from the input to the output images
+    void InitializeSegmentationTransformations();
+
+    /// Initialize single transformation from the input to the output image
+    void InitializeCurrentSegmentationTransformation();
+
     /// Delete all map elements and clear maps
     void ClearDisplayedImages();
 
@@ -91,6 +103,10 @@ protected:
 
     /// Add new image and corresponding tools to maps
     void AddToMaps(irtkImage* newImage, int index);
+
+    /// Add new segmentation and corresponding tools to maps
+    void AddToSegmentationMaps(irtkImage *newSegmentation, SegKey key,
+                               QColor label);
 
     /// Set the orientation according to the view value
     void SetOrientation(int view);

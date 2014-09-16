@@ -47,9 +47,24 @@ void QtGlWidget::setImageOriginVisible(const bool visible) {
     update();
 }
 
+void QtGlWidget::updateSegmentation(QVector<QRgb *> drawable) {
+    deleteSegmentationDrawable();
+    _segmentationDrawable = drawable;
+}
+
 void QtGlWidget::updateDrawable(QVector<QRgb**> drawable) {
     deleteDrawable();
     _drawable = drawable;
+}
+
+void QtGlWidget::deleteSegmentationDrawable() {
+    QVector<QRgb*>::iterator it;
+
+    for (it = _segmentationDrawable.begin(); it != _segmentationDrawable.end(); ++it) {
+        delete [] (*it);
+    }
+
+    _segmentationDrawable.clear();
 }
 
 void QtGlWidget::drawImageOrigin() {

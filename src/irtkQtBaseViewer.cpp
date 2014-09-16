@@ -59,12 +59,18 @@ vector<QRgb**> irtkQtBaseViewer::GetDrawable() {
     return allDrawables;
 }
 
+vector<QRgb*> irtkQtBaseViewer::GetSegmentationDrawable() {
+    vector<QRgb*> vec;
+
+    return vec;
+}
+
 void irtkQtBaseViewer::AddToDisplayedImages(irtkQtImageObject *imageObject, int index) {
     irtkImage* newImage = imageObject->GetImage();
 
     currentIndex = index;
     // If first image to be displayed make it target
-    if (_image.size() == 0) {
+    if ( _image.empty() ) {
         SetTarget(newImage);
         InitializeOrigin();
         InitializeDimensions();
@@ -85,9 +91,12 @@ void irtkQtBaseViewer::AddToDisplayedImages(irtkQtImageObject *imageObject, int 
     _lookupTable.insert(pair<int, irtkQtLookupTable*> ( index, imageObject->GetLookupTable() ));
 }
 
-void irtkQtBaseViewer::AddToDisplayedSegmentations(irtkQtImageObject *segmentation, int index) {
+void irtkQtBaseViewer::AddToDisplayedSegmentations(irtkQtImageObject *segmentation,
+                                                   int parentIndex, int index) {
     irtkImage* image = segmentation->GetImage();
-    _segmentation.insert(pair<int, irtkImage*> ( index, image ));
+    currentKey = make_pair(parentIndex, index);
+
+    AddToSegmentationMaps(image, currentKey, segmentation->GetLabelColor());
 }
 
 void irtkQtBaseViewer::DeleteSingleImage(int index) {
@@ -102,8 +111,11 @@ void irtkQtBaseViewer::DeleteSingleImage(int index) {
     }
 }
 
-void irtkQtBaseViewer::DeleteSingleSegmentation(int index) {
-    _segmentation.erase(index);
+void irtkQtBaseViewer::DeleteSingleSegmentation(int parentIndex, int index) {
+    SegKey key = make_pair(parentIndex, index);
+
+    _segmentation.erase(key);
+    _labelColor.erase(key);
 }
 
 void irtkQtBaseViewer::MoveImage(int, int) {

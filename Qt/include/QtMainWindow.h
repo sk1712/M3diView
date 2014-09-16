@@ -58,6 +58,7 @@ class QtMainWindow : public QMainWindow
     /// Image actions
     QAction *toggleVisibleAction;
     QAction *loadSegmentationAction;
+    QAction *changeLabelAction;
     QAction *deleteImageAction;
 
     /// Visualisation tool widget
@@ -148,6 +149,9 @@ private:
     /// Check if segmentation is already loaded
     bool segmentationInList(const QString fileName) const;
 
+    /// Toggle segmentation visible
+    void toggleSegmentationVisible();
+
     /// Add widget to mainViewWidget
     void addToViewWidget(QWidget *widget);
 
@@ -162,6 +166,9 @@ private:
 
     /// Add single image to displayed images
     void displaySingleImage(QModelIndex index);
+
+    /// Add single segmentation to displayed segmentations
+    void displaySingleSegmentation(QModelIndex index);
 
     /// Delete single image from displayed images
     void deleteSingleImage(int index);
@@ -206,6 +213,9 @@ private slots:
 
     /// Callback function for loadSegmentationAction
     void openSegmentation();
+
+    /// Callback function for changing the segmentation label color
+    void changeLabelColor();
 
     /// Callback function for zoomInAction
     void zoomIn();

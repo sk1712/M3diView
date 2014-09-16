@@ -431,6 +431,22 @@ void irtkQtThreeDimensionalViewer::CalculateCurrentOutput() {
     _originZ = originZ_backup;
 }
 
+void irtkQtThreeDimensionalViewer::CalculateSegmentationOutput() {
+
+}
+
+void irtkQtThreeDimensionalViewer::CalculateCurrentSegmentationOutput() {
+
+}
+
+void irtkQtThreeDimensionalViewer::InitializeSegmentationTransformations() {
+
+}
+
+void irtkQtThreeDimensionalViewer::InitializeCurrentSegmentationTransformation() {
+
+}
+
 void irtkQtThreeDimensionalViewer::DeleteSingleImage(int index) {
     _image.erase(index);
     _lookupTable.erase(index);
@@ -629,6 +645,11 @@ void irtkQtThreeDimensionalViewer::AddToMaps(irtkImage* newImage, int index) {
         transformation->PutSourcePaddingValue(0);
         _transformFilter[index][dim] = transformation;
     }
+}
+
+void irtkQtThreeDimensionalViewer::AddToSegmentationMaps(irtkImage *newSegmentation,
+                                                         SegKey key, QColor label) {
+
 }
 
 void irtkQtThreeDimensionalViewer::SetOrientation(int view) {

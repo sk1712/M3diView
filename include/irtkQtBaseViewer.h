@@ -28,6 +28,8 @@ public:
 
 protected:
 
+    typedef pair<int, int> SegKey;
+
     /// Image origin
     double _originX, _originY, _originZ;
 
@@ -61,6 +63,9 @@ protected:
     /// Current index added to the images displayed
     int currentIndex;
 
+    /// Current key added to the segmentations displayed
+    SegKey currentKey;
+
     /// Image against which all other images are transformed
     irtkImage* _targetImage;
 
@@ -71,7 +76,10 @@ protected:
     map<int, irtkQtLookupTable *> _lookupTable;
 
     /// Image segmentation map
-    map<int, irtkImage*> _segmentation;
+    map<SegKey, irtkImage*> _segmentation;
+
+    /// Image label color map
+    map<SegKey, QColor> _labelColor;
 
     /// The lookup table used for subtraction
     static irtkQtLookupTable *subtractionLookupTable;
@@ -147,6 +155,9 @@ public:
     /// Blend the images using their opacity values
     virtual vector<QRgb**> GetBlendDrawable() = 0;
 
+    /// Get the array of RGB values for the labels drawn on the screen
+    virtual vector<QRgb*> GetSegmentationDrawable();
+
     /// Set interpolation method
     virtual void SetInterpolationMethod(int index,
                                         irtkQtImageObject::irtkQtInterpolationMode mode) = 0;
@@ -163,6 +174,18 @@ public:
     /// Initialize single transformation from the input to the output image
     virtual void InitializeCurrentTransformation() = 0;
 
+    /// Calculate the output segmentations from the transformations
+    virtual void CalculateSegmentationOutput() = 0;
+
+    /// Calculate a single segmentation image from a transformation
+    virtual void CalculateCurrentSegmentationOutput() = 0;
+
+    /// Initialize the transformations from the input to the output segmentations
+    virtual void InitializeSegmentationTransformations() = 0;
+
+    /// Initialize single transformation from the input to the output segmentation
+    virtual void InitializeCurrentSegmentationTransformation() = 0;
+
     /// Delete all map elements and clear maps
     virtual void ClearDisplayedImages() = 0;
 
@@ -170,13 +193,14 @@ public:
     virtual void AddToDisplayedImages(irtkQtImageObject *imageObject, int index);
 
     /// Add to segmentation maps
-    virtual void AddToDisplayedSegmentations(irtkQtImageObject *segmentation, int index);
+    virtual void AddToDisplayedSegmentations(irtkQtImageObject *segmentation,
+                                             int parentIndex, int index);
 
     /// Delete single image
     virtual void DeleteSingleImage(int index);
 
     /// Delete single segmentation
-    virtual void DeleteSingleSegmentation(int index);
+    virtual void DeleteSingleSegmentation(int parentIndex, int index);
 
     /// Move image with key previousKey to newKey
     virtual void MoveImage(int previousKey, int newKey);
@@ -217,6 +241,10 @@ protected:
 
     /// Add new image and corresponding tools to maps
     virtual void AddToMaps(irtkImage* newImage, int index) = 0;
+
+    /// Add new segmentation and corresponding tools to maps
+    virtual void AddToSegmentationMaps(irtkImage *newSegmentation, SegKey key,
+                                       QColor label) = 0;
 
     /// Set image orientation
     void SetOrientation(const double * xaxis, const double * yaxis, const double * zaxis);

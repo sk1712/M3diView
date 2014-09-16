@@ -7,7 +7,9 @@ QStringList irtkQtImageObject::_interpolationStringList;
 
 irtkQtImageObject::irtkQtImageObject()
     : _visible(false), _image(NULL), _lookupTable(NULL)
-{}
+{
+    _labelColor = QColor(255, 255, 255);
+}
 
 irtkQtImageObject::~irtkQtImageObject() {
     delete _image;
@@ -71,4 +73,13 @@ void irtkQtImageObject::DeleteImage() {
 
     _image = NULL;
     _lookupTable = NULL;
+}
+
+
+void irtkQtImageObject::SetLabelColor(const QColor &color) {
+    _labelColor = color;
+}
+
+QColor irtkQtImageObject::GetLabelColor() const {
+    return _labelColor;
 }
