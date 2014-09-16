@@ -6,8 +6,8 @@
 
 #include <irtkQtLookupTable.h>
 
-#include <QMetaType>
 #include <QString>
+#include <QColor>
 
 /*
  * Class storing all image information
@@ -33,6 +33,9 @@ private:
 
     /// Image file name
     QString _fileName;
+
+    /// Label color (if segmentation)
+    QColor _labelColor;
 
     /// Corresponding irtk image
     irtkImage* _image;
@@ -123,9 +126,14 @@ public:
     /// Get interpolation function for the corresponding image
     int GetInterpolation() const;
 
+    /// Set label color
+    void SetLabelColor(const QColor & color);
+
+    /// Get label color
+    QColor GetLabelColor() const;
+
 };
 
-Q_DECLARE_METATYPE(irtkQtImageObject*)
 
 inline bool irtkQtImageObject::IsVisible() const {
     return _visible;
