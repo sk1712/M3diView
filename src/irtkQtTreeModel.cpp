@@ -26,14 +26,23 @@ QVariant irtkQtTreeModel::data(const QModelIndex &index, int role) const {
         return object->GetFileName();
         break;
     case Qt::DecorationRole:
-        if (object->IsVisible())
-            return QIcon(":/icons/eye.png");
+        if (item->parent()->parent() == 0) {
+            if (object->IsVisible())
+                return QIcon(":/icons/eye.png");
+            else {
+                QPixmap pixmap(25, 25);
+                pixmap.fill();
+                QIcon icon(pixmap);
+                return icon;
+            }
+        }
         else {
             QPixmap pixmap(25, 25);
-            pixmap.fill();
+            pixmap.fill(object->GetLabelColor());
             QIcon icon(pixmap);
             return icon;
         }
+
         break;
     case Qt::ToolTipRole:
         return object->GetPath();
