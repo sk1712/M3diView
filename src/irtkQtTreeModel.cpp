@@ -19,7 +19,7 @@ QVariant irtkQtTreeModel::data(const QModelIndex &index, int role) const {
         return QVariant();
 
     irtkQtTreeItem *item = static_cast<irtkQtTreeItem*>(index.internalPointer());
-    irtkQtImageObject *object = item->data(index.column());
+    irtkQtImageObject *object = item->data();
 
     switch (role) {
     case Qt::DisplayRole:

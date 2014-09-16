@@ -25,7 +25,7 @@ int irtkQtTreeItem::columnCount() const {
     return 1;
 }
 
-irtkQtImageObject* irtkQtTreeItem::data(int /*column*/) const {
+irtkQtImageObject* irtkQtTreeItem::data() const {
     return itemData;
 }
 
