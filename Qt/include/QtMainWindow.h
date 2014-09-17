@@ -149,8 +149,11 @@ private:
     /// Check if segmentation is already loaded
     bool segmentationInList(const QString fileName) const;
 
+    /// Callback function for toggleVisibleAction
+    bool toggleImageVisible();
+
     /// Toggle segmentation visible
-    void toggleSegmentationVisible();
+    bool toggleSegmentationVisible();
 
     /// Add widget to mainViewWidget
     void addToViewWidget(QWidget *widget);
@@ -178,6 +181,9 @@ private:
 
     /// Delete images with indices provided in the rowList
     void deleteImages(QModelIndexList rowList);
+
+    /// Add the children indices of the images to be deleted
+    void addChildrenToIndexList(QModelIndexList &deleteList);
 
     /// Set up viewer widgets
     void setUpViewerWidgets();
@@ -212,7 +218,7 @@ private slots:
     void deleteSelectedImages();
 
     /// Callback function for toggleVisibleAction
-    void toggleImageVisible();
+    void toggleVisible();
 
     /// Callback function for loadSegmentationAction
     void openSegmentation();
