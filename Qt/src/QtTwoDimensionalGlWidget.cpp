@@ -22,11 +22,6 @@ void QtTwoDimensionalGlWidget::setCursorVisible(bool visible) {
     update();
 }
 
-void QtTwoDimensionalGlWidget::updateDrawable(QVector<QRgb**> drawable) {
-    QtGlWidget::updateDrawable(drawable);
-    updateGL();
-}
-
 void QtTwoDimensionalGlWidget::initializeGL() {
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_DEPTH_TEST);

@@ -8,8 +8,11 @@ irtkQtThreeDimensionalViewer::irtkQtThreeDimensionalViewer() {
 
     currentSlice = new int[3];
     sliceNum = new int[3];
-
     inverted = new bool[3];
+
+    for (int i = 0; i < 3; ++i) {
+        sliceNum[i] = currentSlice[i] = 0;
+    }
 }
 
 irtkQtThreeDimensionalViewer::~irtkQtThreeDimensionalViewer() {
@@ -288,15 +291,15 @@ vector<QRgb**> irtkQtThreeDimensionalViewer::GetBlendDrawable() {
     return allDrawables;
 }
 
-void irtkQtThreeDimensionalViewer::InitializeTransformation() {
+void irtkQtThreeDimensionalViewer::InitializeImageTransformations() {
     map<int, irtkImage*>::iterator it;
     for (it = _image.begin(); it != _image.end(); ++it) {
         currentIndex = it->first;
-        InitializeCurrentTransformation();
+        InitializeCurrentImageTransformation();
     }
 }
 
-void irtkQtThreeDimensionalViewer::InitializeCurrentTransformation() {
+void irtkQtThreeDimensionalViewer::InitializeCurrentImageTransformation() {
     double _targetMin, _targetMax;
 
     _lookupTable[currentIndex]->GetMinMaxImageValues(_targetMin, _targetMax);
@@ -356,10 +359,10 @@ void irtkQtThreeDimensionalViewer::SetInterpolationMethod(int index,
 
     // Calculate the new output image
     currentIndex = index;
-    CalculateCurrentOutput();
+    CalculateCurrentImageOutput();
 }
 
-void irtkQtThreeDimensionalViewer::CalculateOutputImages() {
+void irtkQtThreeDimensionalViewer::CalculateImageOutput() {
     irtkImageAttributes attr[3];
     // Width of output image
     int width[3] = {sliceNum[0], sliceNum[1], sliceNum[0]};
@@ -405,7 +408,7 @@ void irtkQtThreeDimensionalViewer::CalculateOutputImages() {
     _originZ = originZ_backup;
 }
 
-void irtkQtThreeDimensionalViewer::CalculateCurrentOutput() {
+void irtkQtThreeDimensionalViewer::CalculateCurrentImageOutput() {
     irtkImageAttributes attr[3];
     // Width of output image
     int width[3] = {sliceNum[0], sliceNum[1], sliceNum[0]};

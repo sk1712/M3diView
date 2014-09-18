@@ -67,13 +67,16 @@ public:
     /// Function to be implemented by all derived classes
     virtual void drawImage() const = 0;
 
-    /// Update segmentation drawable
+    /// Callback function to update image drawable
+    virtual void updateImage(QVector<QRgb**> drawable);
+
+    /// Callback function to update segmentation drawable
     void updateSegmentation(QVector<QRgb*> drawable);
 
 public slots:
 
-    /// Callback function to update drawable
-    virtual void updateDrawable(QVector<QRgb**> drawable);
+    /// Callback function to update all drawables
+    void updateAllDrawables(QVector<QRgb**> images, QVector<QRgb*> segmentations);
 
 protected:
 

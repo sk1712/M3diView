@@ -5,8 +5,7 @@
 #include <QKeyEvent>
 #include <iostream>
 
-QtGlWidget::QtGlWidget(QWidget *parent)
-    : QGLWidget(parent) {
+QtGlWidget::QtGlWidget(QWidget *parent) : QGLWidget(parent) {
     setAttribute(Qt::WA_AcceptTouchEvents);
     pixelRatio = windowHandle()->devicePixelRatio();
 
@@ -47,14 +46,21 @@ void QtGlWidget::setImageOriginVisible(const bool visible) {
     update();
 }
 
+void QtGlWidget::updateImage(QVector<QRgb**> drawable) {
+    deleteDrawable();
+    _drawable = drawable;
+    updateGL();
+}
+
 void QtGlWidget::updateSegmentation(QVector<QRgb *> drawable) {
     deleteSegmentationDrawable();
     _segmentationDrawable = drawable;
+    updateGL();
 }
 
-void QtGlWidget::updateDrawable(QVector<QRgb**> drawable) {
-    deleteDrawable();
-    _drawable = drawable;
+void QtGlWidget::updateAllDrawables(QVector<QRgb **> images, QVector<QRgb *> segmentations) {
+    updateImage(images);
+    updateSegmentation(segmentations);
 }
 
 void QtGlWidget::deleteSegmentationDrawable() {

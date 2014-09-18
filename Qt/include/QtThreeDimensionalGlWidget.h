@@ -49,9 +49,6 @@ public:
     /// Set inverted axis flag
     void setInvertedAxis(const bool *inverted);
 
-    /// Update the images to be drawn
-    void updateDrawable(QVector<QRgb**> drawable);
-
 protected:
 
     /// Function to initialize OpenGL inherited from QGLWidget

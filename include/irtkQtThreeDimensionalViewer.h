@@ -47,19 +47,19 @@ public:
     vector<QRgb**> GetBlendDrawable();
 
     /// Initialize the transformations from the input to the output images
-    void InitializeTransformation();
+    void InitializeImageTransformations();
 
     /// Initialize a single transformation from the input to the output image
-    void InitializeCurrentTransformation();
+    void InitializeCurrentImageTransformation();
 
     /// Set interpolation method
     void SetInterpolationMethod(int index, irtkQtImageObject::irtkQtInterpolationMode mode);
 
     /// Calculate the output images from the transformations
-    void CalculateOutputImages();
+    void CalculateImageOutput();
 
     /// Calculate a single output image from the transformation
-    void CalculateCurrentOutput();
+    void CalculateCurrentImageOutput();
 
     /// Calculate the output images from the transformations
     void CalculateSegmentationOutput();

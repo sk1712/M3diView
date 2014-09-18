@@ -21,10 +21,6 @@ irtkQtLookupTable::~irtkQtLookupTable() {
     delete lookupTable;
 }
 
-void irtkQtLookupTable::SetAlpha(int a) {
-    _alpha = a;
-}
-
 void irtkQtLookupTable::Initialize() {
     switch (_mode) {
     case MODE_RED:
@@ -79,6 +75,10 @@ void irtkQtLookupTable::SetColorModeList() {
 
 QStringList irtkQtLookupTable::GetColorModeList() {
     return _colorStringList;
+}
+
+void irtkQtLookupTable::SetAlpha(int a) {
+    _alpha = a;
 }
 
 void irtkQtLookupTable::SetColorMode(irtkColorMode mode) {

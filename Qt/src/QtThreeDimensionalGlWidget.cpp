@@ -20,11 +20,6 @@ QtThreeDimensionalGlWidget::~QtThreeDimensionalGlWidget() {
     deleteDrawable();
 }
 
-void QtThreeDimensionalGlWidget::updateDrawable(QVector<QRgb**> drawable) {
-    QtGlWidget::updateDrawable(drawable);
-    update();
-}
-
 void QtThreeDimensionalGlWidget::initializeGL() {
     // Set background depth to farthest
     glClearDepth(1.0f);

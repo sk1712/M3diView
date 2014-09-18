@@ -4,8 +4,10 @@
 #include <irtkQtImageObject.h>
 
 #include <QList>
-#include <QVariant>
 
+/*
+ * Class reprenting a tree item in the model of image hierarchy
+ */
 
 class irtkQtTreeItem {
 
@@ -35,7 +37,7 @@ public:
 
     irtkQtTreeItem *parent();
 
-    bool insertChildren(int position, int count, int columns = 1);
+    bool insertChildren(int position, int count);
 
     bool removeChildren(int position, int count);
 

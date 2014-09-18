@@ -33,9 +33,6 @@ public:
     /// Set cursor visible
     void setCursorVisible(bool visible);
 
-    /// Update the images to be drawn
-    void updateDrawable(QVector<QRgb**> drawable);
-
 protected:
 
     /// Function to initialize OpenGL inherited from QGLWidget

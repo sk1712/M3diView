@@ -42,7 +42,6 @@ QVariant irtkQtTreeModel::data(const QModelIndex &index, int role) const {
             QIcon icon(pixmap);
             return icon;
         }
-
         break;
     case Qt::ToolTipRole:
         return object->GetPath();
@@ -127,7 +126,7 @@ bool irtkQtTreeModel::insertRows(int position, int rows, const QModelIndex &pare
     irtkQtTreeItem *parentItem = getItem(parent);
 
     beginInsertRows(parent, position, position + rows - 1);
-    bool success = parentItem->insertChildren(position, rows, rootItem->columnCount());
+    bool success = parentItem->insertChildren(position, rows);
     endInsertRows();
 
     return success;

@@ -77,12 +77,12 @@ class QtMainWindow : public QMainWindow
     irtkQtTreeModel *imageModel;
 
     /// Flag for only one viewer visible
-    bool singleViewerInScreen;
+    bool singleViewerOnScreen;
 
     /// Number of currently displayed images
     int numDisplayedImages;
 
-    /// Image index currently clicked
+    /// Image index currently selected
     int currentImageIndex;
 
 public:
@@ -161,11 +161,14 @@ private:
     void addToViewWidget(QWidget *widget, int index);
 
     /// Show message box with message and icon
-    void createMessageBox(QString message,
+    void createMessageBox(const QString & message,
                           QMessageBox::Icon icon = QMessageBox::NoIcon);
 
-    /// Set up viewers with images to be displayed
+    /// Set up newly added viewer with images/labels to be displayed
     bool setDisplayedImages();
+
+    /// View the images in newly added viewer
+    void viewImages();
 
     /// Add single image to displayed images
     void displaySingleImage(QModelIndex index);
@@ -182,14 +185,17 @@ private:
     /// Delete images with indices provided in the rowList
     void deleteImages(QModelIndexList rowList);
 
-    /// Add the children indices of the images to be deleted
+    /// Add the children's indices of the images to be deleted
     void addChildrenToIndexList(QModelIndexList &deleteList);
 
     /// Set up viewer widgets
     void setUpViewerWidgets();
 
-    /// Update all drawables
-    void updateDrawables();
+    /// Update image drawables
+    void updateImageDrawables();
+
+    /// Update segmentation drawables
+    void updateSegmentationDrawables();
 
     /// Create configuration viewer list
     void createConfigurationViewerList();
@@ -210,9 +216,6 @@ private slots:
 
     /// Callback function for saveScreenshotAction
     void saveScreenshot();
-
-    /// Callback function for viewSelectedImageAction
-    void viewImages();
 
     /// Callback function for deleteImageAction
     void deleteSelectedImages();

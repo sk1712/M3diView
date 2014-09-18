@@ -1,5 +1,6 @@
 #include <irtkQtTreeItem.h>
 
+
 irtkQtTreeItem::irtkQtTreeItem(irtkQtImageObject * const data, irtkQtTreeItem *parent)
     : itemData(data), parentItem(parent)
 {}
@@ -40,7 +41,7 @@ irtkQtTreeItem* irtkQtTreeItem::parent() {
     return parentItem;
 }
 
-bool irtkQtTreeItem::insertChildren(int position, int count, int /*columns*/) {
+bool irtkQtTreeItem::insertChildren(int position, int count) {
     if (position < 0 || position > childItems.size())
         return false;
 

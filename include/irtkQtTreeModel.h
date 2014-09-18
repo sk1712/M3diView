@@ -5,6 +5,10 @@
 
 #include <QAbstractItemModel>
 
+/*
+ * Class holding the image hierarchy model
+ */
+
 class irtkQtTreeModel : public QAbstractItemModel
 {
     Q_OBJECT

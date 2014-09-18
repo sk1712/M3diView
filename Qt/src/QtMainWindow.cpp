@@ -15,7 +15,7 @@
 /// free function used to calculate the output images
 /// in parallel for the different viewers
 void CalculateOutputImage(irtkQtBaseViewer* viewer) {
-    viewer->CalculateOutputImages();
+    viewer->CalculateImageOutput();
     viewer->CalculateSegmentationOutput();
 }
 
@@ -35,7 +35,7 @@ QtMainWindow::QtMainWindow() {
     connectWindowSignals();
     connectToolSignals();
 
-    singleViewerInScreen = false;
+    singleViewerOnScreen = false;
     numDisplayedImages = 0;
     currentImageIndex = -1;
     imageModel = new irtkQtTreeModel;
@@ -318,9 +318,12 @@ void QtMainWindow::disconnectViewerSignals() {
     QtViewerWidget *viewerWidget;
     irtkQtBaseViewer *viewer;
 
-    for (int i = 0; i < viewers.size(); i++) {
-        viewerWidget = viewerWidgets[i];
-        viewer = viewers[i];
+    QList<irtkQtBaseViewer*>::iterator bit;
+    QList<QtViewerWidget*>::iterator vit = viewerWidgets.begin();
+
+    for (bit = viewers.begin(); bit != viewers.end(); ++bit, ++vit) {
+        viewerWidget = *vit;
+        viewer = *bit;
 
         disconnect(viewerWidget, SIGNAL(sliderValueChanged(int*)),
                    viewer, SLOT(ChangeSlice(int*)));
@@ -330,8 +333,9 @@ void QtMainWindow::disconnectViewerSignals() {
         // The following do smth only for the 2D viewer
         disconnect(viewerWidget->getGlWidget(), SIGNAL(resized(int, int)),
                    viewer, SLOT(ResizeImage(int, int)));
-        disconnect(viewer, SIGNAL(ImageResized(QVector<QRgb**>)),
-                   viewerWidget->getGlWidget(), SLOT(updateDrawable(QVector<QRgb**>)));
+        disconnect(viewer, SIGNAL(ImageResized(QVector<QRgb**>, QVector<QRgb*>)),
+                   viewerWidget->getGlWidget(),
+                   SLOT(updateAllDrawables(QVector<QRgb**>,QVector<QRgb*>)));
 
         disconnect(viewerWidget->getGlWidget(), SIGNAL(leftButtonPressed(int, int)),
                    viewer, SLOT(ChangeOrigin(int, int)));
@@ -342,11 +346,14 @@ void QtMainWindow::connectViewerSignals() {
     QtViewerWidget *viewerWidget;
     irtkQtBaseViewer *viewer;
 
-    for (int i = 0; i < viewers.size(); i++) {
-        // Update drawable when origin is changed
-        viewerWidget = viewerWidgets[i];
-        viewer = viewers[i];
+    QList<irtkQtBaseViewer*>::iterator bit;
+    QList<QtViewerWidget*>::iterator vit = viewerWidgets.begin();
 
+    for (bit = viewers.begin(); bit != viewers.end(); ++bit, ++vit) {
+        viewerWidget = *vit;
+        viewer = *bit;
+
+        // Update drawable when origin is changed
         connect(viewerWidget, SIGNAL(sliderValueChanged(int*)),
                 viewer, SLOT(ChangeSlice(int*)));
         connect(viewer, SIGNAL(OriginChanged(double, double, double)),
@@ -355,8 +362,9 @@ void QtMainWindow::connectViewerSignals() {
         // The following do smth only for the 2D viewer
         connect(viewerWidget->getGlWidget(), SIGNAL(resized(int, int)),
                 viewer, SLOT(ResizeImage(int, int)));
-        connect(viewer, SIGNAL(ImageResized(QVector<QRgb**>)),
-                viewerWidget->getGlWidget(), SLOT(updateDrawable(QVector<QRgb**>)));
+        connect(viewer, SIGNAL(ImageResized(QVector<QRgb**>, QVector<QRgb*>)),
+                viewerWidget->getGlWidget(),
+                SLOT(updateAllDrawables(QVector<QRgb**>,QVector<QRgb*>)));
 
         connect(viewerWidget->getGlWidget(), SIGNAL(leftButtonPressed(int, int)),
                 viewer, SLOT(ChangeOrigin(int, int)));
@@ -549,7 +557,7 @@ void QtMainWindow::addToViewWidget(QWidget *widget) {
     else
         layout->addWidget(widget, layout->rowCount(), 0);
 
-    if (singleViewerInScreen)
+    if (singleViewerOnScreen)
         widget->hide();
 }
 
@@ -563,7 +571,7 @@ void QtMainWindow::addToViewWidget(QWidget *widget, int index) {
         layout->addWidget(widget, layout->rowCount()-1, 1);
 }
 
-void QtMainWindow::createMessageBox(QString message, QMessageBox::Icon icon) {
+void QtMainWindow::createMessageBox(const QString &message, QMessageBox::Icon icon) {
     QMessageBox msgBox;
     msgBox.setText(message);
     msgBox.setIcon(icon);
@@ -578,18 +586,59 @@ bool QtMainWindow::setDisplayedImages() {
     bool atLeastOneImageVisible = false;
 
     int imageCount = imageModel->rowCount(QModelIndex());
+    QModelIndex currentIndex, childIndex;
     viewer->SetDimensions(glWidget->customWidth(), glWidget->customHeight());
 
     for (int i = 0; i < imageCount; ++i) {
-        irtkQtTreeItem *item = imageModel->getItem(
-                    imageModel->index(i, 0, QModelIndex()));
+        currentIndex = imageModel->index(i, 0, QModelIndex());
+        irtkQtTreeItem *item = imageModel->getItem(currentIndex);
         if (item->data()->IsVisible()) {
             viewer->AddToDisplayedImages(item->data(), i);
             atLeastOneImageVisible = true;
         }
+
+        int childrenCount = imageModel->rowCount(currentIndex);
+        for (int j = 0; j < childrenCount; ++j) {
+            childIndex = imageModel->index(j, 0, currentIndex);
+            irtkQtTreeItem *child = imageModel->getItem(childIndex);
+            if (child->data()->IsVisible())
+                viewer->AddToDisplayedSegmentations(child->data(), i, j);
+        }
     }
 
     return atLeastOneImageVisible;
+}
+
+void QtMainWindow::viewImages() {
+    QtViewerWidget *viewerWidget = viewerWidgets[viewerWidgets.size()-1];
+    irtkQtBaseViewer *viewer = viewers[viewers.size()-1];
+
+    // Disconnect the viewers' signals
+    disconnectViewerSignals();
+
+    // Load the images to be displayed and add them to the viewers
+    if ( !setDisplayedImages() ) {
+        return;
+    }
+
+    // Initialize the transformations and calculate output images
+    viewer->InitializeImageTransformations();
+    viewer->CalculateImageOutput();
+    viewer->InitializeSegmentationTransformations();
+    viewer->CalculateSegmentationOutput();
+
+    // Set up the viewer widget
+    viewerWidget->setEnabled(true);
+    viewerWidget->setInvertedAxes(viewer->GetAxisInverted());
+    viewerWidget->setMaximumSlice(viewer->GetSliceNumber());
+    viewerWidget->setCurrentSlice(viewer->GetCurrentSlice());
+
+    double originX, originY, originZ;
+    viewer->GetOrigin(originX, originY, originZ);
+    viewerWidget->getGlWidget()->setWorldOrigin(originX, originY, originZ);
+
+    // Re-register the viewers' signals
+    connectViewerSignals();
 }
 
 void QtMainWindow::displaySingleImage(QModelIndex index) {
@@ -608,8 +657,8 @@ void QtMainWindow::displaySingleImage(QModelIndex index) {
         viewer->SetDimensions(viewerWidget->getGlWidget()->customWidth(),
                               viewerWidget->getGlWidget()->customHeight());
 
-        viewer->InitializeCurrentTransformation();
-        viewer->CalculateCurrentOutput();
+        viewer->InitializeCurrentImageTransformation();
+        viewer->CalculateCurrentImageOutput();
     }
 
     // Re-register the viewers' signals
@@ -625,8 +674,10 @@ void QtMainWindow::displaySingleSegmentation(QModelIndex index) {
     QList<irtkQtBaseViewer*>::iterator it;
     for (it = viewers.begin(); it != viewers.end(); ++it) {
         viewer = *it;
+
         viewer->AddToDisplayedSegmentations(imageModel->getItem(index)->data(),
                                             imageModel->parent(index).row(), index.row());
+
         viewer->InitializeCurrentSegmentationTransformation();
         viewer->CalculateCurrentSegmentationOutput();
     }
@@ -698,7 +749,7 @@ void QtMainWindow::deleteImages(QModelIndexList rowList) {
                 (*it)->UpdateKeysAfterIndexDeleted(currentImageIndex);
             }
         }
-        else {
+        else { // It's a segmentation
             if (visible) {
                 deleteSingleSegmentation(rowList.back());
             }
@@ -713,7 +764,7 @@ void QtMainWindow::deleteImages(QModelIndexList rowList) {
 
     visualToolWidget->onlyTwoImagesVisible(numDisplayedImages == 2);
     if (numDisplayedImages == 2) {
-        updateDrawables();
+        updateImageDrawables();
     }
 }
 
@@ -759,15 +810,23 @@ void QtMainWindow::setUpViewerWidgets() {
     connectViewerSignals();
 }
 
-void QtMainWindow::updateDrawables() {
+void QtMainWindow::updateImageDrawables() {
+    QList<QtViewerWidget*>::iterator wit = viewerWidgets.begin();
+    QList<irtkQtBaseViewer*>::iterator bit;
+
+    for (bit = viewers.begin(); bit != viewers.end(); ++bit, ++wit) {
+        (*wit)->getGlWidget()->updateImage(
+                    QVector<QRgb**>::fromStdVector( (*bit)->GetDrawable() ) );
+    }
+}
+
+void QtMainWindow::updateSegmentationDrawables() {
     QList<QtViewerWidget*>::iterator wit = viewerWidgets.begin();
     QList<irtkQtBaseViewer*>::iterator bit;
 
     for (bit = viewers.begin(); bit != viewers.end(); ++bit, ++wit) {
         (*wit)->getGlWidget()->updateSegmentation(
-                    QVector<QRgb*>::fromStdVector( (*bit)->GetSegmentationDrawable()) );
-        (*wit)->getGlWidget()->updateDrawable(
-                    QVector<QRgb**>::fromStdVector( (*bit)->GetDrawable() ) );
+                QVector<QRgb*>::fromStdVector( (*bit)->GetSegmentationDrawable()) );
     }
 }
 
@@ -805,7 +864,7 @@ void QtMainWindow::createConfigurationViewerList() {
             viewer.labelsVisible = viewer.cursorVisible = false;
         }
 
-        viewer.fullScreen = singleViewerInScreen && viewerWidgets[i]->isVisible();
+        viewer.fullScreen = singleViewerOnScreen && viewerWidgets[i]->isVisible();
         viewer.imageOriginVisible = viewerWidgets[i]->imageOriginVisible();
         viewer.linked = viewerWidgets[i]->isLinked();
 
@@ -983,38 +1042,6 @@ void QtMainWindow::saveScreenshot() {
     }
 }
 
-void QtMainWindow::viewImages() {
-    QtViewerWidget *viewerWidget = viewerWidgets[viewerWidgets.size()-1];
-    irtkQtBaseViewer *viewer = viewers[viewers.size()-1];
-
-    // Disconnect the viewers' signals
-    disconnectViewerSignals();
-
-    // Load the images to be displayed and add them to the viewers
-    if ( !setDisplayedImages() ) {
-        return;
-    }
-
-    // Initialize the transformations and calculate output images
-    viewer->InitializeTransformation();
-    viewer->CalculateOutputImages();
-
-    // Set up the viewer widget
-    viewerWidget->setEnabled(true);
-    viewerWidget->setInvertedAxes(viewer->GetAxisInverted());
-    viewerWidget->setMaximumSlice(viewer->GetSliceNumber());
-    viewerWidget->setCurrentSlice(viewer->GetCurrentSlice());
-
-    double originX, originY, originZ;
-    viewer->GetOrigin(originX, originY, originZ);
-    viewerWidget->getGlWidget()->setWorldOrigin(originX, originY, originZ);
-    viewerWidget->getGlWidget()->updateDrawable(
-                QVector<QRgb**>::fromStdVector(viewer->GetDrawable()));
-
-    // Re-register the viewers' signals
-    connectViewerSignals();
-}
-
 void QtMainWindow::deleteSelectedImages() {
     qDebug("Deleting images");
 
@@ -1046,6 +1073,7 @@ void QtMainWindow::toggleVisible() {
         clickImage = toggleImageVisible();
     }
     else {
+        // If label is to become visible make parent image visible as well
         if ( !itemParent->data()->IsVisible() &&
              !imageModel->getItem(curIndex)->data()->IsVisible() ) {
             currentImageIndex = imageModel->parent(curIndex).row();
@@ -1056,7 +1084,8 @@ void QtMainWindow::toggleVisible() {
 
     // Update the viewers
     setUpViewerWidgets();
-    updateDrawables();
+    updateImageDrawables();
+    updateSegmentationDrawables();
 
     // Emulate click to show image information
     if (clickImage) {
@@ -1097,7 +1126,7 @@ void QtMainWindow::changeLabelColor() {
                                  imageTreeView->currentIndex().row(), selectedColor);
         }
 
-        updateDrawables();
+        updateSegmentationDrawables();
     }
 }
 
@@ -1130,7 +1159,8 @@ void QtMainWindow::zoomIn() {
     }
 
     // Update the viewers
-    updateDrawables();
+    updateImageDrawables();
+    updateSegmentationDrawables();
 
     delete [] threads;
 }
@@ -1164,15 +1194,16 @@ void QtMainWindow::zoomOut() {
     }
 
     // Update the viewers
-    updateDrawables();
+    updateImageDrawables();
+    updateSegmentationDrawables();
 
     delete [] threads;
 }
 
 void QtMainWindow::showOnlyThisWidget() {
-    singleViewerInScreen = !singleViewerInScreen;
+    singleViewerOnScreen = !singleViewerOnScreen;
 
-    if (!singleViewerInScreen) {
+    if (!singleViewerOnScreen) {
         qDebug("Exiting single viewer mode");
         saveScreenshotAction->setEnabled(true);
         screenshotToolbarAction->setEnabled(true);
@@ -1245,7 +1276,7 @@ void QtMainWindow::clearViews() {
     qDebug("Clearing views");
 
     clearLists();
-    singleViewerInScreen = false;
+    singleViewerOnScreen = false;
 }
 
 void QtMainWindow::updateOrigin(double x, double y, double z) {
@@ -1293,7 +1324,7 @@ void QtMainWindow::updateOrigin(double x, double y, double z) {
             viewerWidget->setCurrentSlice(viewer->GetCurrentSlice());
             viewerWidget->getGlWidget()->updateSegmentation(
                         QVector<QRgb*>::fromStdVector(viewer->GetSegmentationDrawable()));
-            viewerWidget->getGlWidget()->updateDrawable(
+            viewerWidget->getGlWidget()->updateImage(
                         QVector<QRgb**>::fromStdVector(viewer->GetDrawable()));
         }
     }
@@ -1312,7 +1343,7 @@ void QtMainWindow::minDisplayValueChanged(double value) {
     if ( index.isValid() && (item != NULL) ) {
         if (item->IsVisible()) {
             item->SetMinDisplayValue(value);
-            updateDrawables();
+            updateImageDrawables();
         }
     }
 }
@@ -1326,7 +1357,7 @@ void QtMainWindow::maxDisplayValueChanged(double value) {
     if ( index.isValid() && (item != NULL) ) {
         if (item->IsVisible()) {
             item->SetMaxDisplayValue(value);
-            updateDrawables();
+            updateImageDrawables();
         }
     }
 }
@@ -1339,7 +1370,7 @@ void QtMainWindow::colormapIndexChanged(int mode) {
     if ( index.isValid() && (item != NULL) ) {
         if (item->IsVisible()) {
             item->SetColormap(static_cast<irtkQtLookupTable::irtkColorMode>(mode));
-            updateDrawables();
+            updateImageDrawables();
         }
     }
 }
@@ -1363,7 +1394,7 @@ void QtMainWindow::interpolationIndexChanged(int mode) {
                 (*it)->SetInterpolationMethod(index.row(), md);
             }
 
-            updateDrawables();
+            updateImageDrawables();
         }
     }
 }
@@ -1376,7 +1407,7 @@ void QtMainWindow::opacityValueChanged(int value) {
     if ( index.isValid() && (item != NULL) ) {
         if (item->IsVisible()) {
             item->SetOpacity(value);
-            updateDrawables();
+            updateImageDrawables();
         }
     }
 }
@@ -1417,39 +1448,37 @@ void QtMainWindow::treeViewClicked(QModelIndex index) {
 }
 
 void QtMainWindow::treeViewShowContextMenu(const QPoint &pos) {
-    if (imageModel) {
-        QMenu imageMenu;
-        QPoint globalPos = imageTreeView->mapToGlobal(pos);
+    QMenu imageMenu;
+    QPoint globalPos = imageTreeView->mapToGlobal(pos);
 
-        int selectedCount = imageTreeView->selectionModel()->selectedIndexes().size();
+    int selectedCount = imageTreeView->selectionModel()->selectedIndexes().size();
 
-        if ( selectedCount < 1 ) {
-            return;
+    if ( selectedCount < 1 ) {
+        return;
+    }
+    if ( selectedCount == 1) {
+        currentImageIndex = imageTreeView->indexAt(pos).row();
+
+        imageMenu.addAction(toggleVisibleAction);
+        if (imageModel->getItem(imageTreeView->indexAt(pos))->data()->IsVisible()) {
+            toggleVisibleAction->setChecked(true);
         }
-        if ( selectedCount == 1) {
-            currentImageIndex = imageTreeView->indexAt(pos).row();
-
-            imageMenu.addAction(toggleVisibleAction);
-            if (imageModel->getItem(imageTreeView->indexAt(pos))->data()->IsVisible()) {
-                toggleVisibleAction->setChecked(true);
-            }
-            else {
-                toggleVisibleAction->setChecked(false);
-            }
-
-            // Add loadSegmentationAction if the parent of the item is the root
-            if (imageModel->getItem(imageTreeView->indexAt(pos))->parent()->parent() == 0) {
-                imageMenu.addAction(loadSegmentationAction);
-            }
-            // Else add the option to change the label color
-            else {
-                imageMenu.addAction(changeLabelAction);
-            }
+        else {
+            toggleVisibleAction->setChecked(false);
         }
-        if ( selectedCount > 0 ) {
-            imageMenu.addAction(deleteImageAction);
-            imageMenu.exec( globalPos );
+
+        // Add loadSegmentationAction if the parent of the item is the root
+        if (imageModel->getItem(imageTreeView->indexAt(pos))->parent()->parent() == 0) {
+            imageMenu.addAction(loadSegmentationAction);
         }
+        // Else add the option to change the label color
+        else {
+            imageMenu.addAction(changeLabelAction);
+        }
+    }
+    if ( selectedCount > 0 ) {
+        imageMenu.addAction(deleteImageAction);
+        imageMenu.exec( globalPos );
     }
 }
 
@@ -1466,7 +1495,8 @@ void QtMainWindow::moveImageUp() {
         }
 
         setUpViewerWidgets();
-        updateDrawables();
+        updateImageDrawables();
+        updateSegmentationDrawables();
     }
 }
 
@@ -1483,7 +1513,8 @@ void QtMainWindow::moveImageDown() {
         }
 
         setUpViewerWidgets();
-        updateDrawables();
+        updateImageDrawables();
+        updateSegmentationDrawables();
     }
 }
 
@@ -1491,14 +1522,14 @@ void QtMainWindow::blendModeChanged(int mode) {
     for (int i = 0; i < viewers.size(); i++) {
         viewers[i]->SetBlendMode(mode);
     }
-    updateDrawables();
+    updateImageDrawables();
 }
 
 void QtMainWindow::displayMixValueChanged(double value) {
     for (int i = 0; i < viewers.size(); i++) {
         viewers[i]->SetMixValue(value);
     }
-    updateDrawables();
+    updateImageDrawables();
 }
 
 void QtMainWindow::loadConfigurationFile() {

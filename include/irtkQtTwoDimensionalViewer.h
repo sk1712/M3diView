@@ -65,16 +65,16 @@ public:
     void SetInterpolationMethod(int index, irtkQtImageObject::irtkQtInterpolationMode mode);
 
     /// Calculate the output images from the transformations
-    void CalculateOutputImages();
+    void CalculateImageOutput();
 
     /// Calculate a single output image from a transformation
-    void CalculateCurrentOutput();
+    void CalculateCurrentImageOutput();
 
     /// Initialize the transformations from the input to the output images
-    void InitializeTransformation();
+    void InitializeImageTransformations();
 
     /// Initialize a single transformation from the input to the output image
-    void InitializeCurrentTransformation();
+    void InitializeCurrentImageTransformation();
 
     /// Calculate the output images from the transformations
     void CalculateSegmentationOutput();
@@ -136,8 +136,8 @@ protected:
                                QColor label);
 
     /// Delete all elements of a map first and then clear
-    template<class T>
-    void DeleteMap(map<int, T> & mymap);
+    template<class K, class T>
+    void DeleteMap(map<K, T> & mymap);
 };
 
 
@@ -148,14 +148,21 @@ inline void irtkQtTwoDimensionalViewer::ClearDisplayedImages() {
     DeleteMap(_transform);
     DeleteMap(_interpolator);
     DeleteMap(_transformFilter);
+
+    _segmentation.clear();
+    _labelColor.clear();
+    DeleteMap(_segmentationOutput);
+    DeleteMap(_segTransform);
+    DeleteMap(_segInterpolator);
+    DeleteMap(_segTransformFilter);
 }
 
-template<class T>
-void irtkQtTwoDimensionalViewer::DeleteMap(map<int, T> & mymap) {
-    typename map<int, T>::iterator it;
+template<class K, class T>
+void irtkQtTwoDimensionalViewer::DeleteMap(map<K, T> &mymap) {
+    typename map<K, T>::iterator it;
 
     for( it = mymap.begin(); it != mymap.end(); it++){
-            delete ((*it).second);
+        delete ((*it).second);
     }
     mymap.clear();
 }

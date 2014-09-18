@@ -96,16 +96,16 @@ public:
     void SetTarget(irtkImage* image);
 
     /// Set image origin
-    void SetOrigin(const double x, const double y, const double z);
+    void SetOrigin(double x, double y, double z);
 
     /// Get image origin
-    void GetOrigin(double &x, double &y, double &z);
+    void GetOrigin(double &x, double &y, double &z) const;
 
     /// Set image resolution
-    void SetResolution(const double dx, const double dy, const double dz);
+    void SetResolution(double dx, double dy, double dz);
 
     /// Get image resolution
-    void GetResolution(double &dx, double &dy, double &dz);
+    void GetResolution(double &dx, double &dy, double &dz) const;
 
     /// Increase image resolution
     void IncreaseResolution();
@@ -114,16 +114,16 @@ public:
     void DecreaseResolution();
 
     /// Set image dimensions
-    void SetDimensions(const int width, const int height);
+    void SetDimensions(int width, int height);
 
     /// Get view mode (axial, sagittal, coronal, 3D)
     irtkViewMode GetViewMode() const;
 
     /// Set the blend mode
-    void SetBlendMode(const int mode);
+    void SetBlendMode(int mode);
 
     /// Set image mix value
-    void SetMixValue(const double value);
+    void SetMixValue(double value);
 
     /// Get total number of slices
     int* GetSliceNumber() const;
@@ -134,7 +134,7 @@ public:
     /// Get flags for inverted axes
     bool* GetAxisInverted() const;
 
-    /// Set label color
+    /// Set label color for segmentation
     void SetLabelColor(int parentIndex, int index, const QColor& color);
 
     /// Get the array of RGB values to be drawn on the screen
@@ -166,16 +166,16 @@ public:
                                         irtkQtImageObject::irtkQtInterpolationMode mode) = 0;
 
     /// Calculate the output images from the transformations
-    virtual void CalculateOutputImages() = 0;
+    virtual void CalculateImageOutput() = 0;
 
     /// Calculate a single output image from a transformation
-    virtual void CalculateCurrentOutput() = 0;
+    virtual void CalculateCurrentImageOutput() = 0;
 
     /// Initialize the transformations from the input to the output images
-    virtual void InitializeTransformation() = 0;
+    virtual void InitializeImageTransformations() = 0;
 
     /// Initialize single transformation from the input to the output image
-    virtual void InitializeCurrentTransformation() = 0;
+    virtual void InitializeCurrentImageTransformation() = 0;
 
     /// Calculate the output segmentations from the transformations
     virtual void CalculateSegmentationOutput() = 0;
@@ -237,7 +237,7 @@ protected:
     void InitializeOrientation();
 
     /// Get neurological axes orientation
-    void GetNeurologicalOrientation(double *x, double *y, double *z);
+    void GetNeurologicalOrientation(double *x, double *y, double *z) const;
 
     /// Update the current slice (in image coordinates) corresponding to the world coordinates
     virtual void UpdateCurrentSlice() = 0;
@@ -267,7 +267,7 @@ protected:
 signals:
 
     /// Signal emitted when image is resized
-    void ImageResized(QVector<QRgb**>);
+    void ImageResized(QVector<QRgb**>, QVector<QRgb*>);
 
     /// Signal emitted when image origin changes
     void OriginChanged(double originX, double originY, double originZ);
@@ -278,7 +278,7 @@ inline void irtkQtBaseViewer::SetTarget(irtkImage *image) {
     _targetImage = image;
 }
 
-inline void irtkQtBaseViewer::SetOrigin(const double x, const double y, const double z) {
+inline void irtkQtBaseViewer::SetOrigin(double x, double y, double z) {
     _originX = x;
     _originY = y;
     _originZ = z;
@@ -287,19 +287,19 @@ inline void irtkQtBaseViewer::SetOrigin(const double x, const double y, const do
     UpdateCurrentSlice();
 }
 
-inline void irtkQtBaseViewer::GetOrigin(double &x, double &y, double &z) {
+inline void irtkQtBaseViewer::GetOrigin(double &x, double &y, double &z) const {
     x = _originX;
     y = _originY;
     z = _originZ;
 }
 
-inline void irtkQtBaseViewer::SetResolution(const double dx, const double dy, const double dz) {
+inline void irtkQtBaseViewer::SetResolution(double dx, double dy, double dz) {
     _dx = dx;
     _dy = dy;
     _dz = dz;
 }
 
-inline void irtkQtBaseViewer::GetResolution(double &dx, double &dy, double &dz) {
+inline void irtkQtBaseViewer::GetResolution(double &dx, double &dy, double &dz) const {
     dx = _dx;
     dy = _dy;
     dz = _dz;
@@ -319,7 +319,7 @@ inline void irtkQtBaseViewer::DecreaseResolution() {
         _dy += 0.1;
 }
 
-inline void irtkQtBaseViewer::SetDimensions(const int width, const int height) {
+inline void irtkQtBaseViewer::SetDimensions(int width, int height) {
     _width = width;
     _height = height;
 }
@@ -328,11 +328,11 @@ inline irtkQtBaseViewer::irtkViewMode irtkQtBaseViewer::GetViewMode() const {
     return _viewMode;
 }
 
-inline void irtkQtBaseViewer::SetBlendMode(const int mode) {
+inline void irtkQtBaseViewer::SetBlendMode(int mode) {
     _blendMode = static_cast<irtkBlendMode>(mode);
 }
 
-inline void irtkQtBaseViewer::SetMixValue(const double value) {
+inline void irtkQtBaseViewer::SetMixValue(double value) {
     _viewMix = value;
 }
 

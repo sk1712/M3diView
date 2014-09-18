@@ -50,6 +50,7 @@ vector<QRgb**> irtkQtBaseViewer::GetDrawable() {
         allDrawables.push_back(GetVShutterDrawable());
         break;
     case VIEW_SUBTRACT:
+        // Initialize the look up table only once when switching view mode
         allDrawables.push_back(GetSubtractionDrawable());
         break;
     case VIEW_BLEND:
@@ -87,7 +88,7 @@ void irtkQtBaseViewer::AddToDisplayedImages(irtkQtImageObject *imageObject, int 
 
         InitializeDimensions();
         InitializeOrientation();
-        CalculateOutputImages();
+        CalculateImageOutput();
         /// check whether image dimensions agree
     }
 
@@ -112,7 +113,7 @@ void irtkQtBaseViewer::DeleteSingleImage(int index) {
 
         InitializeDimensions();
         InitializeOrientation();
-        CalculateOutputImages();
+        CalculateImageOutput();
     }
 }
 
@@ -131,7 +132,7 @@ void irtkQtBaseViewer::MoveImage(int, int) {
 
         InitializeDimensions();
         InitializeOrientation();
-        CalculateOutputImages();
+        CalculateImageOutput();
     }
 }
 
@@ -407,7 +408,7 @@ void irtkQtBaseViewer::InitializeOrientation() {
     }
 }
 
-void irtkQtBaseViewer::GetNeurologicalOrientation(double *x, double *y, double *z) {
+void irtkQtBaseViewer::GetNeurologicalOrientation(double *x, double *y, double *z) const {
     int iaxis, jaxis, kaxis;
     double xaxis[3], yaxis[3], zaxis[3];
 
