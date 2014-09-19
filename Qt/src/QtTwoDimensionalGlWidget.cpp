@@ -14,12 +14,12 @@ QtTwoDimensionalGlWidget::~QtTwoDimensionalGlWidget() {
 
 void QtTwoDimensionalGlWidget::setLabelsVisible(bool visible) {
     labelsVisible = visible;
-    update();
+    updateGL();
 }
 
 void QtTwoDimensionalGlWidget::setCursorVisible(bool visible) {
     cursorVisible = visible;
-    update();
+    updateGL();
 }
 
 void QtTwoDimensionalGlWidget::initializeGL() {

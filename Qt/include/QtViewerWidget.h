@@ -58,7 +58,7 @@ public:
     bool isLinked() const;
 
     /// Set if viewer is linked to the other viewers
-    void setLinked(const bool link);
+    void setLinked(bool link);
 
     /// Get OpenGL widget of viewer
     virtual QtGlWidget* getGlWidget() const = 0;
