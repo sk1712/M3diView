@@ -32,6 +32,7 @@ bool QtGlWidget::saveScreenshotInFile(QString file) {
 }
 
 QImage QtGlWidget::getDisplayedImage() {
+    updateGL();
     return this->grabFrameBuffer();
 }
 
