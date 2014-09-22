@@ -102,6 +102,13 @@ void QtInfoWidget::createTableWidget(QTableWidget **tableWidget) {
     (*tableWidget)->setFont(font);
     (*tableWidget)->verticalHeader()->hide();
     (*tableWidget)->horizontalHeader()->hide();
+
+    (*tableWidget)->horizontalHeader()
+            ->setSectionResizeMode(QHeaderView::Stretch);
+    (*tableWidget)->verticalHeader()
+            ->setSectionResizeMode(QHeaderView::Stretch);
+
+    (*tableWidget)->setMaximumHeight(100);
 }
 
 void QtInfoWidget::updateImageInfo() {
@@ -177,7 +184,7 @@ void QtInfoWidget::updateImageToWorldMatrix() {
             QTableWidgetItem *newItem =
                     new QTableWidgetItem(tr("%1").arg(
                                              QString::number(matrix.Get(i, j), 'f', 4)));
-            newItem->setTextAlignment(Qt::AlignHCenter);
+            newItem->setTextAlignment(Qt::AlignVCenter | Qt::AlignRight);
             newItem->setFlags(newItem->flags() & ~Qt::ItemIsEditable);
             imageToWorldMatrix->setItem(i, j, newItem);
         }
@@ -198,7 +205,7 @@ void QtInfoWidget::updateWorldToImageMatrix() {
             QTableWidgetItem *newItem =
                     new QTableWidgetItem(tr("%1").arg(
                                              QString::number(matrix.Get(i, j), 'f', 4)));
-            newItem->setTextAlignment(Qt::AlignHCenter);
+            newItem->setTextAlignment(Qt::AlignVCenter | Qt::AlignRight);
             newItem->setFlags(newItem->flags() & ~Qt::ItemIsEditable);
             worldToImageMatrix->setItem(i, j, newItem);
         }

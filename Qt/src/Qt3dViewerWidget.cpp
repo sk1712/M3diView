@@ -29,21 +29,22 @@ void Qt3dViewerWidget::createWidgets() {
     axialSlider = new QSlider(Qt::Vertical);
     axialSlider->setMinimum(1);
     axialSlider->setObjectName("axial");
-    axialSlider->setTracking(false);
+    //axialSlider->setTracking(false);
     sliderLayout->addWidget(axialSlider);
 
     sagittalSlider = new QSlider(Qt::Vertical);
     sagittalSlider->setMinimum(1);
     sagittalSlider->setObjectName("sagittal");
-    sagittalSlider->setTracking(false);
+    //sagittalSlider->setTracking(false);
     sliderLayout->addWidget(sagittalSlider);
 
     coronalSlider = new QSlider(Qt::Vertical);
     coronalSlider->setMinimum(1);
     coronalSlider->setObjectName("coronal");
-    coronalSlider->setTracking(false);
+    //coronalSlider->setTracking(false);
     sliderLayout->addWidget(coronalSlider);
 
+    sliderLayout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(sliderWidget, 0, 1);
 }
 

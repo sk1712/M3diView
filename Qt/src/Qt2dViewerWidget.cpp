@@ -46,7 +46,7 @@ void Qt2dViewerWidget::createWidgets() {
 
     sliceSlider = new QSlider(Qt::Vertical);
     sliceSlider->setMinimum(1);
-    sliceSlider->setTracking(false);
+    //sliceSlider->setTracking(false);
     layout->addWidget(sliceSlider, 0, 1);
 
     sliceLabel = new QLabel();

@@ -31,7 +31,7 @@ QVariant irtkQtTreeModel::data(const QModelIndex &index, int role) const {
                 return QIcon(":/icons/eye.png");
             else {
                 QPixmap pixmap(25, 25);
-                pixmap.fill();
+                pixmap.fill(QColor(255, 255, 255, 0));
                 QIcon icon(pixmap);
                 return icon;
             }
