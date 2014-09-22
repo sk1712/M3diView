@@ -20,7 +20,7 @@ QtViewerWidget::QtViewerWidget(QWidget *parent) : QWidget(parent) {
     expanded = false;
 }
 
-void QtViewerWidget::setLinked(const bool link) {
+void QtViewerWidget::setLinked(bool link) {
     linkToolButton->setChecked(link);
 }
 
@@ -106,12 +106,12 @@ void QtViewerWidget::connectSignals() {
     connect(showImageOriginAction, SIGNAL(toggled(bool)), this, SLOT(toggleImageOriginVisible(bool)));
 }
 
-void QtViewerWidget::deleteWindow() {
-    emit windowDeleted();
-}
-
 void QtViewerWidget::changeLinked(bool checked) {
     linked = checked;
+}
+
+void QtViewerWidget::deleteWindow() {
+    emit windowDeleted();
 }
 
 void QtViewerWidget::saveScreenshot() {
