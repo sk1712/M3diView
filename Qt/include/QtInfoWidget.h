@@ -9,6 +9,8 @@ class QLineEdit;
 class QTextEdit;
 class QTableWidget;
 
+class irtkQtImageObject;
+
 /*
  * Widget displaying image information
  */
@@ -18,7 +20,7 @@ class QtInfoWidget : public QWidget
     Q_OBJECT
 
     /// Image currently chosen
-    irtkImage *_image;
+    irtkQtImageObject *_image;
 
     /// Basic image info
     QLineEdit *imageSizeEdit, *voxelSizeEdit, *imageOriginEdit;
@@ -41,7 +43,7 @@ public:
     QSize sizeHint() const;
 
     /// Set currently chosen image
-    void setImage(irtkImage *image);
+    void setImage(irtkQtImageObject *image);
 
     /// Update all image information
     void update();

@@ -150,10 +150,10 @@ private:
     bool segmentationInList(const QString fileName) const;
 
     /// Callback function for toggleVisibleAction
-    bool toggleImageVisible();
+    void toggleImageVisible();
 
     /// Toggle segmentation visible
-    bool toggleSegmentationVisible();
+    void toggleSegmentationVisible();
 
     /// Add widget to mainViewWidget
     void addToViewWidget(QWidget *widget);

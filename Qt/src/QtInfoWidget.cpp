@@ -1,5 +1,7 @@
 #include <QtInfoWidget.h>
 
+#include <irtkQtImageObject.h>
+
 #include <QFormLayout>
 #include <QHeaderView>
 #include <QLabel>
@@ -18,7 +20,7 @@ QSize QtInfoWidget::sizeHint() const {
     return QSize(350, 500);
 }
 
-void QtInfoWidget::setImage(irtkImage *image) {
+void QtInfoWidget::setImage(irtkQtImageObject *image) {
     _image = image;
 }
 

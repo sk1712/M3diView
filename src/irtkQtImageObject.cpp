@@ -1,5 +1,7 @@
 #include <irtkQtImageObject.h>
 
+#include <irtkFileToImage.h>
+
 #include <QFileInfo>
 
 // Initialize static interpolation string list
@@ -20,6 +22,23 @@ void irtkQtImageObject::setImagePath(const QString &path) {
     _path = path;
     QFileInfo file(path);
     _fileName = file.fileName();
+
+    try {
+        irtkFileToImage *reader = irtkFileToImage::New(_path.toStdString().c_str());
+        irtkBaseImage *image;
+
+        image = reader->GetOutput();
+        _attr = image->GetImageAttributes();
+        _imageToWorldMatrix = image->GetImageToWorldMatrix();
+        _worldToImageMatrix = image->GetWorldToImageMatrix();
+
+        delete reader;
+    }
+    catch (irtkException e) {
+        qCritical("Invalid file '%s'", qPrintable(_path));
+        throw e;
+        return;
+    }
 }
 
 void irtkQtImageObject::SetInterpolationModeList() {

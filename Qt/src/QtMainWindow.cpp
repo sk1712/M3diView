@@ -64,7 +64,15 @@ void QtMainWindow::loadImages(const QStringList &fileList) {
             qDebug("Creating image for file %s", qPrintable(*it));
 
             image = new irtkQtImageObject();
-            image->setImagePath(*it);
+
+            try {
+                image->setImagePath(*it);
+            }
+            catch (irtkException) {
+                createMessageBox("Invalid image file " + (*it), QMessageBox::Critical);
+                delete image;
+                continue;
+            }
 
             // Update the image model
             if ( !imageModel->insertRows(imageCount, 1) ) {
@@ -93,7 +101,15 @@ void QtMainWindow::loadSegmentations(const QStringList &segmentationList) {
             qDebug("Creating segmentation for file %s", qPrintable(*it));
 
             segmentation = new irtkQtImageObject();
-            segmentation->setImagePath(*it);
+
+            try {
+                segmentation->setImagePath(*it);
+            }
+            catch (irtkException) {
+                createMessageBox("Invalid image file " + (*it), QMessageBox::Critical);
+                delete segmentation;
+                continue;
+            }
 
             if ( !imageModel->insertRows(imageCount, 1, currentIndex)) {
                 delete segmentation;
@@ -461,7 +477,7 @@ bool QtMainWindow::segmentationInList(const QString fileName) const {
     return false;
 }
 
-bool QtMainWindow::toggleImageVisible() {
+void QtMainWindow::toggleImageVisible() {
     QModelIndex modelIndex = imageModel->index(currentImageIndex, 0);
     irtkQtTreeItem *item = imageModel->getItem(modelIndex);
     bool visible = !item->data()->IsVisible();
@@ -469,8 +485,6 @@ bool QtMainWindow::toggleImageVisible() {
 
     // Emit signal to update the visible icon in TreeView
     emit imageModel->dataChanged(modelIndex, modelIndex);
-
-    bool clickImage = false;
 
     // If image becomes visible display it
     if (visible) {
@@ -480,7 +494,6 @@ bool QtMainWindow::toggleImageVisible() {
             item->data()->CreateImage();
             displaySingleImage(modelIndex);
             numDisplayedImages++;
-            clickImage = true;
         }
         catch (irtkException) {
             createMessageBox("Invalid image file " + item->data()->GetPath(), QMessageBox::Critical);
@@ -489,7 +502,6 @@ bool QtMainWindow::toggleImageVisible() {
             for (it = viewers.begin(); it != viewers.end(); ++it) {
                 (*it)->UpdateKeysAfterIndexDeleted(currentImageIndex);
             }
-            clickImage = false;
         }
     }
     // Otherwise delete it and decrease the number of visible images
@@ -507,11 +519,9 @@ bool QtMainWindow::toggleImageVisible() {
     }
 
     visualToolWidget->onlyTwoImagesVisible(numDisplayedImages == 2);
-
-    return clickImage;
 }
 
-bool QtMainWindow::toggleSegmentationVisible() {
+void QtMainWindow::toggleSegmentationVisible() {
     QModelIndex index = imageTreeView->currentIndex();
     irtkQtTreeItem *item = imageModel->getItem(index);
 
@@ -521,8 +531,6 @@ bool QtMainWindow::toggleSegmentationVisible() {
     // Emit signal to update the visible icon in TreeView
     emit imageModel->dataChanged(index, index);
 
-    bool clickImage = false;
-
     // If image becomes visible display it
     if (visible) {
         qDebug("Making image visible");
@@ -530,12 +538,10 @@ bool QtMainWindow::toggleSegmentationVisible() {
         try {
             item->data()->CreateImage();
             displaySingleSegmentation(index);
-            clickImage = true;
         }
         catch (irtkException) {
             createMessageBox("Invalid image file " + item->data()->GetPath(), QMessageBox::Critical);
             imageModel->removeRows(currentImageIndex, 1, imageModel->parent(index));
-            clickImage = false;
         }
     }
     // Otherwise delete it and decrease the number of visible images
@@ -544,8 +550,6 @@ bool QtMainWindow::toggleSegmentationVisible() {
         item->data()->DeleteImage();
         deleteSingleSegmentation(index);
     }
-
-    return clickImage;
 }
 
 void QtMainWindow::addToViewWidget(QWidget *widget) {
@@ -698,8 +702,6 @@ void QtMainWindow::deleteSingleImage(int index) {
     // Re-register the viewers' signals
     connectViewerSignals();
 
-    infoWidget->setImage(NULL);
-    infoWidget->update();
     visualToolWidget->setEnabled(false);
 }
 
@@ -715,8 +717,6 @@ void QtMainWindow::deleteSingleSegmentation(const QModelIndex &index) {
     // Re-register the viewers' signals
     connectViewerSignals();
 
-    infoWidget->setImage(NULL);
-    infoWidget->update();
     visualToolWidget->setEnabled(false);
 }
 
@@ -766,6 +766,9 @@ void QtMainWindow::deleteImages(QModelIndexList rowList) {
     if (numDisplayedImages == 2) {
         updateImageDrawables();
     }
+
+    infoWidget->setImage(NULL);
+    infoWidget->update();
 }
 
 void QtMainWindow::addChildrenToIndexList(QModelIndexList &deleteList) {
@@ -826,7 +829,7 @@ void QtMainWindow::updateSegmentationDrawables() {
 
     for (bit = viewers.begin(); bit != viewers.end(); ++bit, ++wit) {
         (*wit)->getGlWidget()->updateSegmentation(
-                QVector<QRgb*>::fromStdVector( (*bit)->GetSegmentationDrawable()) );
+                    QVector<QRgb*>::fromStdVector( (*bit)->GetSegmentationDrawable()) );
     }
 }
 
@@ -1067,10 +1070,9 @@ void QtMainWindow::deleteSelectedImages() {
 void QtMainWindow::toggleVisible() {
     QModelIndex curIndex = imageTreeView->currentIndex();
     irtkQtTreeItem *itemParent = imageModel->getItem(curIndex)->parent();
-    bool clickImage;
 
     if ( itemParent->parent() == 0 ) {
-        clickImage = toggleImageVisible();
+        toggleImageVisible();
     }
     else {
         // If label is to become visible make parent image visible as well
@@ -1079,19 +1081,13 @@ void QtMainWindow::toggleVisible() {
             currentImageIndex = imageModel->parent(curIndex).row();
             toggleImageVisible();
         }
-        clickImage = toggleSegmentationVisible();
+        toggleSegmentationVisible();
     }
 
     // Update the viewers
     setUpViewerWidgets();
     updateImageDrawables();
     updateSegmentationDrawables();
-
-    // Emulate click to show image information
-    if (clickImage) {
-        imageTreeView->setCurrentIndex(curIndex);
-        emit imageTreeView->clicked(curIndex);
-    }
 }
 
 void QtMainWindow::openSegmentation() {
@@ -1440,7 +1436,7 @@ void QtMainWindow::treeViewClicked(QModelIndex index) {
 
     visualToolWidget->blockSignals(false);
 
-    infoWidget->setImage(imageObject->GetImage());
+    infoWidget->setImage(imageObject);
     infoWidget->update();
 
     moveUpAction->setEnabled(isImage);

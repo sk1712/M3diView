@@ -40,6 +40,15 @@ private:
     /// Corresponding irtk image
     irtkImage* _image;
 
+    /// Image attributes
+    irtkImageAttributes _attr;
+
+    /// Image to world matrix
+    irtkMatrix _imageToWorldMatrix;
+
+    /// World to image matrix
+    irtkMatrix _worldToImageMatrix;
+
     /// Corresponding lookuptable
     irtkQtLookupTable* _lookupTable;
 
@@ -80,6 +89,15 @@ public:
 
     /// Get image
     irtkImage* GetImage() const;
+
+    /// Get image attributes
+    irtkImageAttributes GetImageAttributes() const;
+
+    /// Get image to world matrix
+    irtkMatrix GetImageToWorldMatrix() const;
+
+    /// Get world to image matrix
+    irtkMatrix GetWorldToImageMatrix() const;
 
     /// Get lookup table
     irtkQtLookupTable* GetLookupTable() const;
@@ -153,6 +171,18 @@ inline QString irtkQtImageObject::GetPath() const {
 
 inline irtkImage* irtkQtImageObject::GetImage() const {
     return _image;
+}
+
+inline irtkImageAttributes irtkQtImageObject::GetImageAttributes() const {
+    return _attr;
+}
+
+inline irtkMatrix irtkQtImageObject::GetImageToWorldMatrix() const {
+    return _imageToWorldMatrix;
+}
+
+inline irtkMatrix irtkQtImageObject::GetWorldToImageMatrix() const {
+    return _worldToImageMatrix;
 }
 
 inline irtkQtLookupTable* irtkQtImageObject::GetLookupTable() const {
