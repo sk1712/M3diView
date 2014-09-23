@@ -1,6 +1,7 @@
 #include <irtkQtTreeModel.h>
 
 #include <QIcon>
+#include <QPainter>
 
 irtkQtTreeModel::irtkQtTreeModel(QObject *parent)
     :QAbstractItemModel(parent)
@@ -39,6 +40,13 @@ QVariant irtkQtTreeModel::data(const QModelIndex &index, int role) const {
         else {
             QPixmap pixmap(25, 25);
             pixmap.fill(object->GetLabelColor());
+
+            if (object->IsVisible()) {
+                QIcon visible(":/icons/eye.png");
+                QPainter painter(&pixmap);
+                painter.drawPixmap(0, 0, visible.pixmap(25, 25));
+            }
+
             QIcon icon(pixmap);
             return icon;
         }
