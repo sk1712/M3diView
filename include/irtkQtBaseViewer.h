@@ -208,8 +208,11 @@ public:
     /// Move image with key previousKey to newKey
     virtual void MoveImage(int previousKey, int newKey);
 
-    /// Update keys of maps after invalid image is deleted
-    virtual void UpdateKeysAfterIndexDeleted(int index) = 0;
+    /// Update keys of maps after image is deleted
+    virtual void UpdateKeysAfterImageDeleted(int index) = 0;
+
+    /// Update keys of maps after segmentation is deleted
+    virtual void UpdateKeysAfterSegmentationDeleted(int parentIndex, int index) = 0;
 
 public slots:
 
@@ -256,13 +259,28 @@ protected:
     template<class T>
     void MoveImageUp(map<int, T> & mymap, int previousKey, int newKey);
 
+    template<class T>
+    void MoveImageUp(map<SegKey, T> & mymap, int previousKey, int newKey);
+
     /// Move one of the displayed images lower in hierarchy
     template<class T>
     void MoveImageDown(map<int, T> & mymap, int previousKey, int newKey);
 
-    /// Update key values of maps after deleting invalid image
     template<class T>
-    void UpdateKeysAfterIndexDeleted(map<int, T> & mymap, int index);
+    void MoveImageDown(map<SegKey, T> & mymap, int previousKey, int newKey);
+
+    /// Update key values of maps after deleting image
+    template<class T>
+    void UpdateKeysAfterImageDeleted(map<int, T> & mymap, int index);
+
+    /// Update key values of segmentation maps after deleting image
+    template<class T>
+    void UpdateKeysAfterImageDeleted(map<SegKey, T> & mymap, int index);
+
+    /// Update key values of segmentation maps after deleting segmentation
+    template<class T>
+    void UpdateKeysAfterSegmentationDeleted(map<SegKey, T> & mymap,
+                                            int parentIndex, int index);
 
 signals:
 
@@ -379,6 +397,38 @@ void irtkQtBaseViewer::MoveImageUp(map<int, T> & mymap, int previousKey, int new
 }
 
 template<class T>
+void irtkQtBaseViewer::MoveImageUp(map<SegKey, T> & mymap, int previousKey, int newKey) {
+    map<SegKey, T> newmap;
+    typename map<SegKey, T>::iterator it;
+
+    SegKey key;
+    T value;
+
+    for (it = mymap.begin(); it != mymap.end(); ++it) {
+        key = it->first;
+        value = it->second;
+
+        if ((key.first < newKey || key.first > previousKey)) {
+            newmap.insert(pair<SegKey, T> (key, value));
+            continue;
+        }
+        else if (key.first == previousKey) {
+            SegKey newpair = make_pair(newKey, key.second);
+            newmap.insert(pair<SegKey, T> (newpair, value));
+            continue;
+        }
+        else {
+            SegKey newpair = make_pair(key.first + 1, key.second);
+            newmap.insert(pair<SegKey, T> (newpair, value));
+        }
+    }
+
+    mymap.clear();
+
+    mymap = newmap;
+}
+
+template<class T>
 void irtkQtBaseViewer::MoveImageDown(map<int, T> & mymap, int previousKey, int newKey) {
     map<int, T> newmap;
     typename map<int, T>::iterator it;
@@ -394,7 +444,7 @@ void irtkQtBaseViewer::MoveImageDown(map<int, T> & mymap, int previousKey, int n
             newmap.insert(pair<int, T> (key, value));
             continue;
         }
-        else if (it->first == previousKey) {
+        else if (key == previousKey) {
             newmap.insert(pair<int, T> (newKey, value));
             continue;
         }
@@ -409,7 +459,39 @@ void irtkQtBaseViewer::MoveImageDown(map<int, T> & mymap, int previousKey, int n
 }
 
 template<class T>
-void irtkQtBaseViewer::UpdateKeysAfterIndexDeleted(map<int, T> & mymap, int index) {
+void irtkQtBaseViewer::MoveImageDown(map<SegKey, T> & mymap, int previousKey, int newKey) {
+    map<SegKey, T> newmap;
+    typename map<SegKey, T>::iterator it;
+
+    SegKey key;
+    T value;
+
+    for (it = mymap.begin(); it != mymap.end(); ++it) {
+        key = it->first;
+        value = it->second;
+
+        if ((key.first > newKey) || (key.first < previousKey)) {
+            newmap.insert(pair<SegKey, T> (key, value));
+            continue;
+        }
+        else if (key.first == previousKey) {
+            SegKey newpair = make_pair(newKey, key.second);
+            newmap.insert(pair<SegKey, T> (newpair, value));
+            continue;
+        }
+        else {
+            SegKey newpair = make_pair(key.first - 1, key.second);
+            newmap.insert(pair<SegKey, T> (newpair, value));
+        }
+    }
+
+    mymap.clear();
+
+    mymap = newmap;
+}
+
+template<class T>
+void irtkQtBaseViewer::UpdateKeysAfterImageDeleted(map<int, T> & mymap, int index) {
     map<int, T> newmap;
     typename map<int, T>::iterator it;
 
@@ -426,6 +508,61 @@ void irtkQtBaseViewer::UpdateKeysAfterIndexDeleted(map<int, T> & mymap, int inde
         }
         else {
             newmap.insert(pair<int, T> (key - 1, value));
+        }
+    }
+
+    mymap.clear();
+
+    mymap = newmap;
+}
+
+template<class T>
+void irtkQtBaseViewer::UpdateKeysAfterImageDeleted(map<SegKey, T> & mymap, int index) {
+    map<SegKey, T> newmap;
+    typename map<SegKey, T>::iterator it;
+
+    SegKey key;
+    T value;
+
+    for (it = mymap.begin(); it != mymap.end(); ++it) {
+        key = it->first;
+        value = it->second;
+
+        if (key.first < index) {
+            newmap.insert(pair<SegKey, T> (key, value));
+            continue;
+        }
+        else {
+            SegKey newkey = make_pair(key.first - 1, key.second);
+            newmap.insert(pair<SegKey, T> (newkey, value));
+        }
+    }
+
+    mymap.clear();
+
+    mymap = newmap;
+}
+
+template<class T>
+void irtkQtBaseViewer::UpdateKeysAfterSegmentationDeleted(map<SegKey, T> & mymap,
+                                                          int parentIndex, int index) {
+    map<SegKey, T> newmap;
+    typename map<SegKey, T>::iterator it;
+
+    SegKey key;
+    T value;
+
+    for (it = mymap.begin(); it != mymap.end(); ++it) {
+        key = it->first;
+        value = it->second;
+
+        if ( (key.first != parentIndex) || (key.second < index) ) {
+            newmap.insert(pair<SegKey, T> (key, value));
+            continue;
+        }
+        else {
+            SegKey newkey = make_pair(key.first, key.second - 1);
+            newmap.insert(pair<SegKey, T> (newkey, value));
         }
     }
 

@@ -490,19 +490,9 @@ void QtMainWindow::toggleImageVisible() {
     if (visible) {
         qDebug("Making image visible");
 
-        try {
-            item->data()->CreateImage();
-            displaySingleImage(modelIndex);
-            numDisplayedImages++;
-        }
-        catch (irtkException) {
-            createMessageBox("Invalid image file " + item->data()->GetPath(), QMessageBox::Critical);
-            imageModel->removeRows(currentImageIndex, 1, QModelIndex());
-            QList<irtkQtBaseViewer*>::iterator it;
-            for (it = viewers.begin(); it != viewers.end(); ++it) {
-                (*it)->UpdateKeysAfterIndexDeleted(currentImageIndex);
-            }
-        }
+        item->data()->CreateImage();
+        displaySingleImage(modelIndex);
+        numDisplayedImages++;
     }
     // Otherwise delete it and decrease the number of visible images
     else {
@@ -535,14 +525,8 @@ void QtMainWindow::toggleSegmentationVisible() {
     if (visible) {
         qDebug("Making image visible");
 
-        try {
-            item->data()->CreateImage();
-            displaySingleSegmentation(index);
-        }
-        catch (irtkException) {
-            createMessageBox("Invalid image file " + item->data()->GetPath(), QMessageBox::Critical);
-            imageModel->removeRows(currentImageIndex, 1, imageModel->parent(index));
-        }
+        item->data()->CreateImage();
+        displaySingleSegmentation(index);
     }
     // Otherwise delete it and decrease the number of visible images
     else {
@@ -746,27 +730,33 @@ void QtMainWindow::deleteImages(QModelIndexList rowList) {
             // Update the map keys of the images currently displayed
             QList<irtkQtBaseViewer*>::iterator it;
             for (it = viewers.begin(); it != viewers.end(); ++it) {
-                (*it)->UpdateKeysAfterIndexDeleted(currentImageIndex);
+                (*it)->UpdateKeysAfterImageDeleted(currentImageIndex);
             }
         }
         else { // It's a segmentation
             if (visible) {
                 deleteSingleSegmentation(rowList.back());
             }
-            imageModel->removeRows(currentImageIndex, 1,
-                                   imageModel->parent(rowList.back()));
+
+            // Update the model
+            QModelIndex parent = imageModel->parent(rowList.back());
+            imageModel->removeRows(currentImageIndex, 1, parent);
+
+            // Update the map keys of the segmentations currently displayed
+            QList<irtkQtBaseViewer*>::iterator it;
+            for (it = viewers.begin(); it != viewers.end(); ++it) {
+                (*it)->UpdateKeysAfterSegmentationDeleted(parent.row(), currentImageIndex);
+            }
         }
 
         rowList.pop_back();
     }
 
     setUpViewerWidgets();
+    updateImageDrawables();
+    updateSegmentationDrawables();
 
     visualToolWidget->onlyTwoImagesVisible(numDisplayedImages == 2);
-    if (numDisplayedImages == 2) {
-        updateImageDrawables();
-    }
-
     infoWidget->setImage(NULL);
     infoWidget->update();
 }

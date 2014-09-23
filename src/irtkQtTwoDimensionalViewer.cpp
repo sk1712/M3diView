@@ -436,6 +436,13 @@ void irtkQtTwoDimensionalViewer::MoveImage(int previousKey, int newKey) {
         MoveImageUp(_transform, previousKey, newKey);
         MoveImageUp(_interpolator, previousKey, newKey);
         MoveImageUp(_transformFilter, previousKey, newKey);
+
+        MoveImageUp(_segmentation, previousKey, newKey);
+        MoveImageUp(_labelColor, previousKey, newKey);
+        MoveImageUp(_segmentationOutput, previousKey, newKey);
+        MoveImageUp(_segTransform, previousKey, newKey);
+        MoveImageUp(_segInterpolator, previousKey, newKey);
+        MoveImageUp(_segTransformFilter, previousKey, newKey);
     }
     else if (newKey > previousKey){
         MoveImageDown(_image, previousKey, newKey);
@@ -444,18 +451,41 @@ void irtkQtTwoDimensionalViewer::MoveImage(int previousKey, int newKey) {
         MoveImageDown(_transform, previousKey, newKey);
         MoveImageDown(_interpolator, previousKey, newKey);
         MoveImageDown(_transformFilter, previousKey, newKey);
+
+        MoveImageDown(_segmentation, previousKey, newKey);
+        MoveImageDown(_labelColor, previousKey, newKey);
+        MoveImageDown(_segmentationOutput, previousKey, newKey);
+        MoveImageDown(_segTransform, previousKey, newKey);
+        MoveImageDown(_segInterpolator, previousKey, newKey);
+        MoveImageDown(_segTransformFilter, previousKey, newKey);
     }
 
     irtkQtBaseViewer::MoveImage(previousKey, newKey);
 }
 
-void irtkQtTwoDimensionalViewer::UpdateKeysAfterIndexDeleted(int index) {
-    irtkQtBaseViewer::UpdateKeysAfterIndexDeleted(_image, index);
-    irtkQtBaseViewer::UpdateKeysAfterIndexDeleted(_imageOutput, index);
-    irtkQtBaseViewer::UpdateKeysAfterIndexDeleted(_lookupTable, index);
-    irtkQtBaseViewer::UpdateKeysAfterIndexDeleted(_transform, index);
-    irtkQtBaseViewer::UpdateKeysAfterIndexDeleted(_interpolator, index);
-    irtkQtBaseViewer::UpdateKeysAfterIndexDeleted(_transformFilter, index);
+void irtkQtTwoDimensionalViewer::UpdateKeysAfterImageDeleted(int index) {
+    irtkQtBaseViewer::UpdateKeysAfterImageDeleted(_image, index);
+    irtkQtBaseViewer::UpdateKeysAfterImageDeleted(_imageOutput, index);
+    irtkQtBaseViewer::UpdateKeysAfterImageDeleted(_lookupTable, index);
+    irtkQtBaseViewer::UpdateKeysAfterImageDeleted(_transform, index);
+    irtkQtBaseViewer::UpdateKeysAfterImageDeleted(_interpolator, index);
+    irtkQtBaseViewer::UpdateKeysAfterImageDeleted(_transformFilter, index);
+
+    irtkQtBaseViewer::UpdateKeysAfterImageDeleted(_segmentation, index);
+    irtkQtBaseViewer::UpdateKeysAfterImageDeleted(_labelColor, index);
+    irtkQtBaseViewer::UpdateKeysAfterImageDeleted(_segmentationOutput, index);
+    irtkQtBaseViewer::UpdateKeysAfterImageDeleted(_segTransform, index);
+    irtkQtBaseViewer::UpdateKeysAfterImageDeleted(_segInterpolator, index);
+    irtkQtBaseViewer::UpdateKeysAfterImageDeleted(_segTransformFilter, index);
+}
+
+void irtkQtTwoDimensionalViewer::UpdateKeysAfterSegmentationDeleted(int parentIndex, int index) {
+    irtkQtBaseViewer::UpdateKeysAfterSegmentationDeleted(_segmentation, parentIndex, index);
+    irtkQtBaseViewer::UpdateKeysAfterSegmentationDeleted(_labelColor, parentIndex, index);
+    irtkQtBaseViewer::UpdateKeysAfterSegmentationDeleted(_segmentationOutput, parentIndex, index);
+    irtkQtBaseViewer::UpdateKeysAfterSegmentationDeleted(_segTransform, parentIndex, index);
+    irtkQtBaseViewer::UpdateKeysAfterSegmentationDeleted(_segInterpolator, parentIndex, index);
+    irtkQtBaseViewer::UpdateKeysAfterSegmentationDeleted(_segTransformFilter, parentIndex, index);
 }
 
 void irtkQtTwoDimensionalViewer::GetLabels(char &top, char &bottom, char &left, char &right) {

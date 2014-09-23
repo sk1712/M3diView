@@ -82,8 +82,11 @@ public:
     /// Move image with key previousKey to newKey
     void MoveImage(int previousKey, int newKey);
 
-    /// Update key values after invalid image is deleted from the list
-    void UpdateKeysAfterIndexDeleted(int index);
+    /// Update key values after image is deleted from the list
+    void UpdateKeysAfterImageDeleted(int index);
+
+    /// Update key values after segmentation is deleted from the list
+    void UpdateKeysAfterSegmentationDeleted(int parentIndex, int index);
 
 public slots:
 
