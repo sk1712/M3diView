@@ -206,6 +206,9 @@ private:
     /// Load configuration image list
     void loadConfigurationImageList();
 
+    /// Load configuration segmentation lists
+    void loadConfigurationSegmentationList(QList<irtkQtConfigurationImage> & imageList);
+
     /// Load configuration viewer list
     void loadConfigurationViewerList();
 

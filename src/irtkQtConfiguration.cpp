@@ -14,6 +14,7 @@ irtkQtConfiguration::irtkQtConfiguration() {
 
 void irtkQtConfiguration::ReadImages(QXmlStreamReader &xmlReader) {
     _imageList.clear();
+    int imageCount = -1;
 
     while (! (xmlReader.isEndElement() && (xmlReader.name() == "images") ) ) {
         xmlReader.readNext();
@@ -21,27 +22,51 @@ void irtkQtConfiguration::ReadImages(QXmlStreamReader &xmlReader) {
         if (xmlReader.isStartElement()) {
             if (xmlReader.name() == "image") {
                 irtkQtConfigurationImage image;
-                _imageList.push_back(image);
+                _imageList.insert(++imageCount, image);
+                _imageList[imageCount].parentId = -1;
                 QXmlStreamAttributes attr = xmlReader.attributes();
-                _imageList.back().visible = (attr.value("visible").toString() == "true");
+                _imageList[imageCount].visible = (attr.value("visible").toString() == "true");
             }
             else if (xmlReader.name() == "minimumDisplay") {
-                _imageList.back().minDisplay = xmlReader.readElementText().toDouble();
+                _imageList[imageCount].minDisplay = xmlReader.readElementText().toDouble();
             }
             else if (xmlReader.name() == "maximumDisplay") {
-                _imageList.back().maxDisplay = xmlReader.readElementText().toDouble();
+                _imageList[imageCount].maxDisplay = xmlReader.readElementText().toDouble();
             }
             else if (xmlReader.name() == "opacity") {
-                _imageList.back().opacity = xmlReader.readElementText().toInt();
+                _imageList[imageCount].opacity = xmlReader.readElementText().toInt();
             }
             else if (xmlReader.name() == "colormap") {
-                _imageList.back().colormap = xmlReader.readElementText();
+                _imageList[imageCount].colormap = xmlReader.readElementText();
             }
             else if (xmlReader.name() == "interpolation") {
-                _imageList.back().interpolation = xmlReader.readElementText();
+                _imageList[imageCount].interpolation = xmlReader.readElementText();
             }
             else if (xmlReader.name() == "file") {
-                _imageList.back().fileName = xmlReader.readElementText();
+                _imageList[imageCount].fileName = xmlReader.readElementText();
+            }
+            else if (xmlReader.name() == "label") {
+                irtkQtConfigurationImage label;
+                label.parentId = imageCount;
+                _imageList.push_back(label);
+                QXmlStreamAttributes attr = xmlReader.attributes();
+                _imageList.back().visible = (attr.value("visible").toString() == "true");
+
+                while (! (xmlReader.isEndElement() && (xmlReader.name() == "label") ) ) {
+                    xmlReader.readNext();
+
+                    if (xmlReader.isStartElement()) {
+                        if (xmlReader.name() == "file") {
+                            _imageList.back().fileName = xmlReader.readElementText();
+                        }
+                        else if (xmlReader.name() == "opacity") {
+                            _imageList.back().opacity = xmlReader.readElementText().toInt();
+                        }
+                        else if (xmlReader.name() == "color") {
+                            _imageList.back().color = xmlReader.readElementText();
+                        }
+                    }
+                }
             }
         }
     }

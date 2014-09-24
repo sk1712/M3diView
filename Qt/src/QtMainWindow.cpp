@@ -97,6 +97,7 @@ void QtMainWindow::loadSegmentations(const QStringList &segmentationList) {
 
     QStringList::const_iterator it;
     for (it = segmentationList.constBegin(); it != segmentationList.constEnd(); ++it) {
+
         if ( !segmentationInList(*it) ) {
             qDebug("Creating segmentation for file %s", qPrintable(*it));
 
@@ -925,7 +926,7 @@ void QtMainWindow::loadConfigurationImageList() {
     QStringList fileList;
     QList<irtkQtConfigurationImage>::iterator it;
     for (it = imageList.begin(); it != imageList.end(); ++it) {
-        fileList.push_back(it->fileName);
+        if (it->parentId == -1) fileList.push_back(it->fileName);
     }
 
     // Load list of images in imageListView
@@ -934,35 +935,77 @@ void QtMainWindow::loadConfigurationImageList() {
     QStringList modeList = irtkQtLookupTable::GetColorModeList();
     QStringList interpolationList = irtkQtImageObject::GetInterpolationModeList();
 
-    int imageCount = imageModel->rowCount();
+    int imageCount = imageModel->rowCount(QModelIndex());
     for (int i = 0; i < imageCount; i++) {
-        irtkQtImageObject *image = imageModel->getItem(
-                    imageModel->index(i, 0))->data();
-        if (image->IsVisible()) {
+        if (imageList[0].visible) {
             currentImageIndex = i;
             toggleImageVisible();
 
-            int index = -1;
-            for (int j = 0; j < modeList.size(); j++) {
-                if (modeList[j] == imageList[i].colormap) {
-                    index = j;
-                    break;
+            irtkQtImageObject *image = imageModel->getItem(imageModel->index(i, 0))->data();
+            image->SetColormap(static_cast<irtkQtLookupTable::irtkColorMode>(
+                                   modeList.indexOf(imageList[0].colormap)));
+            image->SetInterpolation(static_cast<irtkQtImageObject::irtkQtInterpolationMode>(
+                                        interpolationList.indexOf(imageList[0].interpolation)));
+
+            image->SetOpacity(imageList[0].opacity);
+            image->SetMinDisplayValue(imageList[0].minDisplay);
+            image->SetMaxDisplayValue(imageList[0].maxDisplay);
+        }
+        imageList.takeFirst();
+    }
+
+    loadConfigurationSegmentationList(imageList);
+}
+
+void QtMainWindow::loadConfigurationSegmentationList(QList<irtkQtConfigurationImage> & imageList) {
+    int i, parentIndex = -1;
+    QStringList fileList;
+
+    QList<irtkQtConfigurationImage>::const_iterator it;
+    for (it = imageList.begin(); it != imageList.end(); ++it) {
+        if ( it->parentId != parentIndex ) {
+            if (parentIndex != -1) {
+                QModelIndex parent = imageModel->index(parentIndex, 0);
+                imageTreeView->setCurrentIndex(parent);
+                loadSegmentations(fileList);
+
+                for (i = 0; i < imageModel->rowCount(parent); ++i) {
+                    QModelIndex index = imageModel->index(i, 0, parent);
+                    imageTreeView->setCurrentIndex(index);
+                    if (imageList[0].visible) {
+                        toggleSegmentationVisible();
+                    }
+                    QColor labelColor;
+                    labelColor.setNamedColor(imageList[0].color);
+                    labelColor.setAlpha(imageList[0].opacity);
+                    imageModel->getItem(index)->data()->SetLabelColor(labelColor);
+                    imageList.takeFirst();
                 }
             }
-            visualToolWidget->setColormap(index);
 
-            index = -1;
-            for (int j = 0; j < interpolationList.size(); j++) {
-                if (interpolationList[j] == imageList[i].interpolation) {
-                    index = j;
-                    break;
-                }
+            fileList.clear();
+            parentIndex = it->parentId;
+        }
+
+        fileList.push_back(it->fileName);
+    }
+
+    if ( !fileList.empty() ) {
+        QModelIndex parent = imageModel->index(parentIndex, 0);
+        imageTreeView->setCurrentIndex(parent);
+        loadSegmentations(fileList);
+
+        for (i = 0; i < imageModel->rowCount(parent); ++i) {
+            QModelIndex index = imageModel->index(i, 0, parent);
+            imageTreeView->setCurrentIndex(index);
+            if (imageList[0].visible) {
+                toggleSegmentationVisible();
             }
-            visualToolWidget->setInterpolation(index);
-
-            visualToolWidget->setOpacity(imageList[i].opacity);
-            visualToolWidget->setDisplayMin(imageList[i].minDisplay);
-            visualToolWidget->setDisplayMax(imageList[i].maxDisplay);
+            QColor labelColor;
+            labelColor.setNamedColor(imageList[0].color);
+            labelColor.setAlpha(imageList[0].opacity);
+            imageModel->getItem(index)->data()->SetLabelColor(labelColor);
+            imageList.takeFirst();
         }
     }
 }
@@ -1577,8 +1620,12 @@ void QtMainWindow::loadConfigurationFile() {
     if (irtkQtConfiguration::Instance()->Read(fileName)) {
         clearImages();
         clearViews();
+
         loadConfigurationImageList();
         loadConfigurationViewerList();
+
+        updateImageDrawables();
+        updateSegmentationDrawables();
     }
     else {
         createMessageBox("Could not read configuration file", QMessageBox::Critical);

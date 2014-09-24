@@ -10,6 +10,8 @@
 #include <QSpacerItem>
 #include <QVBoxLayout>
 
+#include <QMessageBox>
+
 QtToolWidget::QtToolWidget(QWidget * parent) : QWidget(parent) {
     createWidgets();
     connectSignals();
@@ -42,13 +44,23 @@ void QtToolWidget::setMinimumImageValue(double minImage) {
 }
 
 void QtToolWidget::setDisplayMin(double min) {
+    minImageSlider->blockSignals(true);
+
     minImageSlider->setValue(min * 10);
     minDisplay = min * 10;
+    minImageLabel->setText(QString::number(min));
+
+    minImageSlider->blockSignals(false);
 }
 
 void QtToolWidget::setDisplayMax(double max) {
+    maxImageSlider->blockSignals(true);
+
     maxImageSlider->setValue(max * 10);
     maxDisplay = max * 10;
+    maxImageLabel->setText(QString::number(max));
+
+    maxImageSlider->blockSignals(false);
 }
 
 void QtToolWidget::setOpacity(int opacity) {
