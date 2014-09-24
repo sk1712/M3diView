@@ -8,6 +8,7 @@ class QXmlStreamWriter;
 class QXmlStreamReader;
 
 struct irtkQtConfigurationImage {
+    int parentId;
     QString fileName;
     double minDisplay;
     double maxDisplay;
@@ -15,6 +16,7 @@ struct irtkQtConfigurationImage {
     bool visible;
     QString interpolation;
     QString colormap;
+    QString color;
 };
 
 struct irtkQtConfigurationViewer {
@@ -39,9 +41,6 @@ class irtkQtConfiguration
 
     /// Viewer list
     QList<irtkQtConfigurationViewer> _viewerList;
-
-    /// List of loaded images
-    QList<irtkQtImageObject*> _imageObjectList;
 
     /// Instance of class
     static irtkQtConfiguration* viewInstance;
@@ -82,6 +81,9 @@ public:
     void Write(const QString fileName);
 
     /// Set list with viewer info
+    void SetImageList(QList<irtkQtConfigurationImage> const &imageList);
+
+    /// Set list with viewer info
     void SetViewerList(QList<irtkQtConfigurationViewer> const &viewerList);
 
     /// Get image list
@@ -91,6 +93,10 @@ public:
     QList<irtkQtConfigurationViewer> GetViewerList() const;
 };
 
+
+inline void irtkQtConfiguration::SetImageList(const QList<irtkQtConfigurationImage> &imageList) {
+    _imageList = imageList;
+}
 
 inline void irtkQtConfiguration::SetViewerList(QList<irtkQtConfigurationViewer> const &viewerList) {
     _viewerList = viewerList;

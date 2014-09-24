@@ -8,7 +8,8 @@
 irtkQtConfiguration* irtkQtConfiguration::viewInstance = NULL;
 
 irtkQtConfiguration::irtkQtConfiguration() {
-    _imageObjectList.clear();
+    _imageList.clear();
+    _viewerList.clear();
 }
 
 void irtkQtConfiguration::ReadImages(QXmlStreamReader &xmlReader) {
@@ -92,31 +93,47 @@ void irtkQtConfiguration::ReadViewers(QXmlStreamReader &xmlReader) {
 void irtkQtConfiguration::WriteImages(QXmlStreamWriter &xmlWriter) {
     xmlWriter.writeStartElement("images");
 
-    QList<irtkQtImageObject*>::iterator it;
-    for (it = _imageObjectList.begin(); it != _imageObjectList.end(); ++it) {
-        xmlWriter.writeStartElement("image");
+    QList<irtkQtConfigurationImage>::iterator it;
+    for (it = _imageList.begin(); it != _imageList.end(); ++it) {
+        if ( it->parentId == -1 ) {
+            if ( it != _imageList.begin() ) {
+                // Close the image tag of the previous image
+                xmlWriter.writeEndElement();
+            }
 
-        if ((*it)->IsVisible()) {
-            xmlWriter.writeAttribute("visible", "true");
-            xmlWriter.writeTextElement("minimumDisplay",
-                                       QString::number((*it)->GetMinDisplayValue()));
-            xmlWriter.writeTextElement("maximumDisplay",
-                                       QString::number((*it)->GetMaxDisplayValue()));
-            xmlWriter.writeTextElement("opacity",
-                                       QString::number((*it)->GetOpacity()));
-            xmlWriter.writeTextElement("colormap",
-                                    irtkQtLookupTable::GetColorModeList().at((*it)->GetColormap()));
-            xmlWriter.writeTextElement("interpolation",
-                                    irtkQtImageObject::GetInterpolationModeList().at((*it)->GetInterpolation()));
+            xmlWriter.writeStartElement("image");
+            if (it->visible) {
+                xmlWriter.writeAttribute("visible", "true");
+                xmlWriter.writeTextElement("minimumDisplay", QString::number(it->minDisplay));
+                xmlWriter.writeTextElement("maximumDisplay", QString::number(it->maxDisplay));
+                xmlWriter.writeTextElement("opacity", QString::number(it->opacity));
+                xmlWriter.writeTextElement("colormap", it->colormap);
+                xmlWriter.writeTextElement("interpolation", it->interpolation);
+            }
+            else {
+                xmlWriter.writeAttribute("visible", "false");
+            }
+
+            xmlWriter.writeTextElement("file", it->fileName);
         }
         else {
-            xmlWriter.writeAttribute("visible", "false");
-        }
+            xmlWriter.writeStartElement("label");
 
-        xmlWriter.writeTextElement("file", (*it)->GetPath());
-        xmlWriter.writeEndElement();
+            if (it->visible) {
+                xmlWriter.writeAttribute("visible", "true");
+            }
+            else {
+                xmlWriter.writeAttribute("visible", "false");
+            }
+            xmlWriter.writeTextElement("file", it->fileName);
+            xmlWriter.writeTextElement("opacity", QString::number(it->opacity));
+            xmlWriter.writeTextElement("color", it->color);
+
+            xmlWriter.writeEndElement(); // label
+        }
     }
 
+    xmlWriter.writeEndElement();
     xmlWriter.writeEndElement(); // images
 }
 

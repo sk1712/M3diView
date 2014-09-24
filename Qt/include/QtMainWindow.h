@@ -197,6 +197,9 @@ private:
     /// Update segmentation drawables
     void updateSegmentationDrawables();
 
+    /// Create configuration image list
+    void createConfigurationImageList();
+
     /// Create configuration viewer list
     void createConfigurationViewerList();
 

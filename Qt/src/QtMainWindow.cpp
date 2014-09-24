@@ -311,7 +311,7 @@ void QtMainWindow::connectWindowSignals() {
     connect(clearImagesAction, SIGNAL(triggered()), this, SLOT(clearImages()));
     connect(saveScreenshotAction, SIGNAL(triggered()), this, SLOT(saveScreenshot()));
     connect(loadConfigurationAction, SIGNAL(triggered()), this, SLOT(loadConfigurationFile()));
-    connect(saveConfigurationAction, SIGNAL(triggered()), this, SLOT(saveConfigutationFile()));
+    connect(saveConfigurationAction, SIGNAL(triggered()), this, SLOT(saveConfigurationFile()));
     connect(viewAxialAction, SIGNAL(triggered()), this, SLOT(createAxialView()));
     connect(viewCoronalAction, SIGNAL(triggered()), this, SLOT(createCoronalView()));
     connect(viewSagittalAction, SIGNAL(triggered()), this, SLOT(createSagittalView()));
@@ -821,6 +821,54 @@ void QtMainWindow::updateSegmentationDrawables() {
         (*wit)->getGlWidget()->updateSegmentation(
                     QVector<QRgb*>::fromStdVector( (*bit)->GetSegmentationDrawable()) );
     }
+}
+
+void QtMainWindow::createConfigurationImageList() {
+    QList<irtkQtConfigurationImage> imageList;
+
+    int labelCount, imageCount = imageModel->rowCount(QModelIndex());
+    int i, j;
+
+    // Add the images to the list first
+    for (i = 0; i < imageCount; ++i) {
+        irtkQtConfigurationImage image;
+
+        QModelIndex index = imageModel->index(i, 0, QModelIndex());
+        irtkQtImageObject *imageObject = imageModel->getItem(index)->data();
+
+        image.parentId = -1;
+        image.fileName = imageObject->GetPath();
+        if ( ( image.visible = imageObject->IsVisible() ) ) {
+            image.minDisplay = imageObject->GetMinDisplayValue();
+            image.maxDisplay = imageObject->GetMaxDisplayValue();
+            image.opacity = imageObject->GetOpacity();
+            image.interpolation = irtkQtImageObject::GetInterpolationModeList().at(
+                        imageObject->GetInterpolation());
+            image.colormap = irtkQtLookupTable::GetColorModeList().at(
+                        imageObject->GetColormap());
+        }
+
+        imageList.push_back(image);
+
+        // Then add the corresponding segmentations
+        labelCount = imageModel->rowCount(index);
+        for (j = 0; j < labelCount; ++j) {
+            irtkQtConfigurationImage label;
+
+            QModelIndex labelIndex = imageModel->index(j, 0, index);
+            irtkQtImageObject *labelObject = imageModel->getItem(labelIndex)->data();
+
+            label.parentId = i;
+            label.fileName = labelObject->GetPath();
+            label.opacity = labelObject->GetLabelColor().alpha();
+            label.visible = labelObject->IsVisible();
+            label.color = labelObject->GetLabelColor().name();
+
+            imageList.push_back(label);
+        }
+    }
+
+    irtkQtConfiguration::Instance()->SetImageList(imageList);
 }
 
 void QtMainWindow::createConfigurationViewerList() {
@@ -1543,6 +1591,8 @@ void QtMainWindow::saveConfigurationFile() {
                 this,tr("Save screenshot as"),
                 "", tr("XML (*.xml)"));
 
+    createConfigurationImageList();
     createConfigurationViewerList();
+
     irtkQtConfiguration::Instance()->Write(fileName);
 }
