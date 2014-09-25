@@ -1042,6 +1042,7 @@ void QtMainWindow::loadConfigurationViewerList() {
         viewers.back()->SetOrigin(it->origin[0], it->origin[1], it->origin[2]);
         viewers.back()->SetResolution(it->resolution[0], it->resolution[1],
                 it->resolution[2]);
+        viewers.back()->CalculateImageOutput();
     }
 
     setUpViewerWidgets();
