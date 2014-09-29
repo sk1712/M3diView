@@ -753,11 +753,12 @@ void QtMainWindow::deleteImages(QModelIndexList rowList) {
         rowList.pop_back();
     }
 
+    visualToolWidget->onlyTwoImagesVisible(numDisplayedImages == 2);
+
     setUpViewerWidgets();
     updateImageDrawables();
     updateSegmentationDrawables();
 
-    visualToolWidget->onlyTwoImagesVisible(numDisplayedImages == 2);
     infoWidget->setImage(NULL);
     infoWidget->update();
 }
@@ -990,6 +991,7 @@ void QtMainWindow::loadConfigurationSegmentationList(QList<irtkQtConfigurationIm
         fileList.push_back(it->fileName);
     }
 
+    // integrate the following in the above loop
     if ( !fileList.empty() ) {
         QModelIndex parent = imageModel->index(parentIndex, 0);
         imageTreeView->setCurrentIndex(parent);
