@@ -32,6 +32,7 @@ void irtkQtImageObject::setImagePath(const QString &path) {
         _imageToWorldMatrix = image->GetImageToWorldMatrix();
         _worldToImageMatrix = image->GetWorldToImageMatrix();
 
+        delete image;
         delete reader;
     }
     catch (irtkException e) {

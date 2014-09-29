@@ -266,7 +266,7 @@ void QtThreeDimensionalGlWidget::drawBorders() {
 void QtThreeDimensionalGlWidget::createTextures() {
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     // the following line might be causing error on MacOS X
-    // glDeleteTextures(3, textures);
+    glDeleteTextures(3, textures);
     glGenTextures(3, textures);
 
     // Create texture for axial view
